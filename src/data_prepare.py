@@ -24,6 +24,7 @@ import argparse
 import pyarrow as pa
 import pyarrow.parquet as pq
 from datasets import load_dataset
+import datasets
 
 
 # ========== System Prompt ==========
@@ -144,39 +145,26 @@ def create_verl_parquet(
     """
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
 
-    data_source_list = []
-    prompt_list = []
-    ability_list = []
-    reward_model_list = []
-    extra_info_list = []
-
+    records = []
     for s in samples:
-        data_source_list.append(s["data_source"])
-
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": s["prompt"]},
         ]
-        prompt_list.append(json.dumps(messages, ensure_ascii=False))
+        records.append({
+            "data_source": s["data_source"],
+            "prompt": messages,
+            "ability": "code_generation",
+            "reward_model": {"style": "rule", "ground_truth": ""},
+            "extra_info": {
+                "test_cases": s["test_cases"],
+                "task_id": s["task_id"],
+            },
+        })
 
-        ability_list.append("code_generation")
-
-        reward_model_list.append(json.dumps({"ground_truth": ""}))
-
-        extra_info_list.append(json.dumps({
-            "test_cases": s["test_cases"],
-            "task_id": s["task_id"],
-        }))
-
-    table = pa.table({
-        "data_source": pa.array(data_source_list, type=pa.string()),
-        "prompt": pa.array(prompt_list, type=pa.string()),
-        "ability": pa.array(ability_list, type=pa.string()),
-        "reward_model": pa.array(reward_model_list, type=pa.string()),
-        "extra_info": pa.array(extra_info_list, type=pa.string()),
-    })
-
-    pq.write_table(table, output_path)
+    # 用 datasets 库保存 parquet，自动处理 dict/list 类型序列化
+    ds = datasets.Dataset.from_list(records)
+    ds.to_parquet(output_path)
     print(f"veRL parquet 已保存: {output_path} ({len(samples)} 条)")
 
 
@@ -199,40 +187,26 @@ def create_multiturn_parquet(
     """
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
 
-    data_source_list = []
-    prompt_list = []
-    ability_list = []
-    reward_model_list = []
-    extra_info_list = []
-    agent_name_list = []
-
+    records = []
     for s in samples:
-        data_source_list.append(s["data_source"])
-
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": s["prompt"]},
         ]
-        prompt_list.append(json.dumps(messages, ensure_ascii=False))
+        records.append({
+            "data_source": s["data_source"],
+            "prompt": messages,
+            "ability": "code_generation",
+            "reward_model": {"style": "rule", "ground_truth": ""},
+            "extra_info": {
+                "test_cases": s["test_cases"],
+                "task_id": s["task_id"],
+            },
+            "agent_name": agent_name,
+        })
 
-        ability_list.append("code_generation")
-        reward_model_list.append(json.dumps({"ground_truth": ""}))
-        extra_info_list.append(json.dumps({
-            "test_cases": s["test_cases"],
-            "task_id": s["task_id"],
-        }))
-        agent_name_list.append(agent_name)
-
-    table = pa.table({
-        "data_source": pa.array(data_source_list, type=pa.string()),
-        "prompt": pa.array(prompt_list, type=pa.string()),
-        "ability": pa.array(ability_list, type=pa.string()),
-        "reward_model": pa.array(reward_model_list, type=pa.string()),
-        "extra_info": pa.array(extra_info_list, type=pa.string()),
-        "agent_name": pa.array(agent_name_list, type=pa.string()),
-    })
-
-    pq.write_table(table, output_path)
+    ds = datasets.Dataset.from_list(records)
+    ds.to_parquet(output_path)
     print(f"多轮训练 parquet 已保存: {output_path} ({len(samples)} 条)")
 
 

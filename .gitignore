@@ -35,3 +35,9 @@ data/*.parquet
 # 敏感文件
 .env
 *.key
+
+# 临时文件
+core
+=*
+wandb/
+.claude/

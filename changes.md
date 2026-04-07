@@ -322,3 +322,88 @@ veRL 0.8.0.dev0 相比文档编写时的 API 有多处破坏性变更，导致�
 - **问题**：WSL2 默认只分配 50% 宿主机 RAM（32GB → 15GB），导致 Ray OOM
 - **修复**：在 `%USERPROFILE%\.wslconfig` 中添加 `memory=24GB`
 - **重启方式**：`wsl.exe --shutdown` 后重新打开终端
+
+---
+
+## 2026-04-07 云端环境准备（AutoDL）
+
+### AutoDL 容器环境搭建
+- **环境信息**：
+  - 容器：AutoDL (autodl-container-d6a547ba47-0a7593b1)
+  - 系统：Linux with 1TB RAM（服务器级资源）
+  - 数据盘：50GB (/root/autodl-tmp)
+  - NVIDIA 驱动：580.76.05 Open Kernel Module
+  - Python：3.12.3
+  - PyTorch：2.5.1+cu124
+
+### 缓存重定向配置（防止系统盘爆满）
+- **问题**：AutoDL 系统盘仅 30GB，HF 模型缓存 ~8GB + pip 缓存数 GB 会爆盘
+- **修复**：重定向所有缓存到数据盘 `/root/autodl-tmp/`
+  ```bash
+  export HF_HOME=/root/autodl-tmp/hf_cache
+  export MODELSCOPE_CACHE=/root/autodl-tmp/modelscope_cache
+  export PIP_CACHE_DIR=/root/autodl-tmp/pip_cache
+  export TORCH_HOME=/root/autodl-tmp/torch_cache
+  ```
+- **持久化**：写入 `/root/.bashrc`，重启后仍生效
+- **验证**：环境变量正确设置，缓存目录创建成功
+
+### veRL 安装（从源码）
+- **版本**：veRL 0.8.0.dev0
+- **安装方式**：从 GitHub 克隆源码，`pip install -e .`
+- **依赖安装**：通过阿里云镜像加速
+  ```bash
+  pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+  ```
+- **额外依赖**：datasets, pyarrow, evalplus, modelscope, matplotlib, tensorboard, wandb, pyyaml, pytest
+
+### HuggingFace 镜像站配置
+- **问题**：直接访问 HuggingFace 网络连接失败（`[Errno 99] Cannot assign requested address`）
+- **修复**：设置 HF_ENDPOINT 环境变量使用国内镜像站
+  ```bash
+  export HF_ENDPOINT=https://hf-mirror.com
+  ```
+- **效果**：数据集下载正常，MBPP 数据加载成功
+
+### 训练数据生成
+- **命令**：`python3 src/data_prepare.py --output data/grpo_train.parquet`
+- **数据源**：MBPP (Sanitized Python Programming Problems)
+- **数据量**：464 条（train 374 + validation 90，**不含 test split**）
+- **输出格式**：veRL 标准格式（5 列：data_source, prompt, ability, reward_model, extra_info）
+- **验证**：parquet 文件正确生成
+
+### 单元测试验证
+- **pytest 安装**：用于运行单元测试
+- **测试结果**：
+  - **沙盒测试**（tests/test_sandbox.py）：7/7 通过
+    - 正常代码执行、语法错误、运行时错误、超时、测试用例、批量执行、僵尸进程清理
+  - **单轮奖励函数**（tests/test_reward.py）：7/7 通过
+    - 代码块提取、完美输出、无代码、错误代码、乱输出、语法错误、超时
+  - **多轮奖励函数**（tests/test_reward_multiturn.py）：9/9 通过
+    - 轮次计数、代码提取、1/2/3 轮成功、多代码块无过度惩罚、无代码、最终失败、奖励保底
+- **总计**：23/23 测试全部通过 ✅
+
+### GPU 环境验证（租用 GPU 后）
+- **GPU**：NVIDIA GeForce RTX 4090, 24564 MiB VRAM
+- **驱动**：NVIDIA 580.76.05 Open Kernel Module, CUDA 13.0
+- **PyTorch**：2.5.1+cu124, CUDA available: True
+- **模型下载**：Qwen3-1.7B 通过 HF 镜像站下载完成，缓存至 /root/autodl-tmp/hf_cache
+- **端到端验证**：verify_e2e.py 全部通过
+  - 测试 1（模型生成 + 代码提取）：PASS
+  - 测试 2（沙盒执行模型代码）：PASS
+  - 测试 3（Reward 管道）：PASS
+- **结论**：云端环境完全就绪，可开始阶段一 GRPO 训练
+
+### 当前状态
+- ✅ 环境配置完成（缓存重定向、veRL 安装、依赖配置）
+- ✅ 数据准备完成（464 条训练样本）
+- ✅ 单元测试通过（23/23）
+- ✅ GPU 环境验证通过（RTX 4090 24GB）
+- ✅ 端到端验证通过（verify_e2e.py）
+- ⏳ 下一步：运行阶段一单轮 GRPO 训练（1.7B 模型）
+
+### 注意事项（新会话开始阶段一时）
+- 需先 `source /root/.bashrc` 加载缓存重定向环境变量
+- 需设置 `HF_ENDPOINT=https://hf-mirror.com`
+- 训练脚本用 `scripts/run_local_single.sh`（1.7B + 24GB 配置），不是 `run_cloud_single.sh`（4B + 80GB）
+- 用 tmux 防断连：`tmux new -s train`

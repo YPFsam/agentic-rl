@@ -131,6 +131,53 @@
 - **状态**：⏳ 待开始（需在 AutoDL 24GB GPU 上运行）
 - **备注**：WSL2 下 vLLM V1 引擎 CUDA 不兼容，无法在本地训练
 
+---
+
+## 阶段零：云端环境准备（AutoDL）
+
+### [0.1] 云端基础环境搭建
+- **状态**：✅ 完成
+- **日期**：2026-04-07
+- **环境**：AutoDL 容器（1TB RAM，50GB 数据盘）
+- **内容**：
+  - [x] 设置缓存重定向到数据盘（HF_HOME, MODELSCOPE_CACHE, PIP_CACHE_DIR, TORCH_HOME）
+  - [x] 安装 veRL 0.8.0.dev0（从源码）
+  - [x] 安装项目依赖（datasets, pyarrow, evalplus, modelscope, matplotlib, tensorboard, wandb, pyyaml, pytest）
+  - [x] 配置 HuggingFace 镜像站（HF_ENDPOINT=https://hf-mirror.com）
+  - [x] 生成训练数据（464 条 MBPP train+val，保存至 data/grpo_train.parquet）
+  - [x] 运行单元测试（23/23 全部通过）：
+    - 沙盒测试：7/7 通过
+    - 单轮奖励函数测试：7/7 通过
+    - 多轮奖励函数测试：9/9 通过
+- **当前状态**：环境已就绪，等待 GPU 租用后开始阶段一训练
+
+---
+
+## 阶段一：云端单轮 GRPO 训练（待 GPU 租用）
+
+### [5.3] 云端 GPU 环境验证
+- **状态**：✅ 完成
+- **日期**：2026-04-07
+- **环境**：AutoDL, NVIDIA RTX 4090 24GB, 1TB RAM
+- **内容**：
+  - [x] GPU 验证通过（nvidia-smi: RTX 4090 24564MiB, CUDA 13.0, Driver 580.76.05）
+  - [x] PyTorch CUDA 验证通过（PyTorch 2.5.1+cu124, CUDA available: True）
+  - [x] veRL 0.8.0.dev0 导入成功
+  - [x] Qwen3-1.7B 模型下载完成（HF 镜像站，缓存至 /root/autodl-tmp/hf_cache）
+  - [x] 端到端验证通过（verify_e2e.py）：
+    - 测试 1：模型生成 + 代码提取 PASS
+    - 测试 2：沙盒执行 PASS
+    - 测试 3：Reward 管道 PASS
+- **结论**：云端环境完全就绪，可开始阶段一训练
+
+### [5.4] 云端单轮 GRPO 训练（1.7B 模型）
+- **状态**：⏳ 待开始
+- **计划**：
+  - 模型：Qwen3-1.7B
+  - GPU：RTX 4090 24GB（AutoDL）
+  - 训练脚本：`scripts/run_local_single.sh`（1.7B 配置，适配 24GB 显存）
+  - 预期：验证 loss 下降、reward 上升
+
 ## 阶段二：多轮 Agentic GRPO
 - **状态**：⏳ 待开始
 

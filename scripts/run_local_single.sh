@@ -12,6 +12,9 @@ export NCCL_IB_DISABLE=1
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export CUDA_MODULE_LOADING=LAZY
 
+# ---- wandb 离线模式（无需登录）----
+export WANDB_MODE=offline
+
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
@@ -43,7 +46,7 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.model.lora.alpha=16 \
   actor_rollout_ref.model.lora.target_modules=all-linear \
   actor_rollout_ref.actor.optim.lr=1e-6 \
-  actor_rollout_ref.model.use_remove_padding=True \
+  actor_rollout_ref.model.use_remove_padding=False \
   actor_rollout_ref.actor.ppo_mini_batch_size=8 \
   actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=1 \
   actor_rollout_ref.actor.use_kl_loss=False \
@@ -53,10 +56,9 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.actor.fsdp_config.optimizer_offload=True \
   actor_rollout_ref.rollout.name=vllm \
   actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
-  actor_rollout_ref.rollout.gpu_memory_utilization=0.5 \
+  actor_rollout_ref.rollout.gpu_memory_utilization=0.4 \
   actor_rollout_ref.rollout.max_model_len=1024 \
   actor_rollout_ref.rollout.enforce_eager=True \
-  actor_rollout_ref.rollout.quantization=fp8 \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=1 \
   actor_rollout_ref.rollout.n=4 \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=1 \
