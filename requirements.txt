@@ -1,0 +1,14 @@
+# 核心依赖（版本锁定，确保可复现）
+torch==2.6.0
+verl>=0.4
+transformers>=4.51.0
+vllm>=0.8.0
+datasets>=3.0.0
+pyarrow>=15.0.0
+evalplus>=0.3.0
+modelscope>=1.14.0
+peft>=0.15.0
+matplotlib>=3.8.0
+tensorboard>=2.15.0
+wandb>=0.17.0
+pyyaml>=6.0
