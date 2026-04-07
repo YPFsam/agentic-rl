@@ -43,8 +43,8 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.actor.kl_loss_coef=0.003 \
   actor_rollout_ref.actor.kl_loss_type=low_var_kl \
   actor_rollout_ref.actor.entropy_coeff=0 \
-  actor_rollout_ref.model.enable_gradient_checkpointing=False \
-  actor_rollout_ref.model.enable_activation_offload=False \
+  actor_rollout_ref.model.enable_gradient_checkpointing=True \
+  actor_rollout_ref.model.enable_activation_offload=True \
   actor_rollout_ref.actor.fsdp_config.param_offload=False \
   actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
   actor_rollout_ref.rollout.name=vllm \
@@ -62,7 +62,7 @@ python3 -m verl.trainer.main_ppo \
   custom_reward_function.name=compute_score_multiturn \
   data.seed=42 \
   trainer.critic_warmup=0 \
-  trainer.logger=["console","tensorboard"] \
+  trainer.logger=["console","wandb"] \
   trainer.project_name=agentic-rl-cloud \
   trainer.experiment_name=qwen3-4b-grpo-multi \
   trainer.n_gpus_per_node=1 \

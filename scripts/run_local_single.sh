@@ -67,7 +67,7 @@ python3 -m verl.trainer.main_ppo \
   reward.num_workers=2 \
   data.seed=42 \
   trainer.critic_warmup=0 \
-  trainer.logger=["console","tensorboard"] \
+  trainer.logger=["console","wandb"] \
   trainer.project_name=agentic-rl-local \
   trainer.experiment_name=qwen3-1.7b-grpo-single \
   trainer.n_gpus_per_node=1 \
