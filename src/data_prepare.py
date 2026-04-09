@@ -17,6 +17,7 @@ veRL 数据格式要求（parquet）：
   - extra_info: dict — 包含 test_cases, task_id 等
 """
 import os
+import re
 import json
 import random
 import argparse
@@ -93,6 +94,53 @@ def validate_mbpp_data(samples: list[dict]) -> list[dict]:
     if skipped > 0:
         print(f"MBPP 数据质量检查: 过滤 {skipped} 条 test_cases 语法错误的样本，剩余 {len(valid)} 条")
     return valid
+
+
+# ========== 跨数据源去重 ==========
+
+def deduplicate_cross_source(samples: list[dict], threshold: float = 0.7) -> list[dict]:
+    """
+    跨数据源去重：基于 prompt 词集合的 Jaccard 相似度检测重复。
+    按顺序保留，先出现的优先（即 MBPP 优先于 APPS）。
+
+    Args:
+        samples: 混合后的样本列表（MBPP 在前）
+        threshold: Jaccard 相似度阈值，超过则视为重复
+
+    Returns:
+        去重后的样本列表
+    """
+    def normalize(text):
+        return re.sub(r'\s+', ' ', text.lower().strip())
+
+    kept_norms = []
+    kept = []
+    dup_count = 0
+
+    for s in samples:
+        norm = normalize(s["prompt"])
+        words_new = set(norm.split())
+        is_dup = False
+        for existing_norm in kept_norms:
+            words_old = set(existing_norm.split())
+            if not words_new or not words_old:
+                continue
+            jaccard = len(words_new & words_old) / len(words_new | words_old)
+            if jaccard > threshold:
+                is_dup = True
+                break
+
+        if is_dup:
+            dup_count += 1
+        else:
+            kept_norms.append(norm)
+            kept.append(s)
+
+    if dup_count > 0:
+        print(f"跨数据源去重: 移除 {dup_count} 条重复样本，剩余 {len(kept)} 条")
+    else:
+        print("跨数据源去重: 未发现重复样本")
+    return kept
 
 
 # ========== APPS 清洗数据加载 ==========
@@ -242,6 +290,8 @@ def main():
     if args.full:
         apps_samples = load_apps_cleaned()
         samples.extend(apps_samples)
+        # 跨数据源去重（MBPP 在前，优先保留）
+        samples = deduplicate_cross_source(samples)
 
     # 打乱顺序
     random.shuffle(samples)

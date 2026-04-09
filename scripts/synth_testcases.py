@@ -16,6 +16,9 @@ import argparse
 import random
 from pathlib import Path
 
+# APPS 数据集中部分测试用例包含超大整数，解除 Python 3.13 的解析限制
+sys.set_int_max_str_digits(0)
+
 # 添加项目根目录到 path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -50,7 +53,7 @@ async def synth_asserts_for_task(
     client,
     task: dict,
     semaphore: asyncio.Semaphore,
-    max_retries: int = 2,
+    max_retries: int = 5,
 ) -> dict | None:
     """用 LLM 为单个 APPS 任务生成 assert 测试用例。"""
     from openai import AsyncOpenAI
@@ -63,13 +66,14 @@ async def synth_asserts_for_task(
             return None
 
         io_text = ""
-        for i, pair in enumerate(io_pairs[:5]):
-            inp = pair.get("input", "").strip()
-            out = pair.get("output", "").strip()
+        for i, pair in enumerate(io_pairs):
+            inp = str(pair.get("input", "")).strip()
+            out = str(pair.get("output", "")).strip()
             io_text += f"Input {i+1}: {inp}\nExpected Output {i+1}: {out}\n\n"
 
-        user_msg = SYNTH_PROMPT.format(prompt=prompt_text[:1000], test_cases=io_text)
+        user_msg = SYNTH_PROMPT.format(prompt=prompt_text, test_cases=io_text)
 
+        llm_output = None
         for attempt in range(max_retries + 1):
             try:
                 response = await client.chat.completions.create(
@@ -77,7 +81,7 @@ async def synth_asserts_for_task(
                     messages=[{"role": "user", "content": user_msg}],
                     temperature=0.0,
                     max_tokens=1024,
-                    timeout=30,
+                    timeout=60,
                 )
                 llm_output = response.choices[0].message.content.strip()
                 break
@@ -85,7 +89,8 @@ async def synth_asserts_for_task(
                 if attempt == max_retries:
                     print(f"  [SKIP] task {task.get('task_id', '?')} API 失败: {e}")
                     return None
-                await asyncio.sleep(2 ** attempt)
+                # 指数退避：2, 4, 8, 16, 32 秒
+                await asyncio.sleep(min(2 ** (attempt + 1), 32))
 
         # 提取 assert 语句
         assert_lines = []
@@ -144,21 +149,51 @@ async def main_async(args):
     )
 
     print("加载 APPS 数据集...")
-    ds = load_dataset("codeparrot/apps", trust_remote_code=True)
+    try:
+        ds = load_dataset("codeparrot/apps")
+        train_ds = ds["train"]
+    except (RuntimeError, ValueError):
+        # 新版 datasets 不支持自定义加载脚本，直接加载 JSONL
+        print("使用 JSONL 格式加载...")
+        train_ds = load_dataset(
+            "json",
+            data_files="hf://datasets/codeparrot/apps/train.jsonl",
+            split="train",
+        )
 
     all_tasks = []
-    for item in ds["train"]:
+    skip_no_tc = 0
+    skip_too_many_tc = 0
+    skip_long_prompt = 0
+    for item in train_ds:
         difficulty = item.get("difficulty", "")
         if difficulty not in ("introductory",):
             continue
 
-        test_cases_raw = item.get("test_cases", "[]")
+        # 解析 input_output 字段（JSONL 格式是 {"inputs": [...], "outputs": [...]}）
+        io_raw = item.get("input_output", "")
         try:
-            io_pairs = json.loads(test_cases_raw) if isinstance(test_cases_raw, str) else test_cases_raw
-        except json.JSONDecodeError:
+            io_data = json.loads(io_raw) if isinstance(io_raw, str) else io_raw
+            inputs = io_data.get("inputs", [])
+            outputs = io_data.get("outputs", [])
+            io_pairs = [{"input": inp, "output": out} for inp, out in zip(inputs, outputs)]
+        except (json.JSONDecodeError, AttributeError):
+            skip_no_tc += 1
             continue
 
         if not io_pairs:
+            skip_no_tc += 1
+            continue
+
+        # 过滤测试用例过多的题目（只要 ≤10 个测试用例的题）
+        if len(io_pairs) > 10:
+            skip_too_many_tc += 1
+            continue
+
+        # 过滤 prompt 过长的题目
+        prompt_text = item.get("question", "")
+        if len(prompt_text) > args.max_prompt_length:
+            skip_long_prompt += 1
             continue
 
         solutions_raw = item.get("solutions", "[]")
@@ -169,8 +204,8 @@ async def main_async(args):
             ref_solution = None
 
         all_tasks.append({
-            "task_id": f"apps_{item.get('problem_id', len(all_tasks))}",
-            "prompt": item.get("question", ""),
+            "task_id": f"apps_{item.get('id', len(all_tasks))}",
+            "prompt": prompt_text,
             "test_cases": io_pairs,
             "reference_solution": ref_solution,
         })
@@ -179,6 +214,8 @@ async def main_async(args):
     if args.max_samples > 0:
         all_tasks = all_tasks[:args.max_samples]
 
+    print(f"筛选结果: {len(all_tasks)} 条入选, {skip_no_tc} 无测试用例, "
+          f"{skip_too_many_tc} 测试用例>10, {skip_long_prompt} prompt过长(>{args.max_prompt_length}字符)")
     print(f"待处理: {len(all_tasks)} 个 APPS 入门题")
 
     semaphore = asyncio.Semaphore(args.max_concurrent)
@@ -192,8 +229,9 @@ async def main_async(args):
             skip_count += 1
             continue
 
-        ref_sol = all_tasks[i].get("reference_solution")
-        is_valid = await validate_with_sandbox(result, ref_sol)
+        # APPS 参考解用 input() 读 stdin，与 assert 直接调用不兼容
+        # 只做语法检查，不执行验证（训练时 reward 函数会做实际执行验证）
+        is_valid = await validate_with_sandbox(result, reference_solution=None)
         if is_valid:
             valid_samples.append(result)
         else:
@@ -214,8 +252,9 @@ def main():
     parser.add_argument("--api_key", type=str, required=True, help="DeepSeek API Key")
     parser.add_argument("--base_url", type=str, default="https://api.deepseek.com", help="API base URL")
     parser.add_argument("--output", type=str, default="data/apps_cleaned.jsonl", help="输出文件路径")
-    parser.add_argument("--max_concurrent", type=int, default=8, help="最大并发请求数")
+    parser.add_argument("--max_concurrent", type=int, default=4, help="最大并发请求数")
     parser.add_argument("--max_samples", type=int, default=3000, help="最大处理样本数")
+    parser.add_argument("--max_prompt_length", type=int, default=4000, help="prompt 最大字符数，超过则跳过")
     args = parser.parse_args()
 
     asyncio.run(main_async(args))
