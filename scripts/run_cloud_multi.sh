@@ -3,7 +3,16 @@
 # 云端多轮 AgentLoop GRPO（Qwen3-4B，80GB GPU）
 # veRL 0.8+ 配置：vLLM rollout + LoRA r=16 + multi_turn
 # ============================================================
+# !! OOM 风险提醒 (运行前必须修复) !!
+# 1. free_cache_engine 未设置 → KV pool 残留 ~40 + actor ~38 = 78 GiB，极度危险
+#    修复: 添加 rollout.free_cache_engine=True
+# 2. gpu_memory_utilization=0.6 对 3 轮 20K seq 偏大
+#    修复: 可降到 0.5
+# 修复后峰值预估 (free_cache=True): ~46 GiB / 80 GiB (57%)
 set -e
+
+# ---- wandb 在线模式（实时查看训练曲线）----
+export WANDB_MODE=online
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
@@ -68,6 +77,6 @@ python3 -m verl.trainer.main_ppo \
   trainer.n_gpus_per_node=1 \
   trainer.nnodes=1 \
   trainer.save_freq=50 \
-  trainer.test_freq=20 \
+  trainer.test_freq=-1 \
   trainer.total_training_steps=200 \
-  trainer.val_before_train=True
+  trainer.val_before_train=False

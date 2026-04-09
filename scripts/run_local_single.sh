@@ -11,9 +11,14 @@ export NCCL_P2P_DISABLE=1
 export NCCL_IB_DISABLE=1
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export CUDA_MODULE_LOADING=LAZY
+export TORCHDYNAMO_DISABLE=1
 
-# ---- wandb 离线模式（无需登录）----
-export WANDB_MODE=offline
+# ---- HuggingFace 镜像 + 离线模式（AutoDL 网络受限）----
+export HF_ENDPOINT=https://hf-mirror.com
+export HF_HUB_OFFLINE=1
+
+# ---- wandb 在线模式（实时查看训练曲线）----
+export WANDB_MODE=online
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
@@ -36,7 +41,7 @@ python3 -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
   data.train_files="$TRAIN_DATA" \
   data.val_files="$TRAIN_DATA" \
-  data.train_batch_size=32 \
+  data.train_batch_size=16 \
   data.max_prompt_length=512 \
   data.max_response_length=512 \
   data.filter_overlong_prompts=True \
@@ -47,7 +52,7 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.model.lora.target_modules=all-linear \
   actor_rollout_ref.actor.optim.lr=1e-6 \
   actor_rollout_ref.model.use_remove_padding=False \
-  actor_rollout_ref.actor.ppo_mini_batch_size=8 \
+  actor_rollout_ref.actor.ppo_mini_batch_size=4 \
   actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=1 \
   actor_rollout_ref.actor.use_kl_loss=False \
   actor_rollout_ref.actor.entropy_coeff=0 \
@@ -57,10 +62,11 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.rollout.name=vllm \
   actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
   actor_rollout_ref.rollout.gpu_memory_utilization=0.4 \
+  actor_rollout_ref.rollout.free_cache_engine=True \
   actor_rollout_ref.rollout.max_model_len=1024 \
   actor_rollout_ref.rollout.enforce_eager=True \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=1 \
-  actor_rollout_ref.rollout.n=4 \
+  actor_rollout_ref.rollout.n=2 \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=1 \
   actor_rollout_ref.ref.fsdp_config.param_offload=True \
   algorithm.use_kl_in_reward=False \
@@ -75,10 +81,14 @@ python3 -m verl.trainer.main_ppo \
   trainer.n_gpus_per_node=1 \
   trainer.nnodes=1 \
   trainer.save_freq=20 \
-  trainer.test_freq=10 \
+  trainer.max_actor_ckpt_to_keep=2 \
+  trainer.test_freq=-1 \
   trainer.total_training_steps=100 \
-  trainer.val_before_train=True \
+  trainer.resume_mode=auto \
+  trainer.val_before_train=False \
   '+ray_kwargs.ray_init.runtime_env.env_vars.NCCL_P2P_DISABLE="1"' \
   '+ray_kwargs.ray_init.runtime_env.env_vars.NCCL_IB_DISABLE="1"' \
   '+ray_kwargs.ray_init.runtime_env.env_vars.VLLM_WORKER_MULTIPROC_METHOD="spawn"' \
-  '+ray_kwargs.ray_init.runtime_env.env_vars.CUDA_MODULE_LOADING="LAZY"'
+  '+ray_kwargs.ray_init.runtime_env.env_vars.CUDA_MODULE_LOADING="LAZY"' \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.HF_ENDPOINT="https://hf-mirror.com"' \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.HF_HUB_OFFLINE="1"'

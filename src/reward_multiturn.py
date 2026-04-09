@@ -15,18 +15,65 @@
 """
 import re
 import ast
-import asyncio
+import subprocess
+import sys
+import tempfile
+import os
+import signal
+import resource
 from typing import Optional
 
-from src.sandbox import execute_code, ExecResult, ExecStatus
+from src.sandbox import ExecResult, ExecStatus, MAX_MEMORY_BYTES, MAX_CPU_SECONDS, _preexec_fn
 from src.reward import extract_code
 
 
-# ========== 异步桥接 ==========
+# ========== 同步执行（避免在已有 event loop 中 asyncio.run 冲突）==========
 
-def _run_async(coro):
-    """在同步上下文中运行 async 函数（veRL Worker 中安全）。"""
-    return asyncio.run(coro)
+def _execute_code_sync(code: str, test_cases: str = "", timeout: float = 5.0) -> ExecResult:
+    """同步版本的沙盒执行，用于 reward 函数（veRL agent_loop 已在 uvloop 中运行）。"""
+    if test_cases:
+        full_code = f"{code}\n\n{test_cases}"
+    else:
+        full_code = code
+
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".py", prefix="sandbox_")
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as f:
+            f.write(full_code)
+
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+        proc = subprocess.Popen(
+            [sys.executable, tmp_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+            preexec_fn=_preexec_fn,
+        )
+
+        try:
+            stdout_bytes, stderr_bytes = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                proc.kill()
+            proc.wait()
+            return ExecResult(status=ExecStatus.TIMEOUT, stdout="", stderr="TimeoutExpired")
+
+        stdout = stdout_bytes.decode("utf-8", errors="replace")
+        stderr = stderr_bytes.decode("utf-8", errors="replace")
+
+        if proc.returncode == 0:
+            return ExecResult(status=ExecStatus.SUCCESS, stdout=stdout, stderr=stderr)
+        if "SyntaxError" in stderr:
+            return ExecResult(status=ExecStatus.SYNTAX_ERROR, stdout=stdout, stderr=stderr)
+        return ExecResult(status=ExecStatus.RUNTIME_ERROR, stdout=stdout, stderr=stderr)
+
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
 
 
 # ========== 多轮轮次计数 ==========
@@ -173,8 +220,8 @@ def compute_score_multiturn(
     except SyntaxError:
         return 0.0
 
-    # ===== 沙盒执行 =====
-    result: ExecResult = _run_async(execute_code(last_code, test_cases, timeout=5.0))
+    # ===== 沙盒执行（同步，避免 asyncio 冲突）=====
+    result: ExecResult = _execute_code_sync(last_code, test_cases, timeout=5.0)
 
     # ===== 计算最终奖励（二元稀疏 + 保底） =====
     if result.status == ExecStatus.SUCCESS:

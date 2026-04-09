@@ -3,7 +3,16 @@
 # 云端单卡 GRPO 训练（Qwen3-4B，80GB GPU）
 # veRL 0.8+ 配置：vLLM rollout + LoRA r=16
 # ============================================================
+# !! OOM 风险提醒 (运行前必须修复) !!
+# 1. grad_ckpt=False + 4B + seq=6656 → 激活 ~39 GiB，直接 OOM
+#    修复: enable_gradient_checkpointing=True
+# 2. gpu_memory_utilization=0.6 → KV pool ~39.5 GiB，sleep mode 下残留 + actor 爆
+#    修复: gpu_memory_utilization=0.4 + free_cache_engine=True
+# 修复后峰值预估: ~60 GiB / 80 GiB (75%)
 set -e
+
+# ---- wandb 在线模式（实时查看训练曲线）----
+export WANDB_MODE=online
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
@@ -65,6 +74,6 @@ python3 -m verl.trainer.main_ppo \
   trainer.n_gpus_per_node=1 \
   trainer.nnodes=1 \
   trainer.save_freq=50 \
-  trainer.test_freq=20 \
+  trainer.test_freq=-1 \
   trainer.total_training_steps=200 \
-  trainer.val_before_train=True
+  trainer.val_before_train=False

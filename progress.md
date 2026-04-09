@@ -127,58 +127,93 @@
     - **HumanEval pass@1: 26.2%**
     - **HumanEval+ pass@1: 24.4%**
 
-### [5.2] 本地单轮 GRPO 训练
-- **状态**：⏳ 待开始（需在 AutoDL 24GB GPU 上运行）
-- **备注**：WSL2 下 vLLM V1 引擎 CUDA 不兼容，无法在本地训练
+### [5.2] 云端环境迁移（官方 Docker 镜像）
+- **状态**：✅ 完成
+- **日期**：2026-04-08
+- **内容**：
+  - [x] 从手工组装环境切换到 veRL 官方 Docker 镜像（verlai/verl:vllm011.latest）
+  - [x] 新环境：Python 3.12.11, PyTorch 2.8.0+cu128, flash-attn 2.8.1, vLLM 0.11.0
+  - [x] GPU 从 RTX 4090 24GB 升级到 RTX 4090 **48GB**（24GB 显存不足以跑 GRPO）
+  - [x] 数据盘从 50GB 扩容到 100GB
+
+### [5.3] 云端单轮 GRPO 训练（1.7B 模型，48GB GPU）
+- **状态**：✅ 完成
+- **日期**：2026-04-08
+- **环境**：AutoDL, RTX 4090 48GB
+- **训练配置**：
+  - 模型：Qwen3-1.7B + LoRA (rank=8, alpha=16)
+  - max_response_length=512, n=2, batch_size=16
+  - param_offload=True, optimizer_offload=True, gradient_checkpointing=True
+  - 无 fp8 量化（RTX 4090 不支持 fp8，会触发 numpy dtype 错误）
+- **结果（100 步）**：
+  - **score/mean: -0.02**（几乎全部为 0 或负分）
+  - **正 reward 步数: 0/100**（没有一个样本通过测试）
+  - **response_length: 512（100% 截断）** — 所有序列都被 max_new_tokens=512 截断
+  - **entropy: 0.22 → 0.26**（策略基本没学到东西）
+  - **val_acc@1: -0.02 ~ -0.03**（验证集同样惨淡）
+- **分析**：
+  - 根本原因是 `max_response_length=512` 太短，Qwen3 thinking 模式消耗了大量 token（平均 1335），剩余空间不够输出完整代码
+  - 所有输出都在 512 token 处被截断，无法生成可执行的代码
+  - 训练曲线平坦，reward 从未转正
+- **checkpoint**：已删除（无保留价值，模型未学到有效知识）
+
+### [5.4] 云端多轮 GRPO 训练（1.7B 模型，48GB GPU）
+- **状态**：✅ 完成
+- **日期**：2026-04-08
+- **环境**：AutoDL, RTX 4090 48GB
+- **训练配置**：
+  - 模型：Qwen3-1.7B + LoRA (rank=8, alpha=16)
+  - max_response_length=2048, n=4, batch_size=16
+  - multi_turn.enable=True, max_assistant_turns=2
+  - max_model_len=5120, gpu_memory_utilization=0.45
+  - param_offload=False, optimizer_offload=False（48GB 足够）
+  - gradient_checkpointing=True
+  - lr=3e-6
+- **结果（step 21→100，共 80 步）**：
+  - **score/mean: +0.046**（正 reward！远优于单轮的 -0.02）
+  - **正 reward 步数占比: 62.5%**（50/80 步有样本通过测试）
+  - **response_length/mean: 1489**（能输出完整代码，不再被截断）
+  - **clip_ratio: 0.40**（只有 40% 的序列被截断，远优于单轮的 100%）
+  - **entropy: 0.14 → 0.06**（下降 57%，策略越来越确定）
+  - **最高单步 score: 0.2188**（step 29，约 14/64 样本通过）
+- **分阶段趋势**：
+  | 阶段 | avg_score | 正reward占比 | entropy | clip_ratio |
+  |------|-----------|-------------|---------|------------|
+  | 21-40 | 0.052 | 60% | 0.112 | 44% |
+  | 41-60 | 0.034 | 45% | 0.080 | 42% |
+  | 61-80 | 0.049 | 70% | 0.070 | 40% |
+  | 81-100 | 0.047 | 75% | 0.068 | 34% |
+- **显存分析**：
+  - 峰值：43.4 GiB / 48 GiB (90%)
+  - 稳态均值：36 GiB (75%)
+  - sleep mode 最低：~21 GiB
+  - 典型锯齿波形：actor 训练时 ~37 GiB，sleep 时 ~21 GiB
+- **checkpoint**：保存在 `/root/autodl-tmp/checkpoints/agentic-rl-local/qwen3-1.7b-grpo-multi/`
+  - 每个 ~21GB（model 7.6G + optimizer 13G），保留最近 2 个
+
+### [5.5] 单轮 vs 多轮训练对比
+
+| 指标 | 单轮 100 步 | 多轮 80 步 |
+|------|-----------|-----------|
+| score/mean | -0.02 | **+0.046** |
+| score/max | 0.0 | **1.0** |
+| 正 reward 步占比 | 0% | **62.5%** |
+| response_length/mean | 512（全截断） | **1489** |
+| clip_ratio | 1.00 | **0.40** |
+| entropy 均值 | 0.22 | **0.083** |
+
+**关键发现**：max_response_length 是单轮训练失败的根本原因。512 token 对 Qwen3 thinking 模式远远不够。
 
 ---
 
-## 阶段零：云端环境准备（AutoDL）
-
-### [0.1] 云端基础环境搭建
-- **状态**：✅ 完成
-- **日期**：2026-04-07
-- **环境**：AutoDL 容器（1TB RAM，50GB 数据盘）
-- **内容**：
-  - [x] 设置缓存重定向到数据盘（HF_HOME, MODELSCOPE_CACHE, PIP_CACHE_DIR, TORCH_HOME）
-  - [x] 安装 veRL 0.8.0.dev0（从源码）
-  - [x] 安装项目依赖（datasets, pyarrow, evalplus, modelscope, matplotlib, tensorboard, wandb, pyyaml, pytest）
-  - [x] 配置 HuggingFace 镜像站（HF_ENDPOINT=https://hf-mirror.com）
-  - [x] 生成训练数据（464 条 MBPP train+val，保存至 data/grpo_train.parquet）
-  - [x] 运行单元测试（23/23 全部通过）：
-    - 沙盒测试：7/7 通过
-    - 单轮奖励函数测试：7/7 通过
-    - 多轮奖励函数测试：9/9 通过
-- **当前状态**：环境已就绪，等待 GPU 租用后开始阶段一训练
-
----
-
-## 阶段一：云端单轮 GRPO 训练（待 GPU 租用）
-
-### [5.3] 云端 GPU 环境验证
-- **状态**：✅ 完成
-- **日期**：2026-04-07
-- **环境**：AutoDL, NVIDIA RTX 4090 24GB, 1TB RAM
-- **内容**：
-  - [x] GPU 验证通过（nvidia-smi: RTX 4090 24564MiB, CUDA 13.0, Driver 580.76.05）
-  - [x] PyTorch CUDA 验证通过（PyTorch 2.5.1+cu124, CUDA available: True）
-  - [x] veRL 0.8.0.dev0 导入成功
-  - [x] Qwen3-1.7B 模型下载完成（HF 镜像站，缓存至 /root/autodl-tmp/hf_cache）
-  - [x] 端到端验证通过（verify_e2e.py）：
-    - 测试 1：模型生成 + 代码提取 PASS
-    - 测试 2：沙盒执行 PASS
-    - 测试 3：Reward 管道 PASS
-- **结论**：云端环境完全就绪，可开始阶段一训练
-
-### [5.4] 云端单轮 GRPO 训练（1.7B 模型）
+## 阶段二：评估与分析
 - **状态**：⏳ 待开始
-- **计划**：
-  - 模型：Qwen3-1.7B
-  - GPU：RTX 4090 24GB（AutoDL）
-  - 训练脚本：`scripts/run_local_single.sh`（1.7B 配置，适配 24GB 显存）
-  - 预期：验证 loss 下降、reward 上升
+- **下一步**：
+  - 用多轮 checkpoint 跑 HumanEval 评估（量化 pass@1 提升幅度）
+  - 考虑加长训练到 200-300 步
+  - 准备上 4B 模型 + 80GB GPU 正式训练
 
-## 阶段二：多轮 Agentic GRPO
+## 阶段三：4B 模型正式训练
 - **状态**：⏳ 待开始
 
 ## 消融实验

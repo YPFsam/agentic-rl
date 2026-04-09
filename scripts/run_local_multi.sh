@@ -1,13 +1,24 @@
 #!/bin/bash
 # ============================================================
-# 本地多轮 AgentLoop GRPO（Qwen3-1.7B，24GB GPU）
-# veRL 0.8+ 配置：vLLM rollout + multi_turn
+# 本地多轮 AgentLoop GRPO（Qwen3-1.7B，48GB GPU）
+# veRL 0.8+ 配置：vLLM rollout + LoRA r=8 + multi_turn
+# 峰值显存预估: ~34 GiB / 48 GiB (71%)
 # ============================================================
 set -e
 
-# WSL2 兼容性修复：禁用 NCCL P2P/IB 避免 CUDA 内存分配器崩溃
+# ---- 运行环境兼容性修复 ----
 export NCCL_P2P_DISABLE=1
 export NCCL_IB_DISABLE=1
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
+export CUDA_MODULE_LOADING=LAZY
+export TORCHDYNAMO_DISABLE=1
+
+# ---- HuggingFace 镜像 + 离线模式（AutoDL 网络受限）----
+export HF_ENDPOINT=https://hf-mirror.com
+export HF_HUB_OFFLINE=1
+
+# ---- wandb 在线模式（实时查看训练曲线）----
+export WANDB_MODE=online
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
@@ -22,7 +33,10 @@ fi
 echo "=========================================="
 echo "本地多轮 AgentLoop GRPO 训练"
 echo "模型: Qwen/Qwen3-1.7B"
-echo "max_turns: 2"
+echo "GPU: $(python3 -c 'import torch; print(torch.cuda.get_device_name(0))' 2>/dev/null || echo 'N/A')"
+echo "max_assistant_turns: 2"
+echo "max_response_length: 2048"
+echo "数据: $TRAIN_DATA"
 echo "=========================================="
 
 python3 -m verl.trainer.main_ppo \
@@ -31,7 +45,7 @@ python3 -m verl.trainer.main_ppo \
   data.val_files="$TRAIN_DATA" \
   data.train_batch_size=16 \
   data.max_prompt_length=512 \
-  data.max_response_length=512 \
+  data.max_response_length=2048 \
   data.filter_overlong_prompts=True \
   data.truncation=left \
   data.return_raw_chat=True \
@@ -40,7 +54,7 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.model.lora.alpha=16 \
   actor_rollout_ref.model.lora.target_modules=all-linear \
   actor_rollout_ref.actor.optim.lr=3e-6 \
-  actor_rollout_ref.model.use_remove_padding=True \
+  actor_rollout_ref.model.use_remove_padding=False \
   actor_rollout_ref.actor.ppo_mini_batch_size=4 \
   actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=1 \
   actor_rollout_ref.actor.use_kl_loss=False \
@@ -50,8 +64,9 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
   actor_rollout_ref.rollout.name=vllm \
   actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
-  actor_rollout_ref.rollout.gpu_memory_utilization=0.3 \
-  actor_rollout_ref.rollout.max_model_len=1024 \
+  actor_rollout_ref.rollout.gpu_memory_utilization=0.45 \
+  actor_rollout_ref.rollout.free_cache_engine=True \
+  actor_rollout_ref.rollout.max_model_len=5120 \
   actor_rollout_ref.rollout.enforce_eager=True \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=1 \
   actor_rollout_ref.rollout.n=4 \
@@ -62,6 +77,7 @@ python3 -m verl.trainer.main_ppo \
   algorithm.use_kl_in_reward=False \
   custom_reward_function.path="$PROJECT_DIR/src/reward_multiturn.py" \
   custom_reward_function.name=compute_score_multiturn \
+  reward.num_workers=2 \
   data.seed=42 \
   trainer.critic_warmup=0 \
   trainer.logger=["console","wandb"] \
@@ -70,6 +86,14 @@ python3 -m verl.trainer.main_ppo \
   trainer.n_gpus_per_node=1 \
   trainer.nnodes=1 \
   trainer.save_freq=20 \
-  trainer.test_freq=10 \
+  trainer.max_actor_ckpt_to_keep=2 \
+  trainer.test_freq=-1 \
   trainer.total_training_steps=100 \
-  trainer.val_before_train=True
+  trainer.resume_mode=auto \
+  trainer.val_before_train=False \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.NCCL_P2P_DISABLE="1"' \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.NCCL_IB_DISABLE="1"' \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.VLLM_WORKER_MULTIPROC_METHOD="spawn"' \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.CUDA_MODULE_LOADING="LAZY"' \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.HF_ENDPOINT="https://hf-mirror.com"' \
+  '+ray_kwargs.ray_init.runtime_env.env_vars.HF_HUB_OFFLINE="1"'

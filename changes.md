@@ -407,3 +407,94 @@ veRL 0.8.0.dev0 相比文档编写时的 API 有多处破坏性变更，导致�
 - 需设置 `HF_ENDPOINT=https://hf-mirror.com`
 - 训练脚本用 `scripts/run_local_single.sh`（1.7B + 24GB 配置），不是 `run_cloud_single.sh`（4B + 80GB）
 - 用 tmux 防断连：`tmux new -s train`
+
+---
+
+## 2026-04-08 云端环境迁移（官方 Docker 镜像）
+
+### 环境切换：从手工组装到官方镜像
+- **原因**：手工安装的 veRL 环境有各种依赖冲突（scipy/numpy、flash_attn 等）
+- **新镜像**：`verlai/verl:vllm011.latest`（官方预构建）
+- **新环境**：Python 3.12.11, PyTorch 2.8.0+cu128, vLLM 0.11.0, flash-attn 2.8.1
+- **GPU 升级**：从 RTX 4090 24GB 切换到 **48GB** 版本
+
+### 数据盘备份策略
+- 系统盘切换 Docker 镜像会被清空，需备份到数据盘
+- 备份位置：`/root/autodl-tmp/agentic-rl-backup/`（项目代码）、`/root/autodl-tmp/claude-config-backup/`（Claude 配置）
+- 模型权重：`/root/autodl-tmp/hf_cache/`（Qwen3-1.7B, ~7.6GB）
+
+---
+
+## 2026-04-08 单轮 GRPO 训练踩坑记录
+
+### 踩坑 1：vLLM QKV 权重名不匹配（KeyError: qkv_proj.weight）
+- **现象**：vLLM Worker 启动时报 `KeyError: 'qkv_proj.weight'`
+- **根因**：LoRA wrapper 将参数重命名 `qkv_proj.weight` → `qkv_proj.base_layer.weight`，但 vLLM 的 `Qwen2Model.load_weights()` 用原始名查找
+- **修复**：添加 `_resolve_param(name, pd)` 辅助函数，找不到原名时尝试 base_layer 变体
+- **自动化**：创建 `scripts/patch_vllm.py`，每次切换镜像需重跑
+- **性能影响**：零。只修改参数名查找逻辑
+
+### 踩坑 2：数据格式错误（AttributeError: 'str' has no attribute 'get'）
+- **根因**：`data_prepare.py` 用 `json.dumps()` 存储 dict，veRL 读取得到 JSON 字符串
+- **修复**：改用 `datasets.Dataset.from_list()` 原生存储 Python dict
+
+### 踩坑 3：24GB GPU 显存不足（OOM）
+- **现象**：Actor ~22.89 GiB + vLLM ~0.5 GiB > 24 GiB
+- **解决**：升级到 RTX 4090 **48GB**
+
+### 踩坑 4：RTX 4090 不支持 fp8
+- **修复**：移除 `quantization=fp8` 参数
+
+### 踩坑 5：PyTorch inductor ImportError
+- **修复**：`export TORCHDYNAMO_DISABLE=1`
+
+### 踩坑 6：libgfortran 缺失
+- **修复**：`ldconfig` 添加 scipy.libs 和 numpy.libs 路径
+
+### 单轮训练结果（失败）
+- **100 步全部 reward 为 0 或负值**，无一个样本通过测试
+- **根因**：`max_response_length=512` 太短，Qwen3 thinking 消耗大量 token
+- **所有输出被截断**，clip_ratio=1.0，Checkpoint 已删除
+
+---
+
+## 2026-04-08 多轮 GRPO 训练踩坑记录
+
+### 多轮脚本优化
+- `max_response_length`: 512 → 2048
+- `max_model_len`: 1024 → 5120
+- `gpu_memory_utilization`: 0.3 → 0.45
+- `param_offload/optimizer_offload`: False（48GB 足够）
+
+### 踩坑 7：numpy.int64 索引 torch.Tensor 失败
+- **根因**：`np.cumsum(int32)` 返回 int64，PyTorch 2.8 + numpy 1.26.4 不支持
+- **修复**：`hidden_states[logit_indices]` → `hidden_states[logit_indices.tolist()]`
+
+### 踩坑 8：uncompyle6 安装污染 numpy
+- **根因**：`xdis` 依赖破坏了 numpy 内部模块
+- **修复**：卸载 uncompyle6 + 重装 numpy 1.26.4
+- **教训**：不要在训练环境安装调试工具
+
+### 踩坑 9：reward_multiturn.py async 不可序列化
+- **修复**：`asyncio.run()` 改为同步 `subprocess.run()`
+
+### 踩坑 10：wandb 认证失败（API key 重复写入 3 次）
+- **修复**：手动修正 `/root/.netrc`
+
+### 踩坑 11：val_files=None 导致启动失败
+- **根因**：Shell 传字符串 `"None"`，veRL 无法处理
+- **修复**：保留 val_files，改 `test_freq=-1` + `val_before_train=False`
+
+### 训练可视化配置
+- `WANDB_MODE` 从 offline 改为 online，4 个脚本均已更新
+
+### 多轮训练结果（成功）
+- **80 步（step 21→100），score/mean: +0.046，62.5% 的步有样本通过测试**
+- **response_length: 1489，clip_ratio: 0.40**
+- **Entropy 0.14 → 0.06（下降 57%）**
+- **显存峰值 43.4 GiB / 48 GiB (90%)**
+
+### 训练日志
+- 单轮：`logs/train_48gb.log`
+- 多轮：`logs/train_multi.log`
+- GPU 监控：`logs/gpu_monitor_multi.csv`
