@@ -488,6 +488,41 @@ veRL 0.8.0.dev0 相比文档编写时的 API 有多处破坏性变更，导致�
 ### 训练可视化配置
 - `WANDB_MODE` 从 offline 改为 online，4 个脚本均已更新
 
+## 2026-04-09 云端 4B 模型训练准备
+
+### 云端脚本显存修复
+- `run_cloud_single.sh`：开 `gradient_checkpointing=True`，加 `free_cache_engine=True`，降 `gpu_memory_utilization=0.4`
+- `run_cloud_multi.sh`：加 `free_cache_engine=True`，降 `gpu_memory_utilization=0.55`
+- 预估：单轮峰值 ~34 GiB (43%)，多轮峰值 ~44 GiB (55%)，80GB 安全
+
+### 云端脚本全面审计与修复
+对比已验证的本地多轮脚本，补充以下缺失配置：
+- **AutoDL 环境变量**：NCCL/CUDA/VLLM_WORKER/TORCHDYNAMO/HF_ENDPOINT
+- **Ray 环境透传**：6 项 env vars 传入 Ray worker
+- **断点续训**：`resume_mode=auto`
+- **Checkpoint 保留**：`max_actor_ckpt_to_keep=4`（保留全部 4 个用于对比过拟合）
+- **vLLM enforce_eager**：防止 CUDA graph 编译问题
+- **reward workers**：`reward.num_workers=2`
+- **多轮 return_raw_chat**：`data.return_raw_chat=True`
+- **Checkpoint 数据盘**：`ln -sf /root/autodl-tmp/checkpoints $PROJECT_DIR/checkpoints`
+
+### Checkpoint 优化器剥离
+- 编写 `scripts/strip_optimizer.py`：训练后删除旧 checkpoint 的 `optim_*.pt`，仅保留最新 checkpoint 完整
+- 本地实测验证：step 20/80 从 21 GiB → 7.6 GiB，释放 25.6 GiB
+- 4B 模型估算：6 个仅模型(~18G) + 2 个完整(~49G) = ~206 GiB
+
+### 踩坑 12：HuggingFace 离线模式导致 tokenizer 加载失败
+- **现象**：`TypeError: expected str, bytes or os.PathLike object, not NoneType`（vocab_file 为 None）
+- **根因**：Qwen3-4B 通过 ModelScope 下载到 `latest/` 目录，HF 标准缓存快照 `1cfa9a.../` 里只有 config.json。`HF_HUB_OFFLINE=1` 阻止了补全下载
+- **修复**：去掉 `HF_HUB_OFFLINE=1`，改用本地路径 `actor_rollout_ref.model.path=/root/autodl-tmp/hf_cache/hub/models--Qwen--Qwen3-4B/snapshots/latest`
+
+### 踩坑 13：numpy 2.x 残留文件导致 `_core/arrayprint.py` 崩溃
+- **现象**：`AttributeError: module 'numpy.core.multiarray' has no attribute 'generic'` → `RuntimeError: Unable to configure default ndarray.__repr__`
+- **根因**：踩坑 8 的修复不彻底。`pip install --force-reinstall numpy==1.26.4` 只覆盖了 `core/` 目录，`_core/` 里残留了 numpy 2.x 的文件（`arrayprint.py`、`numerictypes.py`、`_type_aliases.py`）
+- **为什么之前本地多轮能跑**：1.7B 模型的 vLLM 配置没走到 `_core/arrayprint.py` 代码路径（没触发 repr 调试输出），4B 模型配置触发了 → 是个定时炸弹
+- **修复**：`rm -rf numpy*` 彻底清理 + `pip install numpy==1.26.4`
+- **教训**：降级 numpy 大版本时必须彻底删除旧文件，`--force-reinstall` 不可靠
+
 ### 多轮训练结果（成功）
 - **80 步（step 21→100），score/mean: +0.046，62.5% 的步有样本通过测试**
 - **response_length: 1489，clip_ratio: 0.40**
@@ -498,3 +533,230 @@ veRL 0.8.0.dev0 相比文档编写时的 API 有多处破坏性变更，导致�
 - 单轮：`logs/train_48gb.log`
 - 多轮：`logs/train_multi.log`
 - GPU 监控：`logs/gpu_monitor_multi.csv`
+
+---
+
+## 2026-04-10 4B 训练失败与方案重构
+
+### 踩坑 14：4B 模型单卡 GRPO OOM（A800 80GB）
+
+- **现象**：云端 4B 单轮训练（`cloud_single_0409_2359.log`），第 1 步即 OOM
+  - 00:00:26 `update_weights` 完成（0.33s）
+  - 00:00:26 vLLM `wake_up` 恢复 KV cache → OOM
+  - 00:09:36 vLLM Worker 崩溃：`CUDA Error: out of memory at cumem_allocator.cpp:62`
+  - GPU 峰值：**79,647 MiB / 81,920 MiB (97.3%)**
+  - 第 1 步花了 10 分钟仍未完成
+
+- **根因分析**：veRL sleep/wake 机制下，actor 和 vLLM 的 CUDA 内存**始终同时存在**（cumem allocator 只 unmap 不释放）
+  - Actor 权重：8 GiB
+  - vLLM 权重（sleep）：8 GiB
+  - vLLM KV cache (gpu_util=0.5)：40 GiB
+  - 训练临时：~15 GiB
+  - 合计：~71 GiB + 碎片 → 80 GiB 不够
+
+- **显存预估系统性偏低的根因**：
+  所有之前的预估（包括 AI 建议）都只算了静态权重，忽略了三个关键因素：
+  1. **cumem 双份权重**：actor(8G) + vLLM(8G) 同时常驻
+  2. **KV cache 按 gpu_util 比例分配**：0.5 × 80 = 40G，不是"按需分配"
+  3. **CUDA 内存碎片**：实际占用比理论值多 10-15%
+
+  实测对比：
+
+  | 场景 | 预估 | 实际 | 偏差 |
+  |------|------|------|------|
+  | 1.7B 单轮 48GB | ~36 GiB (75%) | 36 GiB (75%) | 准确 |
+  | 1.7B 多轮 48GB | ~34 GiB (71%) | **43.4 GiB (90%)** | 低 28% |
+  | 4B 单轮 80GB | ~34 GiB (43%) | **79.6 GiB (97%)** OOM | 低 **133%** |
+
+  教训：**显存预估必须包含 cumem 双份权重 + KV cache 全量分配 + 碎片余量**
+
+### 4B 方案速度与经济可行性分析
+
+4B 训练参数：batch=32, n=8, max_response=3072, APPS 数据(prompt ~285 tokens)
+- 每步 rollouts：32 × 8 = 256，avg ~2500 tokens → 640k tokens/步
+- 1.7B 每步：64 rollouts × 1530 tokens = 98k tokens → 65s/步
+- 4B 估算：98k→640k (6.5x tokens) × 2.35 (model size) ÷ 1.5 (A800 faster) ≈ **20-30 min/步**
+- 100 步 = **33-50 小时**，费用 200-300 元
+- 即使不 OOM，时间和经济成本都难以接受
+
+### 方案重构决策：1.7B 升级版替代 4B
+
+**核心洞察**：4B 方案的含金量只有 10% 来自模型规模，90% 来自训练参数（数据多样性、GRPO 采样数、多轮纠错、KL 正则化）。所有参数升级都可以在 1.7B 上实现。
+
+逐项分析 4B 方案含金量来源：
+
+| 含金量来源 | 4B 有 / 1.7B 旧 | 升级可行性 | 升级成本 |
+|---|---|---|---|
+| 模型规模 4B | 核心差距 | ❌ 无法弥补 | — |
+| APPS 数据 (2032条) | 1.7B 只有 MBPP | ✅ 直接用 | 0 |
+| n=4→8 | GRPO baseline 更准 | ✅ 直接改 | 0（vLLM 分页） |
+| response 2048→3072 | 写更长代码 | ✅ 直接改 | KV 略增 |
+| LoRA r=8→16 | 可塑性更强 | ✅ 直接改 | ~0.1 GB |
+| 2轮→3轮纠错 | 更多尝试 | ✅ 直接改 | KV 增大 |
+| KL loss | 无正则化 | ✅ 新增 | ref model 3.4 GB |
+
+**结论：除了模型规模，所有含金量来源都可以在 1.7B 上以零/极低成本实现。**
+
+### 1.7B 多轮训练欠拟合分析
+
+从 80 步训练数据（step 21-100）分析：
+
+**Entropy 趋势（探索能力）**：
+
+| 阶段 | avg entropy | 变化 |
+|------|-----------|------|
+| 21-40 | 0.112 | — |
+| 41-60 | 0.080 | ↓29% |
+| 61-80 | 0.070 | ↓12% |
+| 81-100 | 0.068 | ↓3% |
+
+Entropy 在 ~0.07 稳定，没有崩溃到 0。模型探索能力保持健康。
+
+**Score 趋势**：
+
+| 阶段 | avg score | 正 reward 比例 |
+|------|-----------|--------------|
+| 21-40 | 0.052 | 50% |
+| 41-60 | 0.034 | 45% |
+| 61-80 | 0.049 | 70% |
+| 81-100 | 0.047 | 75% |
+
+正 reward 比例从 50%→75% 提升，但 score 停滞在 0.04-0.05。模型学会了"大概怎么做"但没学会"做得更好"。**诊断：欠拟合。**
+
+**瓶颈排序**：
+1. 数据太少（464 条，致命）→ 升级到 2440 条
+2. n=4 太小（GRPO advantage 方差大）→ 升级到 n=8
+3. LoRA r=8 容量不足 → 升级到 r=16
+4. batch size（最不重要）→ 从 16 升到 48
+
+### veRL 多轮 response_length 机制确认
+
+通过阅读 veRL 源码（`tool_agent_loop.py:254`）确认：
+
+```python
+# response_mask 累加所有轮次的 token（LLM + tool call）
+agent_data.response_mask += [1] * len(agent_data.response_ids)
+
+# 总量超限直接终止所有轮次
+if len(agent_data.response_mask) >= self.response_length:
+    return AgentState.TERMINATED
+```
+
+**`max_response_length` 是所有轮次的共享总预算**，包含 LLM 生成 + tool call 反馈。不是每轮的预算。
+
+从 2 轮实测数据反推：avg 1530 tokens / 2 轮 = ~765 tokens/轮。3 轮需要 ~2295 tokens。
+- max_response=3072 → 3 轮余量仅 34%，大量截断
+- max_response=6144 → 2048/轮，余量 ~170%，几乎没有截断
+
+### APPS 数据难度过滤
+
+APPS 数据虽然已过滤为 introductory 级别，但 1.7B 模型对这类题目的 thinking 仍然很长（阿里官网测试远超 2000 tokens），可能导致 response 预算被 thinking 耗尽，没有空间输出代码。
+
+**解决方案**：按 prompt 字符数过滤 APPS，只保留简单题：
+- `prompt < 600 字符`：777 条（原 2040 条的 38%）
+- 依据：prompt 越短 → 题目越简单 → thinking 越短 → 更可能输出代码
+
+**决策**：选择方案 A（MBPP 408 + APPS-easy 777 = 1185 条），而非方案 B（全部 2448 条 + response=8192）
+- 理由：方案 A 更安全（避免无效训练），数据量足够（1185 × 8.1 epochs），费用更低
+
+**数据对比**：
+
+| 指标 | MBPP | APPS-easy (<600字) | APPS 全部 |
+|------|------|-------------------|-----------|
+| 样本数 | 408 | 777 | 2040 |
+| avg prompt chars | 78 | ~450 | 884 |
+| 预估 thinking | 短 | 中等 | 长 |
+| 代码输出风险 | 低 | 中 | 高 |
+
+`data_prepare.py` 新增 `--apps-easy` 参数实现此过滤。
+
+### 升级后的 1.7B A800 参数对比
+
+| 参数 | 旧 1.7B 多轮 (48GB) | 新 1.7B 单轮 (A800) | 新 1.7B 多轮 (A800) |
+|------|:---:|:---:|:---:|
+| 数据 | 464 MBPP | 1185 MBPP+APPS-easy | 1185 MBPP+APPS-easy |
+| batch | 16 | **48** | **48** |
+| n | 4 | **8** | **8** |
+| rollouts/步 | 64 | 384 | 384 |
+| max_response | 2048 | **4096** | **6144** |
+| max_prompt | 512 | **1024** | **1024** |
+| LoRA | r=8, a=16 | **r=16, a=32** | **r=16, a=32** |
+| 轮次 | 2 | 1 | **3** |
+| max_model_len | 5120 | **6144** | **8192** |
+| KL loss | No | **Yes (0.003)** | **Yes (0.003)** |
+| gpu_util | 0.45 | **0.55** | **0.55** |
+| steps | 80 | **200** | **200** |
+| lr | 3e-6 | 1e-6 | 2e-6 |
+| reward workers | 2 | **4** | **4** |
+| epochs | ~2.8 | ~8.1 | ~8.1 |
+| 显存峰值 | 43.4 GiB (90%) | ~55 GiB (69%) | ~54 GiB (67%) |
+| 每步耗时 | ~65s | ~3 min | ~7 min |
+| 总时长 | ~1.5h | ~10h | ~23h |
+| 费用 | ~5元 | ~60元 | ~140元 |
+
+### 可行性保证
+
+- 显存余量 26+ GiB，安全
+- 200 步 × 3.9 epochs，有 KL loss 防过拟合
+- 先跑 200 步看曲线，可续训
+- Checkpoint 每 50 步保存，最多保留 4 个
+
+---
+
+## 2026-04-10 Response 长度升级到 8192 + Prompt 优化
+
+### max_response_length: 4096/6144 → 8192
+
+- **原因**：即使 APPS-easy（prompt<600字）的题目，1.7B 模型 thinking 仍可达 4000+ tokens，之前 4096/6142 的预算在长 thinking 后几乎没有空间输出代码
+- **影响**：
+  - 单轮 max_model_len: 6144 → **10240**（1024 prompt + 8192 response + 余量）
+  - 多轮 max_model_len: 8192 → **12288**（1024 prompt + 3 轮交互 + 8192 response）
+  - KV cache 增大约 60%，但 A800 80GB 余量充足（预估 ~60 GiB / 80 GiB = 75%）
+  - 生成时间不取决于上限而是实际 token 数，影响有限
+
+### System Prompt 优化：单代码块约束
+
+- **新增指令**：`"Provide only ONE complete Python code block — do not include alternative solutions or extra code blocks."`
+- **原因**：模型在单轮中可能输出多个代码块（不同解法尝试），`extract_last_code()` 会拼接所有代码块导致执行错误
+- **效果**：引导模型集中精力输出一个最优解，减少拼接错误
+
+### 数据重新生成
+
+- `grpo_train_full.parquet`：1184 条（更新后的 prompt）
+- `grpo_train_multi_full.parquet`：1184 条（更新后的 prompt）
+
+### 参数对比（更新后）
+
+| 参数 | 单轮 (A800) | 多轮 (A800) |
+|------|:---:|:---:|
+| max_response_length | **8192** | **8192** |
+| max_model_len | **10240** | **12288** |
+| max_prompt_length | 1024 | 1024 |
+| batch_size | 48 | 48 |
+| n | 8 | 8 |
+| LoRA rank/alpha | 16/32 | 16/32 |
+| KL loss coef | 0.003 | 0.003 |
+| steps | 200 | 200 |
+
+### 踩坑 15: veRL disable_adapter 方法名不兼容 + gpu_util 过高导致 OOM
+
+- **现象**：1.7B 单轮训练在 A800 80GB 上崩溃，显存 79.6/80 GiB (97.2%)
+- **根因（双重问题）**：
+  1. **veRL bug**：`transformer_impl.py:825` 调用 `disable_adapter()`（单数），但 Qwen3 模型的 LoRA 接口是 `disable_adapters()`（复数），导致 `AttributeError`
+  2. **gpu_util 过高**：`gpu_memory_utilization=0.55` 占用 43.6 GB KV cache，加上 Actor(8.75G) + vLLM 权重(4G) + Ref 前向(7G) + 梯度/buffer(10G) = 73 GB，叠加碎片达到 79.6 GB
+- **修复**：
+  1. `patch_vllm.py` 新增 Patch 3：兼容 `disable_adapter` 和 `disable_adapters`
+  2. `gpu_memory_utilization` 从 0.55 降到 **0.4**（KV cache 从 43.6 GB 降到 31.7 GB，省 12 GB）
+- **预估修复后峰值**：~67 GiB / 80 GiB (82%)，安全余量 13 GiB
+- **教训**：之前所有显存预估都低估了 cumem allocator 的叠加效应——vLLM KV cache + Actor + Ref 三者几乎同时占用的峰值远大于各组件单独估算之和
+| 显存预估 | ~60 GiB (75%) | ~60 GiB (75%) |
+
+### 踩坑 16: numpy _core/ 残留文件（克隆实例必现）
+
+- **现象**：`AttributeError: module 'numpy.core.multiarray' has no attribute 'unsignedinteger'` → vLLM EngineDeadError
+- **根因**：Docker 镜像 `verlai/verl:vllm011.latest` 构建时先装 numpy 2.x（给 cupy/opencv），再装 veRL 时降级到 1.26.4，但 `_core/` 目录残留了 2.x 的 `_type_aliases.py` 等文件。vLLM spawn 子进程触发完整 import 链时崩溃
+- **为什么反复出现**：用户经常克隆 AutoDL 实例抢 GPU → 每次克隆 = 新容器 = 系统盘重置到 Docker 镜像原始状态 → numpy 回到出厂就坏的状态
+- **修复**：
+  1. `patch_vllm.py` 新增 Patch 4：检测并删除 `_core/` 中的残留文件，仅保留 1.26.4 兼容性 shim
+  2. 训练脚本 `run_cloud_single.sh` / `run_cloud_multi.sh` 开头自动运行 `patch_vllm.py`
+- **效果**：克隆实例后直接跑 `bash scripts/run_cloud_single.sh` 即可，无需手动修复 numpy

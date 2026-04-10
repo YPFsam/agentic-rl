@@ -34,7 +34,9 @@ SYSTEM_PROMPT = (
     "Solve the programming problem below. "
     "First think step by step, then provide your solution "
     "in a ```python code block. "
-    "Your code will be tested with assert statements."
+    "Your code will be tested with assert statements. "
+    "Provide only ONE complete Python code block — "
+    "do not include alternative solutions or extra code blocks."
 )
 
 
@@ -145,12 +147,14 @@ def deduplicate_cross_source(samples: list[dict], threshold: float = 0.7) -> lis
 
 # ========== APPS 清洗数据加载 ==========
 
-def load_apps_cleaned(max_samples: int = 3000) -> list[dict]:
+def load_apps_cleaned(max_samples: int = 3000, max_prompt_chars: int | None = None) -> list[dict]:
     """
     加载 LLM 清洗后的 APPS 数据（带 assert 测试用例）。
 
     Args:
         max_samples: 最多加载的样本数
+        max_prompt_chars: 按 prompt 字符数过滤（短 prompt = 简单题）。
+            None = 不过滤，600 = 只保留简单题（~777条）
 
     Returns:
         样本列表
@@ -161,10 +165,15 @@ def load_apps_cleaned(max_samples: int = 3000) -> list[dict]:
         return []
 
     samples = []
+    skipped_by_length = 0
     with open(cleaned_path, "r", encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 item = json.loads(line)
+                # 按 prompt 长度过滤（简单题代理指标）
+                if max_prompt_chars and len(item["prompt"]) >= max_prompt_chars:
+                    skipped_by_length += 1
+                    continue
                 samples.append({
                     "task_id": item["task_id"],
                     "prompt": item["prompt"],
@@ -174,7 +183,8 @@ def load_apps_cleaned(max_samples: int = 3000) -> list[dict]:
                 if len(samples) >= max_samples:
                     break
 
-    print(f"APPS-easy-cleaned 加载完成: {len(samples)} 条")
+    filter_msg = f"（过滤 {skipped_by_length} 条 prompt>={max_prompt_chars} 字的难题）" if max_prompt_chars else ""
+    print(f"APPS-easy-cleaned 加载完成: {len(samples)} 条{filter_msg}")
     return samples
 
 
@@ -269,7 +279,15 @@ def main():
     )
     parser.add_argument(
         "--full", action="store_true",
-        help="使用扩充数据（MBPP train+val + APPS-easy-cleaned，~3000条，云端用）",
+        help="使用扩充数据（MBPP train+val + APPS-easy-cleaned，云端用）",
+    )
+    parser.add_argument(
+        "--apps-easy", action="store_true",
+        help="过滤 APPS 只保留简单题（prompt < 600 字符），适合小模型训练",
+    )
+    parser.add_argument(
+        "--apps-max-chars", type=int, default=None,
+        help="APPS prompt 最大字符数（覆盖 --apps-easy 的默认 600）",
     )
     parser.add_argument(
         "--multiturn", action="store_true",
@@ -288,7 +306,13 @@ def main():
     samples = validate_mbpp_data(samples)
 
     if args.full:
-        apps_samples = load_apps_cleaned()
+        if args.apps_max_chars:
+            max_prompt_chars = args.apps_max_chars
+        elif args.apps_easy:
+            max_prompt_chars = 600
+        else:
+            max_prompt_chars = None
+        apps_samples = load_apps_cleaned(max_prompt_chars=max_prompt_chars)
         samples.extend(apps_samples)
         # 跨数据源去重（MBPP 在前，优先保留）
         samples = deduplicate_cross_source(samples)

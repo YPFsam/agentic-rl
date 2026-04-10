@@ -1,62 +1,31 @@
 #!/bin/bash
-# ============================================================
-# 云端单轮 GRPO 训练（Qwen3-1.7B，A800 80GB）
-# veRL 0.8+ 配置：vLLM rollout + LoRA r=16 + KL loss
-# ============================================================
-# 从 4B 方案降级到 1.7B 的升级版（含金量对齐）
-# 升级点 vs 旧 1.7B 单轮(48GB):
-#   数据 464→1185(MBPP+APPS-easy), batch 16→48, n 2→8, response 512→8192
-#   LoRA r=8→16, 新增 KL loss, steps 100→200
-# 显存预估: ~60 GiB / 80 GiB (75%)
-# 时间预估: ~3 min/step × 200步 ≈ 10小时 ≈ 60元
-# Epochs: 200 × 48 / 1185 ≈ 8.1
+# A800 冒烟测试：batch=16, n=8, response=4096（单轮优化版）
 set -e
 
-# ---- 运行环境兼容性修复 ----
 export NCCL_P2P_DISABLE=1
 export NCCL_IB_DISABLE=1
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export CUDA_MODULE_LOADING=LAZY
 export TORCHDYNAMO_DISABLE=1
-
-# ---- HuggingFace 镜像（AutoDL 网络受限）----
 export HF_ENDPOINT=https://hf-mirror.com
 export HF_HUB_OFFLINE=1
-
-# ---- wandb 在线模式 ----
 export WANDB_MODE=online
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
-# ---- vLLM + numpy 补丁（每次克隆实例后必须运行）----
+# 清除旧 checkpoint 防止 resume
+rm -rf "$PROJECT_DIR/checkpoints/agentic-rl-cloud/a800-smoke-r4096"
+
 python3 scripts/patch_vllm.py
-
-# ---- Checkpoint 保存到数据盘 ----
-CKPT_DIR="/root/autodl-tmp/checkpoints"
-mkdir -p "$CKPT_DIR"
-ln -sf "$CKPT_DIR" "$PROJECT_DIR/checkpoints"
-
-TRAIN_DATA="$PROJECT_DIR/data/grpo_train_full.parquet"
-if [ ! -f "$TRAIN_DATA" ]; then
-    echo "扩充数据不存在，生成中..."
-    python src/data_prepare.py --output "$TRAIN_DATA" --full --apps-easy
-fi
-
-echo "=========================================="
-echo "云端单轮 GRPO 训练（1.7B 升级版）"
-echo "模型: Qwen/Qwen3-1.7B"
-echo "GPU: $(python3 -c 'import torch; print(torch.cuda.get_device_name(0))' 2>/dev/null || echo 'N/A')"
-echo "数据: $TRAIN_DATA (1185 MBPP+APPS-easy)"
-echo "=========================================="
 
 python3 -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
-  data.train_files="$TRAIN_DATA" \
-  data.val_files="$TRAIN_DATA" \
-  data.train_batch_size=48 \
+  data.train_files="$PROJECT_DIR/data/grpo_train_a800.parquet" \
+  data.val_files="$PROJECT_DIR/data/grpo_train_a800.parquet" \
+  data.train_batch_size=16 \
   data.max_prompt_length=1024 \
-  data.max_response_length=8192 \
+  data.max_response_length=4096 \
   data.filter_overlong_prompts=True \
   data.truncation=left \
   actor_rollout_ref.model.path=Qwen/Qwen3-1.7B \
@@ -65,7 +34,7 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.model.lora.target_modules=all-linear \
   actor_rollout_ref.actor.optim.lr=1e-6 \
   actor_rollout_ref.model.use_remove_padding=True \
-  actor_rollout_ref.actor.ppo_mini_batch_size=24 \
+  actor_rollout_ref.actor.ppo_mini_batch_size=16 \
   actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 \
   actor_rollout_ref.actor.use_kl_loss=True \
   actor_rollout_ref.actor.kl_loss_coef=0.003 \
@@ -77,9 +46,9 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
   actor_rollout_ref.rollout.name=vllm \
   actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
-  actor_rollout_ref.rollout.gpu_memory_utilization=0.4 \
+  actor_rollout_ref.rollout.gpu_memory_utilization=0.45 \
   actor_rollout_ref.rollout.free_cache_engine=True \
-  actor_rollout_ref.rollout.max_model_len=10240 \
+  actor_rollout_ref.rollout.max_model_len=6144 \
   actor_rollout_ref.rollout.enforce_eager=True \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=4 \
   actor_rollout_ref.rollout.n=8 \
@@ -93,15 +62,14 @@ python3 -m verl.trainer.main_ppo \
   trainer.critic_warmup=0 \
   trainer.logger=["console","wandb"] \
   trainer.project_name=agentic-rl-cloud \
-  trainer.experiment_name=qwen3-1.7b-grpo-single-upgraded \
+  trainer.experiment_name=a800-smoke-r4096 \
   trainer.n_gpus_per_node=1 \
   trainer.nnodes=1 \
-  trainer.save_freq=50 \
-  trainer.max_actor_ckpt_to_keep=4 \
+  trainer.save_freq=999 \
   trainer.test_freq=-1 \
-  trainer.total_training_steps=200 \
-  trainer.resume_mode=auto \
+  trainer.total_training_steps=3 \
   trainer.val_before_train=False \
+  trainer.resume_mode=disable \
   '+ray_kwargs.ray_init.runtime_env.env_vars.NCCL_P2P_DISABLE="1"' \
   '+ray_kwargs.ray_init.runtime_env.env_vars.NCCL_IB_DISABLE="1"' \
   '+ray_kwargs.ray_init.runtime_env.env_vars.VLLM_WORKER_MULTIPROC_METHOD="spawn"' \

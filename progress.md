@@ -211,13 +211,66 @@
 - **下一步**：
   - 用多轮 checkpoint 跑 HumanEval 评估（量化 pass@1 提升幅度）
   - 考虑加长训练到 200-300 步
-  - 准备上 4B 模型 + 80GB GPU 正式训练
 
-## 阶段三：4B 模型正式训练
-- **状态**：⏳ 待开始
+## 阶段三：4B 模型训练（已放弃）
+- **状态**：❌ 放弃（OOM + 经济不可行）
+- **日期**：2026-04-09 ~ 2026-04-10
+- **已完成**：
+  - [x] 云端脚本显存修复（free_cache_engine + grad_ckpt + gpu_util 降级）
+  - [x] 云端脚本全面审计（AutoDL 环境变量、Ray 透传、resume、enforce_eager 等）
+  - [x] Checkpoint 优化器剥离脚本编写并本地验证（释放 25.6 GiB）
+  - [x] 4B 模型路径改用本地绝对路径（避免 HF 缓存格式不兼容）
+  - [x] numpy 2.x 残留文件彻底清理
+- **尝试结果**：4B 单轮训练第 1 步 OOM（79,647/81,920 MiB = 97.3%），10 分钟未完成一步
+- **放弃原因**：
+  - 显存：cumem allocator 导致 actor + vLLM 双份权重常驻，80GB 不够
+  - 速度：即使不 OOM，预估 20-30 min/步 × 100 步 = 33-50 小时
+  - 经济：200-300 元训练费，且成功率不确定
+- **踩坑**：
+  - HF 离线模式 + ModelScope 下载格式 → tokenizer 加载失败（踩坑 12）
+  - numpy 2.x `_core/` 残留 → vLLM repr 崩溃（踩坑 13）
+  - 4B 单卡 GRPO OOM（踩坑 14）：cumem 双份权重 + KV cache 全量分配被系统性低估
 
-## 消融实验
+---
+
+## 阶段三（替代）：1.7B 升级版训练（A800 80GB）
 - **状态**：⏳ 待开始
+- **日期**：2026-04-10
+- **策略**：放弃 4B 模型，将 4B 方案含金量（数据多样性、GRPO 采样数、多轮纠错、KL 正则化）全部迁移到 1.7B + A800
+- **训练配置（单轮）**：
+  - 模型：Qwen3-1.7B + LoRA (rank=16, alpha=32)
+  - 数据：1184 MBPP+APPS-easy（grpo_train_full.parquet，APPS 过滤 prompt<600字）
+  - batch=48, n=8, max_response=**8192**, max_prompt=1024
+  - KL loss=True (coef=0.003), lr=1e-6
+  - gpu_util=0.55, max_model_len=**10240**
+  - 200 步 (~8.1 epochs)
+  - 预估：~10 小时，~60 元
+- **训练配置（多轮）**：
+  - 模型：Qwen3-1.7B + LoRA (rank=16, alpha=32)
+  - 数据：1184 MBPP+APPS-easy（grpo_train_multi_full.parquet，APPS 过滤 prompt<600字）
+  - batch=48, n=8, max_response=**8192** (2730/轮), max_assistant_turns=3
+  - KL loss=True (coef=0.003), lr=2e-6
+  - gpu_util=0.55, max_model_len=**12288**
+  - 200 步 (~8.1 epochs)
+  - 预估：~23 小时，~140 元
+- **Prompt 优化**：新增 "Provide only ONE complete Python code block" 指令，防止多代码块拼接错误
+- **待完成**：
+  - [ ] 上云验证 A800 环境可用
+  - [ ] 运行 `python3 scripts/patch_vllm.py`
+  - [ ] 运行单轮训练 `bash scripts/run_cloud_single.sh`
+  - [ ] 运行多轮训练 `bash scripts/run_cloud_multi.sh`
+  - [ ] 评估 checkpoint（HumanEval/MBPP pass@1）
+- **脚本**：
+  - `scripts/run_cloud_single.sh` — 1.7B 单轮升级版（A800）
+  - `scripts/run_cloud_multi.sh` — 1.7B 多轮升级版（A800）
+
+## 阶段四：评估与消融
+- **状态**：⏳ 待开始
+- **计划**：
+  - 单轮 vs 多轮对比（相同数据/参数）
+  - MBPP vs APPS 分层分析
+  - Turn 分析（第 2/3 轮纠错成功率）
+  - Thinking token 分析
 
 ## 分析与可视化
 - **状态**：⏳ 待开始
