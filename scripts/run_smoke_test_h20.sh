@@ -1,5 +1,5 @@
 #!/bin/bash
-# A800 冒烟测试：batch=16, n=8, response=4096（单轮优化版）
+# H20 96GB 两轮冒烟测试：batch=8, n=8, response=4096, 2 turns
 set -e
 
 export NCCL_P2P_DISABLE=1
@@ -15,7 +15,7 @@ PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 # 清除旧 checkpoint 防止 resume
-rm -rf "$PROJECT_DIR/checkpoints/agentic-rl-cloud/a800-smoke-r3786-g35"
+rm -rf "$PROJECT_DIR/checkpoints/agentic-rl-cloud/h20-smoke-2turn-r4096"
 
 python3 scripts/patch_vllm.py
 
@@ -23,18 +23,19 @@ python3 -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
   data.train_files="$PROJECT_DIR/data/grpo_train_a800.parquet" \
   data.val_files="$PROJECT_DIR/data/grpo_train_a800.parquet" \
-  data.train_batch_size=16 \
+  data.train_batch_size=8 \
   data.max_prompt_length=1024 \
-  data.max_response_length=3200 \
+  data.max_response_length=4096 \
   data.filter_overlong_prompts=True \
   data.truncation=left \
+  data.return_raw_chat=True \
   actor_rollout_ref.model.path=Qwen/Qwen3-1.7B \
   actor_rollout_ref.model.lora.rank=16 \
   actor_rollout_ref.model.lora.alpha=32 \
   actor_rollout_ref.model.lora.target_modules=all-linear \
   actor_rollout_ref.actor.optim.lr=1e-6 \
   actor_rollout_ref.model.use_remove_padding=True \
-  actor_rollout_ref.actor.ppo_mini_batch_size=16 \
+  actor_rollout_ref.actor.ppo_mini_batch_size=8 \
   actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 \
   actor_rollout_ref.actor.use_kl_loss=True \
   actor_rollout_ref.actor.kl_loss_coef=0.003 \
@@ -48,21 +49,23 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
   actor_rollout_ref.rollout.gpu_memory_utilization=0.35 \
   actor_rollout_ref.rollout.free_cache_engine=True \
-  actor_rollout_ref.rollout.max_model_len=4800 \
+  actor_rollout_ref.rollout.max_model_len=5120 \
   actor_rollout_ref.rollout.enforce_eager=True \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=4 \
   actor_rollout_ref.rollout.n=8 \
+  actor_rollout_ref.rollout.multi_turn.enable=True \
+  actor_rollout_ref.rollout.multi_turn.max_assistant_turns=2 \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=4 \
   actor_rollout_ref.ref.fsdp_config.param_offload=True \
   algorithm.use_kl_in_reward=False \
-  custom_reward_function.path="$PROJECT_DIR/src/reward.py" \
-  custom_reward_function.name=compute_score \
+  custom_reward_function.path="$PROJECT_DIR/src/reward_multiturn.py" \
+  custom_reward_function.name=compute_score_multiturn \
   reward.num_workers=4 \
   data.seed=42 \
   trainer.critic_warmup=0 \
   trainer.logger=["console","wandb"] \
   trainer.project_name=agentic-rl-cloud \
-  trainer.experiment_name=a800-smoke-r3786-g35 \
+  trainer.experiment_name=h20-smoke-2turn-r4096 \
   trainer.n_gpus_per_node=1 \
   trainer.nnodes=1 \
   trainer.save_freq=999 \
