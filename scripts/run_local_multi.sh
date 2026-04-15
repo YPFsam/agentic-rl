@@ -23,6 +23,12 @@ export WANDB_MODE=online
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
+# 确保 Ray worker 能导入 src.agent_loop.CodeAgentLoop
+export PYTHONPATH="$PROJECT_DIR:${PYTHONPATH:-}"
+
+# 清理 __pycache__：Ray worker 会缓存旧 .pyc
+rm -rf "$PROJECT_DIR/src/__pycache__"
+
 TRAIN_DATA="$PROJECT_DIR/data/grpo_train.parquet"
 
 if [ ! -f "$TRAIN_DATA" ]; then
@@ -72,6 +78,7 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.rollout.n=4 \
   actor_rollout_ref.rollout.multi_turn.enable=True \
   actor_rollout_ref.rollout.multi_turn.max_assistant_turns=2 \
+  actor_rollout_ref.rollout.agent.agent_loop_config_path="$PROJECT_DIR/configs/agent_loop.yaml" \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=1 \
   actor_rollout_ref.ref.fsdp_config.param_offload=True \
   algorithm.use_kl_in_reward=False \

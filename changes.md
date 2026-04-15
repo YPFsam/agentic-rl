@@ -760,3 +760,577 @@ APPS 数据虽然已过滤为 introductory 级别，但 1.7B 模型对这类题�
   1. `patch_vllm.py` 新增 Patch 4：检测并删除 `_core/` 中的残留文件，仅保留 1.26.4 兼容性 shim
   2. 训练脚本 `run_cloud_single.sh` / `run_cloud_multi.sh` 开头自动运行 `patch_vllm.py`
 - **效果**：克隆实例后直接跑 `bash scripts/run_cloud_single.sh` 即可，无需手动修复 numpy
+
+---
+
+## 2026-04-11 H20 冒烟测试踩坑记录
+
+### H20 冒烟测试结果（失败）
+
+**配置**: H20 96GB, batch=8, n=8, response=4096, 2轮, gpu_util=0.35
+**数据**: grpo_train_multi_full.parquet (605 条)
+
+**显存占用**:
+| 阶段 | 显存 | 占比 |
+|------|------|------|
+| 模型加载 (FSDP) | 7.6 GiB | 7.8% |
+| vLLM wake_up 峰值 | 42.6 GiB | 43.6% |
+| 稳定 (update_weights 后) | 8.2 GiB | 8.4% |
+
+显存非常宽裕，峰值仅 43.6%，还有 55 GiB 余量。但训练在第一个 step 的 rollout 阶段就崩溃了。
+
+### 踩坑 17: 自定义 AgentLoop 未注册到 veRL
+
+- **现象**：`AssertionError: Agent loop code_agent_loop not registered, registered agent loops: dict_keys(['single_turn_agent', 'diffusion_single_turn_agent', 'tool_agent'])`
+- **根因**：
+  1. 多轮训练数据（`grpo_train_multi_full.parquet`）的 `agent_name` 列为 `code_agent_loop`
+  2. veRL 的 `AgentLoopWorker._run_agent_loop()` 根据数据中的 `agent_name` 查找注册表
+  3. veRL 内置只有 3 个 agent loop：`single_turn_agent`、`diffusion_single_turn_agent`、`tool_agent`
+  4. 项目自定义的 `CodeAgentLoop`（`src/agent_loop.py`）**从未注册到 veRL 的 `_agent_loop_registry`**
+  5. 旧的 `register_agent.py` 只定义了一个本地 dict `AGENT_REGISTRY`，没有调用 veRL 的注册机制
+
+- **veRL 的注册机制**（源码分析）：
+  ```python
+  # 方式 1: 装饰器注册
+  @register("code_agent_loop")
+  class CodeAgentLoop(AgentLoopBase): ...
+
+  # 方式 2: 配置文件注册（推荐）
+  # agent_loop_config_path 加载 YAML → 写入 _agent_loop_registry → hydra.utils.instantiate() 创建实例
+  _agent_loop_registry["code_agent_loop"] = {"_target_": "src.agent_loop.CodeAgentLoop"}
+  ```
+
+- **修复**：
+  1. 创建 `configs/agent_loop.yaml`：
+     ```yaml
+     - name: code_agent_loop
+       _target_: src.agent_loop.CodeAgentLoop
+     ```
+  2. 多轮训练脚本添加参数：`actor_rollout_ref.rollout.agent.agent_loop_config_path=$PROJECT_DIR/configs/agent_loop.yaml`
+  3. 多轮训练脚本添加 `export PYTHONPATH="$PROJECT_DIR:${PYTHONPATH:-}"`，确保 Ray worker 能导入 `src.agent_loop.CodeAgentLoop`
+  4. 更新 `register_agent.py`（仅保留参考文档）
+
+- **影响范围**：所有多轮训练脚本（`run_local_multi.sh`、`run_cloud_multi.sh`、`run_smoke_test_h20.sh`）
+- **教训**：veRL 的 agent loop 是通过 `hydra.utils.instantiate()` 动态创建的，自定义 agent loop 必须同时满足：①注册到 `_agent_loop_registry` ②类路径可被 Ray worker 导入
+
+---
+
+### 踩坑 18: TokenOutput 属性名写错（`ids` → `token_ids`）
+
+- **现象**：H20 冒烟测试（`smoke_h20_0411_0052.log`）在第一个 rollout 步就崩溃：
+  ```
+  AttributeError: 'TokenOutput' object has no attribute 'ids'. Did you mean: '_return_value'?
+  ```
+  定位到 `src/agent_loop.py:108`：
+  ```python
+  generated_ids = llm_output.ids  # ❌ 错误
+  ```
+
+- **根因**：
+  - veRL 的 `TokenOutput`（定义在 `verl.workers.rollout.replica`）属性名是 **`token_ids`**，不是 `ids`
+  - veRL 内置的 `single_turn_agent_loop.py:69` 和 `tool_agent_loop.py:244` 都用的是 `output.token_ids`
+  - 自定义 `CodeAgentLoop` 写成了 `.ids`，本地之前的 48GB 多轮训练可能用了不同版本的 veRL 或 vLLM，属性名恰好匹配；切换到 H20 环境后接口不一致导致报错
+
+- **修复**：`src/agent_loop.py:108`
+  ```python
+  generated_ids = llm_output.token_ids  # ✅ 正确
+  ```
+
+- **教训**：自定义 AgentLoop 中访问 vLLM/veRL 返回对象的属性时，必须对照 veRL 内置 agent loop（`single_turn_agent_loop.py`、`tool_agent_loop.py`）的实现，不要凭猜测写属性名
+
+---
+
+### 踩坑 19: AgentLoopOutput 必需 `metrics` 字段缺失
+
+- **现象**：H20 冒烟测试第二次尝试（`smoke_h20_0411_0104.log`），修复了踩坑 17/18 后，第一个 step rollout 阶段崩溃：
+  ```
+  pydantic_core._pydantic_core.ValidationError: 1 validation error for AgentLoopOutput
+  metrics
+    Field required [type=missing, input_value={'prompt_ids': [...], 'response_ids': [...], ...}]
+  ```
+
+- **根因**：
+  - veRL 最新版的 `AgentLoopOutput`（pydantic BaseModel）新增了 **必填** 字段 `metrics: AgentLoopMetrics`
+  - `AgentLoopMetrics` 包含 `generate_sequences`（LLM 生成耗时）、`tool_calls`（工具调用耗时）、`num_preempted`（抢占次数）
+  - 旧版 veRL 的 `AgentLoopOutput` 没有这个字段，项目代码是从旧版 API 编写的
+  - 自定义 `CodeAgentLoop.run()` 返回 `AgentLoopOutput(prompt_ids=..., response_ids=..., response_mask=...)` 时缺少 `metrics`，pydantic 校验失败
+
+- **修复**：`src/agent_loop.py` 三处修改：
+  1. 导入 `simple_timer`：`from verl.utils.profiler import simple_timer`
+  2. LLM 生成用 `with simple_timer("generate_sequences", metrics)` 计时
+  3. 沙盒执行用 `with simple_timer("tool_calls", metrics)` 计时
+  4. 返回值新增 `num_turns=actual_turns` 和 `metrics=metrics`
+  ```python
+  # 修改前
+  return AgentLoopOutput(
+      prompt_ids=list(prompt_ids),
+      response_ids=response_ids,
+      response_mask=response_mask,
+  )
+
+  # 修改后
+  return AgentLoopOutput(
+      prompt_ids=list(prompt_ids),
+      response_ids=response_ids,
+      response_mask=response_mask,
+      num_turns=actual_turns,
+      metrics=metrics,
+  )
+  ```
+
+- **教训**：自定义 AgentLoop 的返回对象必须与 veRL 内置 agent loop 完全对齐，包括所有必填字段。veRL 版本升级时 `AgentLoopOutput` 可能新增必填字段，需要对照 `single_turn_agent_loop.py` 的返回值检查
+
+---
+
+### 踩坑 20: 多轮 response_ids 超出 response_length 导致 tensor size mismatch
+
+- **现象**：H20 冒烟测试第三次尝试（`smoke_h20_0411_0116.log`），修复踩坑 17/18/19 后，第一个 step rollout 阶段崩溃：
+  ```
+  RuntimeError: Sizes of tensors must match except in dimension 0.
+  Expected size 4096 but got size 4848 for tensor number 3 in the list.
+  ```
+  定位到 veRL `agent_loop.py:879` 的 `_postprocess` 方法：
+  ```python
+  response_ids = torch.cat([input.response_ids for input in inputs], dim=0)
+  ```
+
+- **根因**：
+  - 多轮交互中，LLM 生成的 tokens + 环境反馈 tokens 累计超出了 `max_response_length`（4096）
+  - 某个样本的 response_ids 为 4848 tokens，其他样本为 4096 tokens（被截断或未超限）
+  - veRL 的 `_agent_loop_postprocess` 中 `tokenizer.pad(max_length=4096)` 只**填充**短序列，不会**截断**长序列
+  - 结果是 `_postprocess` 收到 shape 不同的 tensor（[1,4096] vs [1,4848]），`torch.cat` dim=0 时 dim=1 不匹配
+
+- **修复**：`src/agent_loop.py` 三处修改：
+  1. 循环内增加**预算检查**：每轮生成前检查 `len(response_ids) >= response_length`，超限则提前终止
+  2. 生成后检查：如果单轮生成导致超限，截断到 `response_length` 并 break
+  3. 返回前**最终保障**：再次检查并截断，确保 `response_ids` 不超过 `response_length`
+
+  ```python
+  response_length = self.rollout_config.response_length
+
+  for turn in range(self.max_turns):
+      # 预算检查：剩余空间不足则提前终止
+      if len(response_ids) >= response_length:
+          break
+      # ... LLM 生成 ...
+      # 生成后超限则截断并终止
+      if len(response_ids) > response_length:
+          response_ids = response_ids[:response_length]
+          response_mask = response_mask[:response_length]
+          break
+
+  # 最终保障
+  if len(response_ids) > response_length:
+      response_ids = response_ids[:response_length]
+      response_mask = response_mask[:response_length]
+  ```
+
+- **教训**：
+  - `max_response_length` 是所有轮次的**共享总预算**（LLM tokens + feedback tokens），不是每轮的预算
+  - 自定义 AgentLoop 必须自己负责截断到 `response_length`，veRL 的 `tokenizer.pad` 只填充不截断
+  - 对照 veRL 内置 `tool_agent_loop.py` 的 `TERMINATED` 逻辑：`if len(response_mask) >= self.response_length: return AgentState.TERMINATED`
+
+### H20 96GB 显存占用（实测）
+
+**配置**: H20 96GB, Qwen3-1.7B, batch=8, n=8, response=4096, 2轮, gpu_util=0.35, param_offload=False
+
+| 阶段 | 显存 | 占比 |
+|------|------|------|
+| 模型加载 (FSDP) | 7.6 GiB | 7.8% |
+| vLLM wake_up 峰值 | 36.7 GiB | 37.5% |
+| update_weights 后 | 8.2 GiB | 8.4% |
+| 稳定训练 | 36.7 GiB | 37.5% |
+
+**结论**：H20 96GB 显存非常宽裕，峰值仅 37.5%，还有 **55 GiB 余量**。可以大幅提升参数：
+- gpu_util: 0.35 → 0.5（KV cache 翻倍）
+- response: 4096 → 8192（长 thinking 空间）
+- batch: 8 → 48（更多梯度信息）
+- max_model_len: 5120 → 12288（3轮交互空间）
+
+### 踩坑 21: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True 导致启动崩溃
+
+- **现象**：H20 冒烟测试（`smoke_h20_20260411_103614.log`）启动即崩溃：
+  ```
+  AssertionError: Expandable segments are not compatible with memory pool.
+  Please track https://github.com/pytorch/pytorch/issues/147851 for the latest updates.
+  ```
+  发生在 vLLM `cumem.py:150`，模型都没加载就挂了。
+
+- **根因链条**：
+  1. 09:28 那次冒烟测试跑了 3 步后在 step 4 的 `update_weights` 阶段 OOM（`tensor.clone()` 要 48 MiB 但只剩 29.5 MiB）
+  2. PyTorch 的 OOM 错误信息建议：`try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation`
+  3. 按建议加了 `export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` 到 `run_smoke_test_h20.sh`
+  4. 但 vLLM 的 `enable_sleep_mode=True`（veRL colocated 模式自动启用）使用自定义的 `CuMemAllocator` 内存池
+  5. **`expandable_segments` 和 `CuMemAllocator` 不兼容**——两者都试图管理同一块 GPU 内存，vLLM 直接 assert 失败
+
+- **expandable_segments 是什么**：PyTorch CUDA 内存分配器的优化选项，允许已分配的内存段动态扩展而非重新分配，能减少内存碎片。但它与 vLLM sleep mode 的自定义内存池（CuMemAllocator）冲突。
+
+- **修复**：
+  1. 删除 `export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
+  2. 降低 `gpu_memory_utilization` 从 0.35 到 0.30，给 update_weights 多留余量
+  3. 依赖 Patch 5（sleep 后清理 prefix cache）和 Patch 6（gc + empty_cache）缓解显存泄漏
+
+- **09:28 次运行的显存泄漏数据**：
+
+  | Step | 峰值 VRAM | 剩余 | 结果 |
+  |------|-----------|------|------|
+  | 1 | ~78 GiB | ~20 GiB | OK |
+  | 2 | ~92 GiB | ~6 GiB | 紧张 |
+  | 3 | ~97.3 GiB | 0.6 GiB | OOM |
+
+  每步泄漏 7-14 GiB，sleep mode 没有完全释放 KV cache。
+
+- **教训**：
+  - **不要盲目跟随 PyTorch OOM 的建议**——那个建议是给普通 PyTorch 训练的，不适用于 vLLM 自定义内存池
+  - veRL colocated 模式下 vLLM 使用 `CuMemAllocator`，不能同时使用 `expandable_segments`
+  - 显存泄漏应从根源解决（清理缓存、降低 gpu_util），而不是用 PyTorch 分配器优化绕过
+
+---
+
+## 2026-04-11 H20 正式多轮训练踩坑
+
+### H20 正式训练配置
+
+**配置**: H20 96GB, Qwen3-1.7B, batch=8, n=8, response=6800, max_assistant_turns=2, gpu_util=0.25, lr=1e-6
+
+### 训练结果（16 步后卡死）
+
+| 指标 | 值 |
+|------|-----|
+| 完成步数 | 16 步（step 17 卡死） |
+| score/mean 范围 | -0.016 ~ +0.277 |
+| 正 reward 步占比 | 81% (13/16) |
+| response_length/mean | 2294 ~ 4613 |
+| clip_ratio | 0.03 ~ 0.375 |
+| num_turns/mean | 1.12 ~ 1.42 |
+| pg_clipfrac | 全部 = 0（无学习） |
+| ppo_kl | 全部 = 0 |
+
+**训练卡死现象**：
+- Step 15: step_time=2069s（正常 ~300s），tool_calls/max=861s
+- Step 17: vLLM generate 完全挂起，GPU 卡在 80 GiB / 0% util
+- GPU 日志最后 28 分钟：40519 MiB / 0% util（idle 等待）
+
+### 踩坑 22: 多轮 sampling_params 的 max_new_tokens 不随轮次调整
+
+- **现象**：
+  1. 多轮训练中第 2/3 轮极少触发有效修正（num_turns/mean 仅 1.2）
+  2. 训练在 step 15 出现 2069s 超长 step_time，step 17 完全卡死
+  3. vLLM 在 step 17 的 generate 阶段挂起，GPU 显存 80 GiB 但利用率 0%
+
+- **根因**：
+  `agent_loop.py` 的 `sampling_params` 中 `max_new_tokens` 始终为原始值（6800），不会根据已消耗的 response 预算动态调整。这导致两个严重后果：
+
+  **后果 A — 第 2 轮修正无效**：
+  ```
+  Turn 1: LLM 生成 4000 tokens → 错误反馈 200 tokens → 累计 4200/6800
+  Turn 2: vLLM 被告知 max_new_tokens=6800（实际仅剩 2600）
+    → vLLM 尝试生成 6800 tokens，agent_loop 事后截断
+    → 第 2 轮代码被截断，修正毫无意义
+
+  极端情况：Turn 1 生成 6000+ tokens
+    → 剩余 < 600 tokens，第 2 轮连函数定义都写不完
+  ```
+
+  **后果 B — vLLM preemption 死锁**：
+  ```
+  prompt(82) + turn1 LLM(4000) + feedback(200) + turn2 请求 max_new_tokens(6800)
+  = 总长度可能超过 max_model_len=8816
+  → vLLM v1 engine 的 KV cache preemption 无法处理
+  → 调度器进入死循环，generate 永远不返回 → 训练卡死
+  ```
+
+- **数据佐证**：
+  | 指标 | 值 | 含义 |
+  |------|-----|------|
+  | num_turns/mean | 1.12 ~ 1.42 | 平均仅 1.2 轮，第 2 轮极少有效触发 |
+  | response_length/max | 几乎全是 6800 | 每步都有样本打满预算 |
+  | clip_ratio | 0.03 ~ 0.375 | 3%~37.5% 样本被截断 |
+  | Step 15 tool_calls/max | 861s（正常 <0.5s） | vLLM preemption 异常 |
+  | Step 17 GPU | 80 GiB / 0% util | vLLM 完全挂起 |
+
+- **修复**：`src/agent_loop.py` 在每次 `generate` 调用前动态调整 `max_new_tokens`：
+  ```python
+  # 修改前：sampling_params 始终传原始 max_new_tokens
+  llm_output = await self.server_manager.generate(
+      request_id=request_id,
+      prompt_ids=current_ids,
+      sampling_params=sampling_params,  # max_new_tokens 永远是 6800
+  )
+
+  # 修改后：根据剩余预算动态调整
+  remaining = response_length - len(response_ids)
+  adjusted_params = dict(sampling_params)
+  original_max = adjusted_params.get("max_new_tokens", response_length)
+  adjusted_params["max_new_tokens"] = min(remaining, original_max)
+
+  llm_output = await self.server_manager.generate(
+      request_id=request_id,
+      prompt_ids=current_ids,
+      sampling_params=adjusted_params,  # 精确到剩余预算
+  )
+  ```
+
+- **影响**：
+  1. 第 2/3 轮修正现在能获得精确的剩余预算，不会被事后截断
+  2. vLLM 不再收到超出 max_model_len 的请求，避免 preemption 死锁
+  3. 多轮交互的 token 利用率从"先到先得"变为"公平分配"
+
+- **教训**：
+  - 多轮 AgentLoop 的 `sampling_params.max_new_tokens` 必须按轮次动态调整，不能传固定值
+  - vLLM 不知道 veRL 的 `response_length` 限制，它只会按 `max_new_tokens` 分配 KV cache
+  - 多轮累积序列长度（prompt + 所有轮次 tokens）可能超过 `max_model_len`，需要在应用层提前预防
+  - 对照 veRL 内置 `tool_agent_loop.py` 的 `TERMINATED` 检查：它在每次循环开始时检查 `len(response_mask) >= self.response_length`，但没有动态调整 `max_new_tokens`——这是 veRL 内置 agent loop 也能触发的潜在问题
+
+---
+
+## 2026-04-13 H20 显存泄漏修复
+
+### 问题
+H20 96GB 正式多轮训练（gpu_util=0.30, response=6000）在 step 8 的 `update_weights` 阶段 OOM：
+- 显存从 step 4-7 的 ~82 GiB 稳态，突增到 step 8 的 ~95 GiB
+- OOM 点：`bucketed_weight_transfer.py:251` 的 `tensor.clone()`（IPC weight transfer 需要 48 MiB，但仅剩 19.88 MiB 可用）
+- 根因：KV cache 预留过大（gpu_util=0.30）+ IPC tensor clone 临时显存未及时释放 + 训练梯度/优化器缓存累积
+
+### 修复内容
+
+#### 1. gpu_memory_utilization 0.30 → 0.25
+- 释放 ~5 GiB KV cache 空间，为 weight transfer 的 `tensor.clone()` 腾出余量
+- 影响：并发序列数从 ~21 降到 ~17，多轮抢占可能略增，但 OOM 风险大幅降低
+- 修改文件：`scripts/run_cloud_multi.sh`, `scripts/run_smoke_test_h20.sh`
+
+#### 2. Patch 7: 训练循环关键节点加 gc.collect() + empty_cache()
+- `_update_actor` 后：释放训练产生的梯度和激活值缓存
+- `update_weights` 后：释放 IPC tensor 残留 + CUDA IPC handles（`ipc_collect()`）
+- warmup 路径的 `update_weights` 后：同样处理
+- 修改文件：`/tmp/verl/verl/trainer/ppo/ray_trainer.py`
+- 速度影响：每步 +0.5-1s（<0.3%），可忽略
+
+#### 3. Patch 8: 每处理完一个 weight bucket 后立即清理
+- 在 `bucketed_weight_transfer.py` 的 `on_bucket_received` 回调后加 `empty_cache()`
+- 确保 clone 副本显存及时回收，不让多个 bucket 的临时 tensor 累积
+- 修改文件：`/tmp/verl/verl/workers/rollout/vllm_rollout/bucketed_weight_transfer.py`
+- 速度影响：每个 bucket +50ms（~10-20 个 bucket/次），总计 +0.5-1s
+
+#### 已有 Patch 回顾
+- Patch 5: vLLM sleep 后 `reset_prefix_cache()`（vllm_async_server.py）
+- Patch 6: 训练步末尾 `del batch + gc.collect + empty_cache`（ray_trainer.py）
+
+### 修改文件汇总
+- `scripts/patch_vllm.py` — 新增 Patch 7 + Patch 8
+- `scripts/run_cloud_multi.sh` — gpu_util 0.30 → 0.25
+- `scripts/run_smoke_test_h20.sh` — gpu_util 0.30 → 0.25
+- `/tmp/verl/verl/trainer/ppo/ray_trainer.py` — Patch 7 已直接应用
+- `/tmp/verl/verl/workers/rollout/vllm_rollout/bucketed_weight_transfer.py` — Patch 8 已直接应用
+
+### 训练结果（修复前，7 步，H20 96GB）
+| 步数 | score | response_length | clip_ratio | gen_max |
+|------|-------|----------------|------------|---------|
+| 1 | 0.000 | 2995 | 0.14 | 114s |
+| 2 | +0.093 | 2466 | 0.03 | 110s |
+| 3 | -0.005 | 4213 | 0.34 | 116s |
+| 4 | +0.146 | 3321 | 0.09 | 114s |
+| 5 | +0.053 | 3805 | 0.34 | 115s |
+| 6 | +0.027 | 2535 | 0.02 | 113s |
+| 7 | +0.159 | 3498 | 0.06 | 113s |
+
+---
+
+## 2026-04-13 Patch 6/7 修复：移除 TaskRunner 中的有害 CUDA 调用
+
+### 踩坑 23: torch.cuda.ipc_collect() 在 CPU 进程中崩溃
+
+- **现象**：H20 正式多轮训练第二次运行（12:10），Step 1 完成后崩溃：
+  ```
+  RuntimeError: No CUDA GPUs are available
+  ```
+  位于 `ray_trainer.py:1605` 的 `torch.cuda.ipc_collect()`
+
+- **根因**：Patch 7 在 `ray_trainer.py` 的 `fit()` 方法中调用了 `torch.cuda.ipc_collect()` 和 `torch.cuda.empty_cache()`，但 `fit()` 运行在 **TaskRunner** 进程中——这是一个 **CPU-only Ray actor**（`ray.remote(num_cpus=1)`，无 GPU 分配）。
+
+  veRL 进程架构：
+  ```
+  TaskRunner  (Ray actor, num_cpus=1, 无 GPU)  ← ray_trainer.py 的 fit() 运行在这里
+     ├── WorkerDict     (Ray actor, 有 GPU)     ← FSDP 模型、训练、权重传输
+     ├── vLLMHttpServer (Ray actor, 有 GPU)     ← vLLM 推理引擎
+     └── AgentLoopWorker x8                     ← Agent Loop 执行
+  ```
+
+  IPC tensor 的实际流向是 WorkerDict ↔ vLLM Worker，TaskRunner 不持有任何 IPC handles。在 TaskRunner 里调用 `ipc_collect()` 即使成功也清理不到任何东西。
+
+  `torch.cuda.ipc_collect()` 源码：
+  ```python
+  def ipc_collect():
+      _lazy_init()               # ← 无条件初始化 CUDA，GPU 状态不佳就崩溃
+      return torch._C._cuda_ipc_collect()
+  ```
+
+  对比 `torch.cuda.empty_cache()`：
+  ```python
+  def empty_cache():
+      if is_initialized():       # ← CUDA 没初始化就直接返回，不会崩溃
+          torch._C._cuda_emptyCache()
+  ```
+
+- **为什么有时不崩溃**：`_lazy_init()` 在 GPU 状态正常时能成功创建 CUDA context。00:59 运行中跑了 7 步没崩溃，但 12:10 运行中 GPU 在 step 1 后显存从 68 GiB 突降到 0（疑似 GPU 驱动状态异常），`_lazy_init()` 失败。行为不可预测。
+
+- **修复**：
+  1. Patch 6 Part 2：移除 `torch.cuda.empty_cache()`（在 CPU 进程中无效）
+  2. Patch 7 所有位置：移除 `torch.cuda.ipc_collect()` 和 `torch.cuda.empty_cache()`，只保留 `gc.collect()`
+  3. Patch 8 保持不变（在 vLLM Worker 进程内，是正确位置）
+
+  各清理调用在不同进程的效果：
+  | 调用 | TaskRunner (CPU) | WorkerDict (GPU) | vLLM Worker (GPU) |
+  |------|:---:|:---:|:---:|
+  | gc.collect() | 有效（Python 层） | 有效 | 有效 |
+  | torch.cuda.empty_cache() | 无效（无 GPU 缓存） | 有效 | 有效 |
+  | torch.cuda.ipc_collect() | 有害（崩溃） | 有效 | 有效 |
+
+- **修改文件**：
+  - `scripts/patch_vllm.py` — Patch 6/7 的 new_block 模板移除 CUDA 调用
+  - `/tmp/verl/verl/trainer/ppo/ray_trainer.py` — 直接修改已打补丁的文件
+
+- **教训**：
+  - veRL 中 `ray_trainer.py` 的 `fit()` 运行在 CPU-only TaskRunner 进程，不能调用任何需要 GPU 的 torch.cuda 函数
+  - 显存清理必须在实际持有 GPU 内存的进程（WorkerDict、vLLM Worker）中执行
+  - `gc.collect()` 是唯一在任意进程都安全且有效的清理操作
+  - Patch 8（`bucketed_weight_transfer.py`）和 Patch 5（`vllm_async_server.py`）在正确进程中，无需修改
+
+---
+
+## 2026-04-13 OOM 根因分析：Patch 7 无效 + update_actor 缺少 empty_cache
+
+### 踩坑 24: Patch 7 gc.collect() 在错误进程中，对显存零效果
+
+- **现象**：H20 正式多轮训练反复在 step 8 的 `update_weights_from_ipc` → `tensor.clone(48 MiB)` 处 OOM
+  - 显存 ~89 GiB / 95 GiB (93.7%)，仅 ~6 GiB 余量
+  - PyTorch 报 "reserved but unallocated: 20-44 MiB"，找不到 48 MiB 连续空间
+  - 降 response (6800→6000)、降 gpu_util (0.30→0.25) 都不解决
+
+- **根因**：Patch 7 的 `gc.collect()` 在 **TaskRunner** 进程（CPU-only），而训练内存（梯度/激活值）在 **WorkerDict** 进程（GPU）
+  ```
+  TaskRunner (无 GPU)                         ← Patch 7 gc.collect() 在这里（无用）
+    ├── WorkerDict (GPU, Ray actor)           ← 训练在这里，~25 GiB PyTorch 缓存未释放
+    └── vLLM Worker (GPU, Ray actor)          ← tensor.clone() OOM 在这里
+  ```
+  veRL 的 `_update_actor()` 调用 `self.actor_rollout_wg.update_actor()` 是 **Ray 远程调用**到 WorkerDict。
+  Ray 调用返回后 TaskRunner 执行 gc.collect()，对 WorkerDict 的 GPU 内存零效果。
+
+- **对比**：veRL 自带的 `generate_sequences()` 在 `fsdp_workers.py:1120` 有正确的清理：
+  ```python
+  get_torch_device().empty_cache()  # ✅ 在 WorkerDict 进程内
+  ```
+  但 `update_actor()` (line 1029-1071) **从未调用过任何显存清理**。
+
+- **内存布局（OOM 时刻）**：
+  | 组件 | 占用 | 说明 |
+  |------|------|------|
+  | cumem（vLLM KV cache, sleep）| ~64 GiB | 已 unmap 但 CUDA 驱动级仍分配 |
+  | WorkerDict PyTorch（训练缓存）| ~20-25 GiB | 梯度/激活值未释放 |
+  | vLLM Worker PyTorch | ~4-5 GiB | 模型权重 |
+  | **总计** | **~89 GiB / 95 GiB** | **仅 ~6 GiB 余量** |
+
+- **为什么第一次跑 16 步没 OOM**：运气好。93.7% 利用率下 OOM 是概率事件，取决于碎片化程度。
+  第一次恰好 16 步都没触发最坏情况，后续几次运气差就早爆了。
+
+- **修复**：Patch 9 — 在 `fsdp_workers.py` 的 `update_actor` 返回前加 `aggressive_empty_cache(force_sync=True)`，
+  直接在 WorkerDict 进程内释放 PyTorch 缓存的训练内存。
+
+- **torch.compile 不是原因**：`TORCHDYNAMO_DISABLE=1` 已禁用，`enforce_eager=True` + `compilation_config level=0` 确认未运行。
+
+### GPU 显存对比（3 次运行实测）
+
+| 运行 | gpu_util | response | 步数 | valleys (sleep) | peaks (gen) | 结果 |
+|------|---------|----------|------|-----------------|-------------|------|
+| Apr 11 13:35 | 0.25 | 6800 | 16 | 无 GPU 数据 | 无数据 | 挂起（非 OOM）|
+| Apr 13 00:59 | 0.25 | 6800 | 7 | ~43.4 GiB | 68-97 GiB | Step 8 OOM |
+| Apr 13 12:55 | 0.25 | 6000 | 8 | ~40.5 GiB | 68-97 GiB | Step 9 OOM |
+
+ valleys 稳定（无泄漏），peaks 波动大（数据依赖），OOM 是 peak 撑到 ~97 GiB 时触发。
+
+---
+
+## 2026-04-14 KL 散度修复 + 多轮训练数据分析
+
+### 踩坑 25: FSDP + LoRA 下 KL loss 始终为 0
+
+- **现象**：多轮 GRPO 训练（A800 80GB）中 `actor/kl_loss` 一直为 0.0，`actor/ppo_kl` 也为 0
+- **ppo_kl 为 0 正常**：GRPO 是 on-policy 单次更新，old_log_probs = current_log_probs，所以 ppo_kl=0
+- **kl_loss 为 0 不正常**：kl_loss 是当前策略 vs 参考模型的 KL 散度，开启 `use_kl_loss=True` + `kl_loss_coef=0.003` 时应该非零
+
+- **根因**：FSDP + LoRA 场景下 `disable_adapter()` 无法工作
+  1. veRL 的 `ref_in_actor` 机制：LoRA 训练时复用 actor worker 计算 ref log prob，通过 `disable_adapter()` 临时禁用 LoRA
+  2. FSDP 在 `DecoderLayer` 级别 auto_wrap，将参数 flatten 为 `FlatParameter`，LoRA 层被隐藏在 FSDP 的 flat param 中
+  3. `disable_adapter()` 遍历 `model.modules()` 查找 LoRA 层 → 找不到 → 实际计算的是 actor 的 log prob（LoRA 启用），不是 ref 的
+  4. actor_log_prob == ref_log_prob → kl_loss = 0
+
+- **修复**：强制 `ref_in_actor=False`，使用独立的 ref 模型（通过 `ActorRolloutRef` 角色）
+  修改两个文件：
+  1. `/tmp/verl/verl/trainer/main_ppo.py` (~line 141)：强制 `ref_in_actor=False`，创建 `ActorRolloutRef` 角色
+  2. `/tmp/verl/verl/trainer/ppo/ray_trainer.py` (~line 310)：强制 `self.ref_in_actor=False`
+
+  ```python
+  # main_ppo.py
+  ref_in_actor = lora_rank > 0 or config.actor_rollout_ref.model.get("lora_adapter_path") is not None
+  # FSDP + LoRA: disable_adapter 无法工作，强制使用独立 ref 模型
+  if ref_in_actor and config.actor_rollout_ref.actor.strategy in ("fsdp", "fsdp2"):
+      ref_in_actor = False
+
+  # ray_trainer.py
+  self.ref_in_actor = lora_rank > 0 or ...
+  if self.ref_in_actor:
+      import logging
+      logging.getLogger(__name__).warning("[FIX] ref_in_actor=True but FSDP+LoRA disable_adapter is broken, forcing ref_in_actor=False")
+      self.ref_in_actor = False
+  ```
+
+- **显存影响**：独立 ref 模型额外占用 ~3.4 GiB（与 actor 共享同一 GPU），用 `param_offload=True` 卸载到 CPU 可减少 GPU 占用
+- **修复验证**：kl_loss 从 0 变为 ~0.001（step 1-20 稳定）
+- **教训**：
+  - veRL 的 `ref_in_actor` 是优化手段（省显存），但在 FSDP 下因参数 flatten 导致 LoRA 层不可见，优化失效
+  - 这个问题不是我们的项目特殊——任何使用 veRL FSDP + LoRA + KL loss 的训练都会遇到
+  - Megatron 后端不受影响（不 flatten 参数），所以 veRL 框架的大部分用户（大模型用 Megatron）没碰到
+
+### 多轮训练指标分析（step 1-20，1313 样本）
+
+**训练配置**：A800 80GB, Qwen3-1.7B, batch=8, n=8, response=8192, 3轮, LoRA r=16, KL loss=0.003
+**训练数据**：`grpo_train_multi_full.parquet`（602 条），每 epoch 75 步，总 250 步 = 3.3 epoch
+
+**核心指标**：
+| 指标 | 数值 |
+|------|------|
+| 首轮成功率 | 12.0%（158/1313） |
+| 第2轮纠错率 | 2.1%（18/841） |
+| 第3轮纠错率 | 0.9%（7/809） |
+| 最终通过率 | 13.9%（183/1313） |
+| NO_CODE（≈截断） | 26.9%（353/1313） |
+| 正/零/负 reward | 14.1% / 59.2% / 26.9% |
+
+**Reward 分布**（与公式一致）：
+- 1.00（第1轮成功）：158
+- 0.85（第2轮成功）：18
+- 0.70（第3轮成功）：7
+
+**首轮失败分布**：
+- RUNTIME_ERROR: 65.0%
+- NO_CODE: 21.4%（≈截断率下限 25%）
+- SYNTAX_ERROR: 1.2%
+- TIMEOUT: 0.4%
+
+**验证结果**：
+- agent_loop vs reward 函数执行状态匹配率：**99.5%+**（verify log 960 条确认）
+- 代码提取一致性：`extract_code()` 和 `extract_code_from_turn()` 结果相同
+- `first_failed=False 且 reward<=0` 的样本 = **0**（数据完全一致）
+- 脱敏检查：0 条 assert 行泄露
+
+**关键发现**：
+1. **负 reward = NO_CODE**：完全一一对应（283=283），截断导致代码块不完整 → 提取失败
+2. **NO_CODE率 ≈ 截断率**：首轮 NO_CODE 21.4% 接近 clip_ratio 25%，部分截断代码仍有完整代码块（fallback 提取）
+3. **纠错率极低**：训练初期模型不会根据错误反馈修复代码，属正常现象
+4. **多轮指标日志**：两个 Ray worker 进程分别写入 `logs/multiturn_metrics_YYYYMMDD_HHMMSS.jsonl`，分析时需合并
+
+### patch_vllm.py Patch 3 更新
+
+- `transformer_impl.py` 中 `disable_adapter` 相关代码经历了多次调试修改
+- Patch 3 需识别多种历史版本：原始版本、旧 patch、调试版本、ValueError catch 版本、manual disable 版本
+- 通过检测 `_manual_disable` 字符串判断是否已应用新 patch

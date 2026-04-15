@@ -1,23 +1,22 @@
 """
 注册自定义 AgentLoop 到 veRL。
 
-veRL 通过 agent_name 字段查找对应的 AgentLoop 类。
-在训练启动脚本中 import 此模块即可完成注册。
+veRL v0.8 提供两种注册方式：
+  1. @register("name") 装饰器 — 在 import 时自动注册
+  2. agent_loop_config_path — YAML 配置文件（推荐，无需 import hack）
+
+本项目使用方式 2（configs/agent_loop.yaml），此文件保留仅供参考。
+
+如果需要使用方式 1，需在训练启动前 import 此模块：
+  import src.register_agent
 """
 from src.agent_loop import CodeAgentLoop
 
-# veRL 使用全局注册表管理 AgentLoop
-# 注册名称必须与训练数据中 agent_name 列一致
-AGENT_REGISTRY = {
-    "code_agent_loop": CodeAgentLoop,
-}
-
-
-def get_agent_loop(name: str):
-    """根据名称获取 AgentLoop 类。"""
-    if name not in AGENT_REGISTRY:
-        raise ValueError(
-            f"Unknown agent_name: {name}. "
-            f"Available: {list(AGENT_REGISTRY.keys())}"
-        )
-    return AGENT_REGISTRY[name]
+# 尝试注册到 veRL 的全局注册表
+try:
+    from verl.experimental.agent_loop.agent_loop import _agent_loop_registry
+    _agent_loop_registry["code_agent_loop"] = {
+        "_target_": "src.agent_loop.CodeAgentLoop"
+    }
+except ImportError:
+    pass

@@ -1,5 +1,5 @@
 #!/bin/bash
-# H20 96GB 两轮冒烟测试：batch=8, n=8, response=4096, 2 turns
+# H20 96GB 两轮冒烟测试：batch=8, n=8, response=7200, 2 turns, 6 steps（测显存稳态）
 set -e
 
 export NCCL_P2P_DISABLE=1
@@ -7,6 +7,8 @@ export NCCL_IB_DISABLE=1
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export CUDA_MODULE_LOADING=LAZY
 export TORCHDYNAMO_DISABLE=1
+# 注意：不能设置 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# 与 vLLM sleep mode 的 CuMemAllocator 不兼容，会导致启动崩溃
 export HF_ENDPOINT=https://hf-mirror.com
 export HF_HUB_OFFLINE=1
 export WANDB_MODE=online
@@ -14,18 +16,24 @@ export WANDB_MODE=online
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
+# 确保 Ray worker 能导入 src.agent_loop.CodeAgentLoop
+export PYTHONPATH="$PROJECT_DIR:${PYTHONPATH:-}"
+
+# 清理 __pycache__：Ray worker 会缓存旧 .pyc
+rm -rf "$PROJECT_DIR/src/__pycache__"
+
 # 清除旧 checkpoint 防止 resume
-rm -rf "$PROJECT_DIR/checkpoints/agentic-rl-cloud/h20-smoke-2turn-r4096"
+rm -rf "$PROJECT_DIR/checkpoints/agentic-rl-cloud/h20-smoke-2turn-r7200"
 
 python3 scripts/patch_vllm.py
 
 python3 -m verl.trainer.main_ppo \
   algorithm.adv_estimator=grpo \
-  data.train_files="$PROJECT_DIR/data/grpo_train_a800.parquet" \
-  data.val_files="$PROJECT_DIR/data/grpo_train_a800.parquet" \
+  data.train_files="$PROJECT_DIR/data/grpo_train_multi_full.parquet" \
+  data.val_files="$PROJECT_DIR/data/grpo_train_multi_full.parquet" \
   data.train_batch_size=8 \
   data.max_prompt_length=1024 \
-  data.max_response_length=4096 \
+  data.max_response_length=7200 \
   data.filter_overlong_prompts=True \
   data.truncation=left \
   data.return_raw_chat=True \
@@ -47,14 +55,15 @@ python3 -m verl.trainer.main_ppo \
   actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
   actor_rollout_ref.rollout.name=vllm \
   actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
-  actor_rollout_ref.rollout.gpu_memory_utilization=0.35 \
+  actor_rollout_ref.rollout.gpu_memory_utilization=0.25 \
   actor_rollout_ref.rollout.free_cache_engine=True \
-  actor_rollout_ref.rollout.max_model_len=5120 \
+  actor_rollout_ref.rollout.max_model_len=9216 \
   actor_rollout_ref.rollout.enforce_eager=True \
   actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=4 \
   actor_rollout_ref.rollout.n=8 \
   actor_rollout_ref.rollout.multi_turn.enable=True \
   actor_rollout_ref.rollout.multi_turn.max_assistant_turns=2 \
+  actor_rollout_ref.rollout.agent.agent_loop_config_path="$PROJECT_DIR/configs/agent_loop.yaml" \
   actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=4 \
   actor_rollout_ref.ref.fsdp_config.param_offload=True \
   algorithm.use_kl_in_reward=False \
@@ -65,12 +74,12 @@ python3 -m verl.trainer.main_ppo \
   trainer.critic_warmup=0 \
   trainer.logger=["console","wandb"] \
   trainer.project_name=agentic-rl-cloud \
-  trainer.experiment_name=h20-smoke-2turn-r4096 \
+  trainer.experiment_name=h20-smoke-2turn-r7200 \
   trainer.n_gpus_per_node=1 \
   trainer.nnodes=1 \
   trainer.save_freq=999 \
   trainer.test_freq=-1 \
-  trainer.total_training_steps=3 \
+  trainer.total_training_steps=10 \
   trainer.val_before_train=False \
   trainer.resume_mode=disable \
   '+ray_kwargs.ray_init.runtime_env.env_vars.NCCL_P2P_DISABLE="1"' \

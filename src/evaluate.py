@@ -36,7 +36,8 @@ SYSTEM_PROMPT = (
     "Solve the programming problem below. "
     "First think step by step, then provide your solution "
     "in a ```python code block. "
-    "Your code will be tested with assert statements."
+    "Your code will be tested with assert statements. "
+    "Provide only ONE complete Python code block — do not include alternative solutions or extra code blocks."
 )
 
 

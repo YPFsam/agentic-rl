@@ -40,11 +40,12 @@ def _preexec_fn():
     """preexec_fn：在子进程 fork 后、exec 前设置资源限制和进程组。
 
     防御层设计（由外到内）：
-      0. os.setsid() — 创建新进程组，超时时可 killpg 杀掉整个进程组（含孙子进程）
-      1. Docker 容器隔离（文件系统 + 网络）——最外层
-      2. RLIMIT_AS 2GB（内存）——防 while True: a+=[1]*10**9 吞内存
-      3. RLIMIT_CPU 3s（CPU 时间）——防 while True: pass 霸占 CPU，内核级强制
-      4. asyncio.wait_for 5s（wall-clock 超时）——兜底，处理 sleep/IO 阻塞
+      0. OS timeout 命令（wall-clock 硬超时）——最外层，不依赖 asyncio/进程组
+      1. os.setsid() — 创建新进程组，超时时可 killpg 杀掉整个进程组（含孙子进程）
+      2. Docker 容器隔离（文件系统 + 网络）
+      3. RLIMIT_AS 2GB（内存）——防 while True: a+=[1]*10**9 吞内存
+      4. RLIMIT_CPU 3s（CPU 时间）——防 while True: pass 霸占 CPU，内核级强制
+      5. asyncio.wait_for 5s（wall-clock 超时）——第一层超时，处理 sleep/IO 阻塞
     """
     os.setsid()  # 创建新进程组，使 killpg 能杀掉孙子进程
     resource.setrlimit(resource.RLIMIT_AS, (MAX_MEMORY_BYTES, MAX_MEMORY_BYTES))
@@ -95,8 +96,15 @@ async def execute_code(
             f.write(full_code)
 
         # 用 asyncio 子进程执行
+        # 外层用系统 timeout 命令作为 OS 级硬超时保障：
+        #   - 不依赖 asyncio 事件循环（防止事件循环积压导致 wait_for 回调延迟）
+        #   - 不依赖进程组（防 os.fork()+setpgrp 逃逸）
+        #   - timeout 追踪的是 PID，比 killpg 更可靠
+        # 内层 asyncio.wait_for 仍然保留，作为第一层超时
         env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+        hard_timeout = int(timeout) + 2  # 比 asyncio 超时多 2s，作为最后防线
         proc = await asyncio.create_subprocess_exec(
+            "timeout", str(hard_timeout),
             sys.executable, tmp_path,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,

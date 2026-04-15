@@ -41,3 +41,8 @@ core
 =*
 wandb/
 .claude/
+.ipynb_checkpoints/
+untitled.md
+checkpoints/
+data/taco_tmp/
+data/apps_prompt_review.jsonl

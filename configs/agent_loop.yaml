@@ -1,0 +1,5 @@
+# 自定义 AgentLoop 注册配置
+# 通过 actor_rollout_ref.rollout.agent.agent_loop_config_path 加载
+# veRL 使用 hydra.utils.instantiate() 创建实例，_target_ 必须是可导入的完整类路径
+- name: code_agent_loop
+  _target_: src.agent_loop.CodeAgentLoop
