@@ -337,22 +337,16 @@
 
 ## 工程经验总结
 
-> 以下问题的排查过程借助了 AI 辅助（Claude）阅读 veRL/vLLM 源码、分析报错栈和定位根因。最终修复方案均经过人工确认和实测验证。
+> 以下问题的排查过程借助了 AI 辅助（Claude code+glm5.1）阅读 veRL/vLLM 源码、分析报错栈和定位根因。最终修复方案均经过人工确认和实测验证。
 
 ### 踩过的坑（25+ 个）
 
 | # | 问题 | 影响 | 解决方案 |
 |---|------|------|---------|
-| 1 | max_response_length=512 导致全截断 | 100步无正reward | 增大到 4800+ |
 | 5 | numpy 2.x 降级残留 `_core/` | vLLM spawn 崩溃 | `rm -rf numpy*` + 重装 |
 | 13 | LoRA QKV 权重名 `base_layer.` 前缀 | vLLM load_weights 失败 | patch_vllm.py 正则替换 |
 | 21 | `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` | vLLM sleep mode 启动崩溃 | 禁止设置此变量 |
-| 23 | ray_trainer 中调用 `torch.cuda.ipc_collect()` | CPU-only 进程调用 GPU API 报错 | 移除，在 vLLM 进程中 gc |
 | 25 | FSDP + LoRA 下 `disable_adapter()` 失效 | kl_loss=0，无正则化 | 独立 ref 模型 |
-
-### vLLM 多轮抢占问题
-
-H20 96GB、gpu_util=0.25 下 KV cache 仅支持 ~21 个并发序列，但实际需求 64 个（8 prompts × 8 GRPO samples）。多轮训练时 Turn 1 的 KV cache 未释放，Turn 2 到达后触发抢占级联，实测极端情况单步耗时从 130s 飙升到 993s（16 步中出现 1 次严重、2 次轻微）。
 
 ## 项目文件结构
 
@@ -449,5 +443,3 @@ bash scripts/eval_all_checkpoints_multiturn.sh # 多轮评估
 2. **限制 Qwen3 thinking**：thinking 消耗大量 budget，可加 thinking budget 上限
 3. **降低 KL coef 或加 KL warmup**：多轮训练 KL 增长过快导致后期过拟合
 4. **更大基模型**：Qwen3-4B 或 8B，代码生成基线更强，纠错空间更大
-5. **多轮 reward shaping**：纯稀疏奖励（+1/0/-1）信号稀疏，可考虑渐进式奖励（部分通过给部分分）
-6. **训练数据扩充**：602 条可能不够，增加更多 APPS 中等难度题目
