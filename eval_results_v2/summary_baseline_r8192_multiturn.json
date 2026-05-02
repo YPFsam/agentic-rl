@@ -1,0 +1,18 @@
+{
+  "tag": "baseline_r8192",
+  "model_path": "/root/autodl-tmp/hf_cache/hub/models--Qwen--Qwen3-1.7B/snapshots/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+  "max_turns": 3,
+  "max_response_length": 8192,
+  "stats": {
+    "total": 164,
+    "turn1_pass": 113,
+    "turn2_pass": 4,
+    "turn3_pass": 1,
+    "no_code": 33,
+    "final_pass": 118,
+    "extract_ok": 118,
+    "extract_fail": 46
+  },
+  "evalplus_output": "Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl\nReading samples...\nhumaneval (base tests)\npass@1:\t0.720\nhumaneval+ (base + extra tests)\npass@1:\t0.671\n",
+  "log_path": "logs/multiturn_eval_baseline_r8192_20260420_230658.jsonl"
+}

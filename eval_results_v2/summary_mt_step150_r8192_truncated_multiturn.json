@@ -1,0 +1,18 @@
+{
+  "tag": "mt_step150_r8192_truncated",
+  "model_path": "/root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_150_hf",
+  "max_turns": 3,
+  "max_response_length": 8192,
+  "stats": {
+    "total": 32,
+    "turn1_pass": 6,
+    "turn2_pass": 1,
+    "turn3_pass": 1,
+    "no_code": 8,
+    "final_pass": 8,
+    "extract_ok": 8,
+    "extract_fail": 24
+  },
+  "evalplus_output": "Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl\nReading samples...\n",
+  "log_path": "logs/multiturn_eval_mt_step150_r8192_truncated_20260420_162734.jsonl"
+}

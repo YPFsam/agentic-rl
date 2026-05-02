@@ -1,0 +1,2128 @@
+===== 顺序评估 10 个 checkpoint =====
+多轮训练 (mt): global_step_*_hf in /root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800
+单轮训练 (st): step* in /root/autodl-tmp/hf_models
+
+>>>>> 多轮训练 step100 | tag=mt_step100 | path=/root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_100_hf >>>>>
+加载模型: /root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_100_hf
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=mt_step100)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=24.2s tok=1272 | ETA 3961s
+  [2/164] HumanEval/1 NO_CODE | gen=83.2s tok=4800 | ETA 8709s
+  [3/164] HumanEval/2 OK | gen=14.0s tok=805 | ETA 6519s
+  [4/164] HumanEval/3 OK | gen=14.0s tok=809 | ETA 5420s
+  [5/164] HumanEval/4 OK | gen=15.4s tok=890 | ETA 4798s
+  [6/164] HumanEval/5 OK | gen=16.5s tok=951 | ETA 4408s
+  [7/164] HumanEval/6 NO_CODE | gen=83.5s tok=4800 | ETA 5628s
+  [8/164] HumanEval/7 OK | gen=12.9s tok=749 | ETA 5145s
+  [9/164] HumanEval/8 OK | gen=14.9s tok=865 | ETA 4801s
+  [10/164] HumanEval/9 OK | gen=20.2s tok=1148 | ETA 4604s
+  [11/164] HumanEval/10 NO_CODE | gen=83.3s tok=4800 | ETA 5316s
+  [12/164] HumanEval/11 OK | gen=16.6s tok=974 | ETA 5052s
+  [13/164] HumanEval/12 OK | gen=31.5s tok=1741 | ETA 4998s
+  [14/164] HumanEval/13 OK | gen=15.0s tok=861 | ETA 4771s
+  [15/164] HumanEval/14 OK | gen=9.7s tok=557 | ETA 4519s
+  [16/164] HumanEval/15 OK | gen=12.5s tok=710 | ETA 4324s
+  [17/164] HumanEval/16 OK | gen=10.5s tok=593 | ETA 4133s
+  [18/164] HumanEval/17 OK | gen=29.4s tok=1656 | ETA 4115s
+  [19/164] HumanEval/18 OK | gen=45.6s tok=2629 | ETA 4220s
+  [20/164] HumanEval/19 OK | gen=32.2s tok=1795 | ETA 4213s
+  [21/164] HumanEval/20 OK | gen=52.8s tok=3043 | ETA 4344s
+  [22/164] HumanEval/21 OK | gen=23.9s tok=1385 | ETA 4272s
+  [23/164] HumanEval/22 OK | gen=26.8s tok=1545 | ETA 4222s
+  [24/164] HumanEval/23 OK | gen=5.2s tok=305 | ETA 4048s
+  [25/164] HumanEval/24 OK | gen=33.2s tok=1906 | ETA 4043s
+  [26/164] HumanEval/25 OK | gen=32.9s tok=1900 | ETA 4034s
+  [27/164] HumanEval/26 OK | gen=56.0s tok=3213 | ETA 4141s
+  [28/164] HumanEval/27 OK | gen=21.8s tok=1248 | ETA 4070s
+  [29/164] HumanEval/28 OK | gen=8.5s tok=489 | ETA 3941s
+  [30/164] HumanEval/29 OK | gen=10.9s tok=631 | ETA 3830s
+  [31/164] HumanEval/30 OK | gen=10.6s tok=613 | ETA 3724s
+  [32/164] HumanEval/31 OK | gen=42.0s tok=2432 | ETA 3754s
+  [33/164] HumanEval/32 NO_CODE | gen=83.1s tok=4800 | ETA 3942s
+  [34/164] HumanEval/33 OK | gen=67.2s tok=3902 | ETA 4054s
+  [35/164] HumanEval/34 OK | gen=72.1s tok=4171 | ETA 4174s
+  [36/164] HumanEval/35 OK | gen=16.7s tok=970 | ETA 4086s
+  [37/164] HumanEval/36 NO_CODE | gen=82.7s tok=4800 | ETA 4228s
+  [38/164] HumanEval/37 OK | gen=34.6s tok=2006 | ETA 4199s
+  [39/164] HumanEval/38 OK | gen=63.5s tok=3679 | ETA 4262s
+  [40/164] HumanEval/39 NO_CODE | gen=83.5s tok=4800 | ETA 4381s
+  [41/164] HumanEval/40 NO_CODE | gen=83.1s tok=4800 | ETA 4489s
+  [42/164] HumanEval/41 OK | gen=44.1s tok=2557 | ETA 4475s
+  [43/164] HumanEval/42 OK | gen=10.8s tok=631 | ETA 4366s
+  [44/164] HumanEval/43 OK | gen=28.3s tok=1641 | ETA 4308s
+  [45/164] HumanEval/44 OK | gen=28.2s tok=1638 | ETA 4252s
+  [46/164] HumanEval/45 OK | gen=8.0s tok=462 | ETA 4145s
+  [47/164] HumanEval/46 OK | gen=69.3s tok=4023 | ETA 4195s
+  [48/164] HumanEval/47 NO_CODE | gen=83.0s tok=4800 | ETA 4273s
+  [49/164] HumanEval/48 OK | gen=13.1s tok=755 | ETA 4181s
+  [50/164] HumanEval/49 OK | gen=56.3s tok=3268 | ETA 4190s
+  [51/164] HumanEval/50 OK | gen=27.0s tok=1558 | ETA 4131s
+  [52/164] HumanEval/51 OK | gen=21.3s tok=1227 | ETA 4062s
+  [53/164] HumanEval/52 OK | gen=12.8s tok=749 | ETA 3977s
+  [54/164] HumanEval/53 OK | gen=7.2s tok=418 | ETA 3882s
+  [55/164] HumanEval/54 OK | gen=34.5s tok=1998 | ETA 3845s
+  [56/164] HumanEval/55 OK | gen=17.2s tok=997 | ETA 3775s
+  [57/164] HumanEval/56 OK | gen=19.7s tok=1143 | ETA 3712s
+  [58/164] HumanEval/57 OK | gen=25.7s tok=1492 | ETA 3661s
+  [59/164] HumanEval/58 OK | gen=12.8s tok=747 | ETA 3587s
+  [60/164] HumanEval/59 NO_CODE | gen=83.0s tok=4800 | ETA 3638s
+  [61/164] HumanEval/60 OK | gen=9.7s tok=561 | ETA 3560s
+  [62/164] HumanEval/61 OK | gen=31.1s tok=1790 | ETA 3520s
+  [63/164] HumanEval/62 OK | gen=39.9s tok=2325 | ETA 3494s
+  [64/164] HumanEval/63 OK | gen=29.9s tok=1739 | ETA 3452s
+  [65/164] HumanEval/64 OK | gen=23.2s tok=1341 | ETA 3400s
+  [66/164] HumanEval/65 OK | gen=22.2s tok=1287 | ETA 3348s
+  [67/164] HumanEval/66 OK | gen=17.1s tok=987 | ETA 3289s
+  [68/164] HumanEval/67 OK | gen=16.4s tok=950 | ETA 3231s
+  [69/164] HumanEval/68 OK | gen=40.9s tok=2355 | ETA 3207s
+  [70/164] HumanEval/69 OK | gen=23.4s tok=1357 | ETA 3159s
+  [71/164] HumanEval/70 OK | gen=40.4s tok=2346 | ETA 3134s
+  [72/164] HumanEval/71 OK | gen=40.8s tok=2342 | ETA 3110s
+  [73/164] HumanEval/72 OK | gen=16.1s tok=930 | ETA 3054s
+  [74/164] HumanEval/73 OK | gen=26.7s tok=1540 | ETA 3012s
+  [75/164] HumanEval/74 OK | gen=17.1s tok=995 | ETA 2959s
+  [76/164] HumanEval/75 OK | gen=39.6s tok=2306 | ETA 2933s
+  [77/164] HumanEval/76 OK | gen=60.5s tok=3507 | ETA 2931s
+  [78/164] HumanEval/77 OK | gen=69.1s tok=3975 | ETA 2936s
+  [79/164] HumanEval/78 OK | gen=17.6s tok=1018 | ETA 2884s
+  [80/164] HumanEval/79 OK | gen=13.6s tok=792 | ETA 2829s
+  [81/164] HumanEval/80 OK | gen=24.9s tok=1445 | ETA 2786s
+  [82/164] HumanEval/81 OK | gen=83.3s tok=4800 | ETA 2802s
+  [83/164] HumanEval/82 OK | gen=25.5s tok=1479 | ETA 2760s
+  [84/164] HumanEval/83 OK | gen=36.4s tok=2117 | ETA 2728s
+  [85/164] HumanEval/84 OK | gen=40.9s tok=2250 | ETA 2700s
+  [86/164] HumanEval/85 OK | gen=15.5s tok=917 | ETA 2649s
+  [87/164] HumanEval/86 OK | gen=26.3s tok=1553 | ETA 2608s
+  [88/164] HumanEval/87 OK | gen=29.8s tok=1753 | ETA 2571s
+  [89/164] HumanEval/88 OK | gen=13.1s tok=771 | ETA 2520s
+  [90/164] HumanEval/89 OK | gen=25.9s tok=1531 | ETA 2480s
+  [91/164] HumanEval/90 OK | gen=46.2s tok=2709 | ETA 2456s
+  [92/164] HumanEval/91 OK | gen=39.3s tok=2304 | ETA 2427s
+  [93/164] HumanEval/92 OK | gen=67.4s tok=3861 | ETA 2419s
+  [94/164] HumanEval/93 OK | gen=54.1s tok=3159 | ETA 2400s
+  [95/164] HumanEval/94 OK | gen=60.9s tok=3530 | ETA 2385s
+  [96/164] HumanEval/95 OK | gen=32.2s tok=1826 | ETA 2349s
+  [97/164] HumanEval/96 OK | gen=51.4s tok=3023 | ETA 2326s
+  [98/164] HumanEval/97 OK | gen=13.9s tok=815 | ETA 2277s
+  [99/164] HumanEval/98 OK | gen=17.4s tok=1025 | ETA 2231s
+  [100/164] HumanEval/99 OK | gen=76.4s tok=4495 | ETA 2224s
+  [101/164] HumanEval/100 OK | gen=17.0s tok=1004 | ETA 2178s
+  [102/164] HumanEval/101 OK | gen=21.6s tok=1274 | ETA 2136s
+  [103/164] HumanEval/102 OK | gen=48.0s tok=2825 | ETA 2109s
+  [104/164] HumanEval/103 OK | gen=34.0s tok=1996 | ETA 2074s
+  [105/164] HumanEval/104 OK | gen=22.3s tok=1315 | ETA 2033s
+  [106/164] HumanEval/105 OK | gen=32.0s tok=1884 | ETA 1997s
+  [107/164] HumanEval/106 OK | gen=22.6s tok=1321 | ETA 1956s
+  [108/164] HumanEval/107 NO_CODE | gen=82.0s tok=4800 | ETA 1947s
+  [109/164] HumanEval/108 OK | gen=43.5s tok=2555 | ETA 1916s
+  [110/164] HumanEval/109 OK | gen=74.7s tok=4373 | ETA 1901s
+  [111/164] HumanEval/110 OK | gen=20.7s tok=1219 | ETA 1859s
+  [112/164] HumanEval/111 OK | gen=19.8s tok=1160 | ETA 1817s
+  [113/164] HumanEval/112 OK | gen=20.4s tok=1195 | ETA 1775s
+  [114/164] HumanEval/113 OK | gen=65.6s tok=3850 | ETA 1754s
+  [115/164] HumanEval/114 OK | gen=34.5s tok=2027 | ETA 1719s
+  [116/164] HumanEval/115 OK | gen=29.9s tok=1757 | ETA 1682s
+  [117/164] HumanEval/116 NO_CODE | gen=82.1s tok=4800 | ETA 1665s
+  [118/164] HumanEval/117 OK | gen=41.8s tok=2465 | ETA 1632s
+  [119/164] HumanEval/118 OK | gen=57.0s tok=3337 | ETA 1605s
+  [120/164] HumanEval/119 NO_CODE | gen=82.0s tok=4800 | ETA 1586s
+  [121/164] HumanEval/120 OK | gen=32.7s tok=1904 | ETA 1549s
+  [122/164] HumanEval/121 OK | gen=19.0s tok=1116 | ETA 1507s
+  [123/164] HumanEval/122 OK | gen=39.0s tok=2286 | ETA 1472s
+  [124/164] HumanEval/123 OK | gen=32.9s tok=1930 | ETA 1436s
+  [125/164] HumanEval/124 NO_CODE | gen=83.1s tok=4800 | ETA 1414s
+  [126/164] HumanEval/125 OK | gen=36.7s tok=2161 | ETA 1378s
+  [127/164] HumanEval/126 OK | gen=28.3s tok=1659 | ETA 1340s
+  [128/164] HumanEval/127 OK | gen=48.3s tok=2771 | ETA 1307s
+  [129/164] HumanEval/128 OK | gen=22.6s tok=1314 | ETA 1267s
+  [130/164] HumanEval/129 NO_CODE | gen=81.9s tok=4800 | ETA 1243s
+  [131/164] HumanEval/130 NO_CODE | gen=82.8s tok=4800 | ETA 1218s
+  [132/164] HumanEval/131 NO_CODE | gen=81.7s tok=4800 | ETA 1192s
+  [133/164] HumanEval/132 NO_CODE | gen=82.9s tok=4800 | ETA 1165s
+  [134/164] HumanEval/133 OK | gen=20.0s tok=1179 | ETA 1124s
+  [135/164] HumanEval/134 NO_CODE | gen=81.8s tok=4800 | ETA 1096s
+  [136/164] HumanEval/135 OK | gen=19.9s tok=1165 | ETA 1054s
+  [137/164] HumanEval/136 OK | gen=13.8s tok=807 | ETA 1012s
+  [138/164] HumanEval/137 NO_CODE | gen=81.8s tok=4800 | ETA 983s
+  [139/164] HumanEval/138 OK | gen=22.4s tok=1319 | ETA 942s
+  [140/164] HumanEval/139 OK | gen=20.9s tok=1222 | ETA 902s
+  [141/164] HumanEval/140 OK | gen=69.0s tok=4030 | ETA 869s
+  [142/164] HumanEval/141 OK | gen=31.7s tok=1862 | ETA 830s
+  [143/164] HumanEval/142 OK | gen=27.8s tok=1646 | ETA 791s
+  [144/164] HumanEval/143 OK | gen=25.8s tok=1510 | ETA 752s
+  [145/164] HumanEval/144 OK | gen=28.3s tok=1650 | ETA 713s
+  [146/164] HumanEval/145 OK | gen=58.8s tok=3441 | ETA 678s
+  [147/164] HumanEval/146 OK | gen=44.3s tok=2615 | ETA 641s
+  [148/164] HumanEval/147 NO_CODE | gen=83.5s tok=4800 | ETA 608s
+  [149/164] HumanEval/148 OK | gen=63.4s tok=3742 | ETA 573s
+  [150/164] HumanEval/149 OK | gen=30.4s tok=1783 | ETA 534s
+  [151/164] HumanEval/150 OK | gen=42.6s tok=2468 | ETA 496s
+  [152/164] HumanEval/151 OK | gen=34.0s tok=1980 | ETA 458s
+  [153/164] HumanEval/152 OK | gen=10.0s tok=574 | ETA 418s
+  [154/164] HumanEval/153 NO_CODE | gen=81.1s tok=4800 | ETA 382s
+  [155/164] HumanEval/154 NO_CODE | gen=82.3s tok=4800 | ETA 347s
+  [156/164] HumanEval/155 OK | gen=13.2s tok=770 | ETA 307s
+  [157/164] HumanEval/156 OK | gen=29.8s tok=1750 | ETA 268s
+  [158/164] HumanEval/157 OK | gen=19.1s tok=1131 | ETA 229s
+  [159/164] HumanEval/158 OK | gen=74.3s tok=4355 | ETA 192s
+  [160/164] HumanEval/159 OK | gen=19.4s tok=1139 | ETA 153s
+  [161/164] HumanEval/160 NO_CODE | gen=81.8s tok=4800 | ETA 116s
+  [162/164] HumanEval/161 OK | gen=19.6s tok=1152 | ETA 77s
+  [163/164] HumanEval/162 OK | gen=11.4s tok=670 | ETA 38s
+  [164/164] HumanEval/163 NO_CODE | gen=81.9s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_mt_step100.jsonl (耗时 6322.7s)
+  统计: extract_ok=140 fail=24
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_mt_step100.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.726
+humaneval+ (base + extra tests)
+pass@1:	0.677
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.19it/s]
+164it [00:00, 192.84it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:37
+ 10%| | 16/164 [00:00<00:0
+ 15%|▏| 24/164 [00:00<00:0
+ 18%|▏| 29/164 [00:00<00:0
+ 58%|▌| 95/164 [00:01<00:0
+ 78%|▊| 128/164 [00:01<00:
+ 97%|▉| 159/164 [00:01<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=mt_step100)
+============================================================
+  humaneval: {'pass@1': 0.677}
+
+汇总已保存: eval_results_v2/summary_mt_step100.json
+<<<<< 多轮训练 step100 完成 <<<<<
+
+>>>>> 多轮训练 step150 | tag=mt_step150 | path=/root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_150_hf >>>>>
+加载模型: /root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_150_hf
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=mt_step150)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=37.2s tok=2109 | ETA 6073s
+  [2/164] HumanEval/1 NO_CODE | gen=79.3s tok=4800 | ETA 9438s
+  [3/164] HumanEval/2 OK | gen=8.4s tok=508 | ETA 6703s
+  [4/164] HumanEval/3 OK | gen=11.8s tok=718 | ETA 5468s
+  [5/164] HumanEval/4 OK | gen=14.7s tok=896 | ETA 4814s
+  [6/164] HumanEval/5 OK | gen=15.3s tok=932 | ETA 4388s
+  [7/164] HumanEval/6 OK | gen=27.6s tok=1682 | ETA 4357s
+  [8/164] HumanEval/7 OK | gen=9.8s tok=588 | ETA 3978s
+  [9/164] HumanEval/8 OK | gen=11.7s tok=706 | ETA 3715s
+  [10/164] HumanEval/9 OK | gen=21.8s tok=1325 | ETA 3657s
+  [11/164] HumanEval/10 OK | gen=27.3s tok=1658 | ETA 3682s
+  [12/164] HumanEval/11 OK | gen=15.4s tok=940 | ETA 3549s
+  [13/164] HumanEval/12 OK | gen=15.6s tok=953 | ETA 3436s
+  [14/164] HumanEval/13 OK | gen=18.5s tok=1133 | ETA 3368s
+  [15/164] HumanEval/14 OK | gen=11.2s tok=683 | ETA 3234s
+  [16/164] HumanEval/15 OK | gen=11.4s tok=612 | ETA 3117s
+  [17/164] HumanEval/16 OK | gen=10.6s tok=602 | ETA 3005s
+  [18/164] HumanEval/17 OK | gen=16.1s tok=922 | ETA 2950s
+  [19/164] HumanEval/18 OK | gen=27.0s tok=1567 | ETA 2982s
+  [20/164] HumanEval/19 OK | gen=28.8s tok=1693 | ETA 3021s
+  [21/164] HumanEval/20 OK | gen=62.4s tok=3710 | ETA 3282s
+  [22/164] HumanEval/21 OK | gen=23.0s tok=1354 | ETA 3259s
+  [23/164] HumanEval/22 OK | gen=29.4s tok=1693 | ETA 3276s
+  [24/164] HumanEval/23 OK | gen=6.3s tok=375 | ETA 3154s
+  [25/164] HumanEval/24 OK | gen=36.2s tok=2165 | ETA 3208s
+  [26/164] HumanEval/25 OK | gen=29.7s tok=1767 | ETA 3220s
+  [27/164] HumanEval/26 OK | gen=33.3s tok=2003 | ETA 3247s
+  [28/164] HumanEval/27 OK | gen=8.8s tok=527 | ETA 3151s
+  [29/164] HumanEval/28 OK | gen=8.1s tok=485 | ETA 3058s
+  [30/164] HumanEval/29 OK | gen=8.7s tok=519 | ETA 2973s
+  [31/164] HumanEval/30 OK | gen=10.1s tok=609 | ETA 2899s
+  [32/164] HumanEval/31 OK | gen=28.7s tok=1726 | ETA 2906s
+  [33/164] HumanEval/32 NO_CODE | gen=80.5s tok=4800 | ETA 3116s
+  [34/164] HumanEval/33 OK | gen=26.5s tok=1574 | ETA 3102s
+  [35/164] HumanEval/34 NO_CODE | gen=82.4s tok=4800 | ETA 3294s
+  [36/164] HumanEval/35 OK | gen=15.6s tok=931 | ETA 3233s
+  [37/164] HumanEval/36 OK | gen=54.2s tok=3248 | ETA 3308s
+  [38/164] HumanEval/37 OK | gen=29.7s tok=1772 | ETA 3294s
+  [39/164] HumanEval/38 OK | gen=77.8s tok=4167 | ETA 3433s
+  [40/164] HumanEval/39 NO_CODE | gen=83.2s tok=4800 | ETA 3578s
+  [41/164] HumanEval/40 OK | gen=57.3s tok=3444 | ETA 3635s
+  [42/164] HumanEval/41 OK | gen=51.7s tok=3114 | ETA 3670s
+  [43/164] HumanEval/42 OK | gen=10.5s tok=571 | ETA 3585s
+  [44/164] HumanEval/43 OK | gen=77.3s tok=4116 | ETA 3685s
+  [45/164] HumanEval/44 OK | gen=24.6s tok=1388 | ETA 3638s
+  [46/164] HumanEval/45 OK | gen=9.0s tok=496 | ETA 3552s
+  [47/164] HumanEval/46 OK | gen=34.3s tok=1994 | ETA 3533s
+  [48/164] HumanEval/47 NO_CODE | gen=88.4s tok=4800 | ETA 3643s
+  [49/164] HumanEval/48 OK | gen=17.4s tok=887 | ETA 3579s
+  [50/164] HumanEval/49 OK | gen=36.0s tok=2126 | ETA 3559s
+  [51/164] HumanEval/50 OK | gen=39.3s tok=2072 | ETA 3546s
+  [52/164] HumanEval/51 OK | gen=14.4s tok=764 | ETA 3478s
+  [53/164] HumanEval/52 OK | gen=11.3s tok=558 | ETA 3405s
+  [54/164] HumanEval/53 OK | gen=8.2s tok=423 | ETA 3329s
+  [55/164] HumanEval/54 OK | gen=23.1s tok=1204 | ETA 3284s
+  [56/164] HumanEval/55 OK | gen=15.7s tok=836 | ETA 3226s
+  [57/164] HumanEval/56 OK | gen=25.9s tok=1387 | ETA 3189s
+  [58/164] HumanEval/57 OK | gen=16.6s tok=902 | ETA 3135s
+  [59/164] HumanEval/58 OK | gen=16.3s tok=940 | ETA 3082s
+  [60/164] HumanEval/59 OK | gen=50.0s tok=2734 | ETA 3089s
+  [61/164] HumanEval/60 OK | gen=11.8s tok=636 | ETA 3029s
+  [62/164] HumanEval/61 OK | gen=20.6s tok=1059 | ETA 2985s
+  [63/164] HumanEval/62 OK | gen=30.0s tok=1655 | ETA 2957s
+  [64/164] HumanEval/63 OK | gen=58.4s tok=3321 | ETA 2973s
+  [65/164] HumanEval/64 OK | gen=24.6s tok=1401 | ETA 2935s
+  [66/164] HumanEval/65 OK | gen=25.2s tok=1396 | ETA 2899s
+  [67/164] HumanEval/66 OK | gen=10.4s tok=585 | ETA 2842s
+  [68/164] HumanEval/67 OK | gen=19.7s tok=1115 | ETA 2799s
+  [69/164] HumanEval/68 OK | gen=32.5s tok=1781 | ETA 2774s
+  [70/164] HumanEval/69 OK | gen=30.4s tok=1623 | ETA 2747s
+  [71/164] HumanEval/70 OK | gen=39.0s tok=2339 | ETA 2730s
+  [72/164] HumanEval/71 OK | gen=26.0s tok=1569 | ETA 2697s
+  [73/164] HumanEval/72 OK | gen=17.9s tok=985 | ETA 2653s
+  [74/164] HumanEval/73 OK | gen=33.0s tok=1786 | ETA 2629s
+  [75/164] HumanEval/74 OK | gen=17.4s tok=929 | ETA 2586s
+  [76/164] HumanEval/75 OK | gen=59.9s tok=3472 | ETA 2592s
+  [77/164] HumanEval/76 NO_CODE | gen=81.3s tok=4800 | ETA 2621s
+  [78/164] HumanEval/77 OK | gen=67.2s tok=3613 | ETA 2632s
+  [79/164] HumanEval/78 OK | gen=18.6s tok=1005 | ETA 2589s
+  [80/164] HumanEval/79 OK | gen=9.5s tok=511 | ETA 2536s
+  [81/164] HumanEval/80 OK | gen=19.6s tok=1069 | ETA 2495s
+  [82/164] HumanEval/81 NO_CODE | gen=87.2s tok=4800 | ETA 2522s
+  [83/164] HumanEval/82 OK | gen=16.7s tok=992 | ETA 2478s
+  [84/164] HumanEval/83 OK | gen=61.6s tok=3644 | ETA 2477s
+  [85/164] HumanEval/84 OK | gen=57.1s tok=3417 | ETA 2470s
+  [86/164] HumanEval/85 OK | gen=10.9s tok=642 | ETA 2420s
+  [87/164] HumanEval/86 OK | gen=18.0s tok=982 | ETA 2378s
+  [88/164] HumanEval/87 OK | gen=57.8s tok=3077 | ETA 2370s
+  [89/164] HumanEval/88 OK | gen=22.1s tok=1121 | ETA 2331s
+  [90/164] HumanEval/89 OK | gen=24.4s tok=1297 | ETA 2295s
+  [91/164] HumanEval/90 OK | gen=26.4s tok=1404 | ETA 2260s
+  [92/164] HumanEval/91 OK | gen=54.6s tok=2880 | ETA 2247s
+  [93/164] HumanEval/92 OK | gen=44.1s tok=2439 | ETA 2226s
+  [94/164] HumanEval/93 NO_CODE | gen=92.0s tok=4800 | ETA 2240s
+  [95/164] HumanEval/94 OK | gen=35.7s tok=1957 | ETA 2211s
+  [96/164] HumanEval/95 OK | gen=34.1s tok=1853 | ETA 2180s
+  [97/164] HumanEval/96 OK | gen=39.0s tok=2097 | ETA 2153s
+  [98/164] HumanEval/97 OK | gen=14.5s tok=813 | ETA 2109s
+  [99/164] HumanEval/98 OK | gen=23.8s tok=1369 | ETA 2071s
+  [100/164] HumanEval/99 OK | gen=38.6s tok=2123 | ETA 2044s
+  [101/164] HumanEval/100 OK | gen=21.1s tok=1135 | ETA 2005s
+  [102/164] HumanEval/101 OK | gen=21.9s tok=1160 | ETA 1967s
+  [103/164] HumanEval/102 OK | gen=19.3s tok=1019 | ETA 1928s
+  [104/164] HumanEval/103 OK | gen=38.0s tok=2025 | ETA 1900s
+  [105/164] HumanEval/104 OK | gen=21.2s tok=1110 | ETA 1863s
+  [106/164] HumanEval/105 OK | gen=33.5s tok=1806 | ETA 1832s
+  [107/164] HumanEval/106 OK | gen=25.8s tok=1345 | ETA 1798s
+  [108/164] HumanEval/107 OK | gen=23.5s tok=1260 | ETA 1762s
+  [109/164] HumanEval/108 NO_CODE | gen=83.7s tok=4800 | ETA 1757s
+  [110/164] HumanEval/109 OK | gen=77.7s tok=4091 | ETA 1747s
+  [111/164] HumanEval/110 OK | gen=22.3s tok=1310 | ETA 1710s
+  [112/164] HumanEval/111 OK | gen=20.2s tok=1203 | ETA 1672s
+  [113/164] HumanEval/112 OK | gen=21.9s tok=1289 | ETA 1635s
+  [114/164] HumanEval/113 OK | gen=49.6s tok=2962 | ETA 1611s
+  [115/164] HumanEval/114 OK | gen=33.6s tok=1987 | ETA 1579s
+  [116/164] HumanEval/115 OK | gen=39.8s tok=2329 | ETA 1550s
+  [117/164] HumanEval/116 NO_CODE | gen=80.2s tok=4800 | ETA 1537s
+  [118/164] HumanEval/117 OK | gen=53.3s tok=2898 | ETA 1513s
+  [119/164] HumanEval/118 NO_CODE | gen=91.3s tok=4800 | ETA 1502s
+  [120/164] HumanEval/119 OK | gen=79.8s tok=4461 | ETA 1485s
+  [121/164] HumanEval/120 OK | gen=20.9s tok=1263 | ETA 1447s
+  [122/164] HumanEval/121 OK | gen=17.2s tok=1032 | ETA 1408s
+  [123/164] HumanEval/122 OK | gen=21.6s tok=1254 | ETA 1370s
+  [124/164] HumanEval/123 OK | gen=49.8s tok=2949 | ETA 1342s
+  [125/164] HumanEval/124 OK | gen=80.4s tok=4800 | ETA 1323s
+  [126/164] HumanEval/125 OK | gen=42.0s tok=2489 | ETA 1292s
+  [127/164] HumanEval/126 NO_CODE | gen=80.3s tok=4800 | ETA 1271s
+  [128/164] HumanEval/127 OK | gen=38.9s tok=2299 | ETA 1238s
+  [129/164] HumanEval/128 OK | gen=28.4s tok=1644 | ETA 1202s
+  [130/164] HumanEval/129 NO_CODE | gen=80.0s tok=4800 | ETA 1180s
+  [131/164] HumanEval/130 NO_CODE | gen=80.9s tok=4800 | ETA 1157s
+  [132/164] HumanEval/131 NO_CODE | gen=80.3s tok=4800 | ETA 1133s
+  [133/164] HumanEval/132 NO_CODE | gen=79.5s tok=4800 | ETA 1107s
+  [134/164] HumanEval/133 OK | gen=21.7s tok=1311 | ETA 1069s
+  [135/164] HumanEval/134 NO_CODE | gen=80.1s tok=4800 | ETA 1043s
+  [136/164] HumanEval/135 OK | gen=16.4s tok=978 | ETA 1003s
+  [137/164] HumanEval/136 OK | gen=17.4s tok=1054 | ETA 963s
+  [138/164] HumanEval/137 OK | gen=61.2s tok=3715 | ETA 932s
+  [139/164] HumanEval/138 OK | gen=27.8s tok=1488 | ETA 895s
+  [140/164] HumanEval/139 OK | gen=47.5s tok=2485 | ETA 861s
+  [141/164] HumanEval/140 OK | gen=33.2s tok=1929 | ETA 825s
+  [142/164] HumanEval/141 OK | gen=34.5s tok=2046 | ETA 789s
+  [143/164] HumanEval/142 OK | gen=70.5s tok=4173 | ETA 758s
+  [144/164] HumanEval/143 OK | gen=27.7s tok=1665 | ETA 721s
+  [145/164] HumanEval/144 OK | gen=20.7s tok=1237 | ETA 683s
+  [146/164] HumanEval/145 NO_CODE | gen=81.8s tok=4800 | ETA 652s
+  [147/164] HumanEval/146 NO_CODE | gen=80.6s tok=4800 | ETA 621s
+  [148/164] HumanEval/147 NO_CODE | gen=81.4s tok=4800 | ETA 590s
+  [149/164] HumanEval/148 OK | gen=34.6s tok=2039 | ETA 553s
+  [150/164] HumanEval/149 OK | gen=32.8s tok=1934 | ETA 515s
+  [151/164] HumanEval/150 OK | gen=22.4s tok=1331 | ETA 477s
+  [152/164] HumanEval/151 OK | gen=43.2s tok=2521 | ETA 441s
+  [153/164] HumanEval/152 OK | gen=10.3s tok=536 | ETA 402s
+  [154/164] HumanEval/153 OK | gen=33.4s tok=1765 | ETA 366s
+  [155/164] HumanEval/154 OK | gen=60.6s tok=3257 | ETA 330s
+  [156/164] HumanEval/155 OK | gen=11.4s tok=669 | ETA 292s
+  [157/164] HumanEval/156 OK | gen=62.9s tok=3430 | ETA 257s
+  [158/164] HumanEval/157 OK | gen=18.7s tok=986 | ETA 220s
+  [159/164] HumanEval/158 OK | gen=24.3s tok=1420 | ETA 183s
+  [160/164] HumanEval/159 OK | gen=20.5s tok=1205 | ETA 146s
+  [161/164] HumanEval/160 OK | gen=51.9s tok=3013 | ETA 110s
+  [162/164] HumanEval/161 OK | gen=18.5s tok=1106 | ETA 73s
+  [163/164] HumanEval/162 OK | gen=11.4s tok=686 | ETA 36s
+  [164/164] HumanEval/163 NO_CODE | gen=80.8s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_mt_step150.jsonl (耗时 5991.7s)
+  统计: extract_ok=143 fail=21
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_mt_step150.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.787
+humaneval+ (base + extra tests)
+pass@1:	0.732
+
+
+0it [00:00, ?it/s]
+1it [00:01,  1.32s/it]
+164it [00:01, 123.04it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:37
+ 10%| | 16/164 [00:00<00:0
+ 14%|▏| 23/164 [00:00<00:0
+ 17%|▏| 28/164 [00:00<00:0
+ 44%|▍| 72/164 [00:01<00:0
+ 55%|▌| 91/164 [00:01<00:0
+ 77%|▊| 127/164 [00:01<00:
+ 87%|▊| 142/164 [00:02<00:
+ 98%|▉| 160/164 [00:02<00:
+100%|█| 164/164 [00:07<00:
+
+
+============================================================
+评估汇总 (tag=mt_step150)
+============================================================
+  humaneval: {'pass@1': 0.732}
+
+汇总已保存: eval_results_v2/summary_mt_step150.json
+<<<<< 多轮训练 step150 完成 <<<<<
+
+>>>>> 多轮训练 step200 | tag=mt_step200 | path=/root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_200_hf >>>>>
+加载模型: /root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_200_hf
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=mt_step200)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=26.6s tok=1346 | ETA 4349s
+  [2/164] HumanEval/1 NO_CODE | gen=88.6s tok=4800 | ETA 9340s
+  [3/164] HumanEval/2 OK | gen=11.7s tok=641 | ETA 6819s
+  [4/164] HumanEval/3 OK | gen=12.6s tok=688 | ETA 5588s
+  [5/164] HumanEval/4 OK | gen=15.9s tok=860 | ETA 4949s
+  [6/164] HumanEval/5 OK | gen=16.8s tok=907 | ETA 4541s
+  [7/164] HumanEval/6 NO_CODE | gen=87.5s tok=4800 | ETA 5830s
+  [8/164] HumanEval/7 OK | gen=11.4s tok=615 | ETA 5290s
+  [9/164] HumanEval/8 OK | gen=13.6s tok=734 | ETA 4907s
+  [10/164] HumanEval/9 OK | gen=16.6s tok=903 | ETA 4643s
+  [11/164] HumanEval/10 OK | gen=21.3s tok=1173 | ETA 4490s
+  [12/164] HumanEval/11 OK | gen=14.6s tok=787 | ETA 4273s
+  [13/164] HumanEval/12 OK | gen=18.0s tok=985 | ETA 4128s
+  [14/164] HumanEval/13 OK | gen=18.9s tok=1050 | ETA 4010s
+  [15/164] HumanEval/14 OK | gen=11.3s tok=619 | ETA 3830s
+  [16/164] HumanEval/15 OK | gen=9.2s tok=510 | ETA 3651s
+  [17/164] HumanEval/16 OK | gen=10.5s tok=582 | ETA 3504s
+  [18/164] HumanEval/17 OK | gen=35.2s tok=1921 | ETA 3572s
+  [19/164] HumanEval/18 OK | gen=25.8s tok=1372 | ETA 3558s
+  [20/164] HumanEval/19 OK | gen=25.2s tok=1378 | ETA 3539s
+  [21/164] HumanEval/20 OK | gen=29.5s tok=1558 | ETA 3548s
+  [22/164] HumanEval/21 OK | gen=16.9s tok=910 | ETA 3472s
+  [23/164] HumanEval/22 OK | gen=16.0s tok=856 | ETA 3396s
+  [24/164] HumanEval/23 OK | gen=5.1s tok=272 | ETA 3261s
+  [25/164] HumanEval/24 OK | gen=41.9s tok=2281 | ETA 3341s
+  [26/164] HumanEval/25 OK | gen=22.1s tok=1135 | ETA 3307s
+  [27/164] HumanEval/26 NO_CODE | gen=87.6s tok=4800 | ETA 3606s
+  [28/164] HumanEval/27 OK | gen=14.2s tok=777 | ETA 3520s
+  [29/164] HumanEval/28 OK | gen=7.0s tok=382 | ETA 3407s
+  [30/164] HumanEval/29 OK | gen=13.0s tok=700 | ETA 3327s
+  [31/164] HumanEval/30 OK | gen=9.8s tok=533 | ETA 3237s
+  [32/164] HumanEval/31 OK | gen=27.1s tok=1474 | ETA 3224s
+  [33/164] HumanEval/32 NO_CODE | gen=86.1s tok=4800 | ETA 3445s
+  [34/164] HumanEval/33 OK | gen=32.5s tok=1876 | ETA 3442s
+  [35/164] HumanEval/34 OK | gen=9.9s tok=569 | ETA 3354s
+  [36/164] HumanEval/35 OK | gen=7.5s tok=433 | ETA 3262s
+  [37/164] HumanEval/36 OK | gen=28.1s tok=1632 | ETA 3246s
+  [38/164] HumanEval/37 OK | gen=21.6s tok=1250 | ETA 3207s
+  [39/164] HumanEval/38 OK | gen=42.9s tok=2491 | ETA 3238s
+  [40/164] HumanEval/39 OK | gen=49.5s tok=2859 | ETA 3285s
+  [41/164] HumanEval/40 OK | gen=68.0s tok=3902 | ETA 3383s
+  [42/164] HumanEval/41 OK | gen=26.9s tok=1551 | ETA 3354s
+  [43/164] HumanEval/42 OK | gen=10.5s tok=612 | ETA 3279s
+  [44/164] HumanEval/43 OK | gen=64.1s tok=3715 | ETA 3353s
+  [45/164] HumanEval/44 OK | gen=19.8s tok=1160 | ETA 3303s
+  [46/164] HumanEval/45 OK | gen=7.1s tok=404 | ETA 3222s
+  [47/164] HumanEval/46 OK | gen=58.4s tok=3375 | ETA 3273s
+  [48/164] HumanEval/47 OK | gen=77.1s tok=4484 | ETA 3363s
+  [49/164] HumanEval/48 OK | gen=11.0s tok=636 | ETA 3292s
+  [50/164] HumanEval/49 OK | gen=30.1s tok=1747 | ETA 3267s
+  [51/164] HumanEval/50 OK | gen=27.3s tok=1584 | ETA 3235s
+  [52/164] HumanEval/51 OK | gen=8.4s tok=493 | ETA 3163s
+  [53/164] HumanEval/52 OK | gen=11.4s tok=653 | ETA 3100s
+  [54/164] HumanEval/53 OK | gen=8.1s tok=478 | ETA 3032s
+  [55/164] HumanEval/54 NO_CODE | gen=85.0s tok=4800 | ETA 3118s
+  [56/164] HumanEval/55 OK | gen=17.7s tok=1029 | ETA 3068s
+  [57/164] HumanEval/56 OK | gen=39.3s tok=2260 | ETA 3060s
+  [58/164] HumanEval/57 OK | gen=18.9s tok=1084 | ETA 3014s
+  [59/164] HumanEval/58 OK | gen=16.7s tok=958 | ETA 2965s
+  [60/164] HumanEval/59 NO_CODE | gen=84.2s tok=4800 | ETA 3033s
+  [61/164] HumanEval/60 OK | gen=10.3s tok=581 | ETA 2972s
+  [62/164] HumanEval/61 OK | gen=17.4s tok=982 | ETA 2925s
+  [63/164] HumanEval/62 OK | gen=17.7s tok=1008 | ETA 2878s
+  [64/164] HumanEval/63 OK | gen=33.0s tok=1867 | ETA 2857s
+  [65/164] HumanEval/64 OK | gen=18.3s tok=1045 | ETA 2813s
+  [66/164] HumanEval/65 OK | gen=18.2s tok=1057 | ETA 2769s
+  [67/164] HumanEval/66 OK | gen=10.2s tok=587 | ETA 2715s
+  [68/164] HumanEval/67 OK | gen=16.5s tok=940 | ETA 2671s
+  [69/164] HumanEval/68 OK | gen=45.9s tok=2578 | ETA 2668s
+  [70/164] HumanEval/69 OK | gen=36.1s tok=1973 | ETA 2650s
+  [71/164] HumanEval/70 OK | gen=21.9s tok=1246 | ETA 2614s
+  [72/164] HumanEval/71 OK | gen=44.0s tok=2536 | ETA 2606s
+  [73/164] HumanEval/72 OK | gen=17.5s tok=1001 | ETA 2564s
+  [74/164] HumanEval/73 NO_CODE | gen=89.8s tok=4800 | ETA 2611s
+  [75/164] HumanEval/74 OK | gen=15.8s tok=873 | ETA 2566s
+  [76/164] HumanEval/75 OK | gen=36.6s tok=1910 | ETA 2546s
+  [77/164] HumanEval/76 OK | gen=83.2s tok=4613 | ETA 2579s
+  [78/164] HumanEval/77 OK | gen=43.1s tok=2435 | ETA 2564s
+  [79/164] HumanEval/78 OK | gen=12.6s tok=685 | ETA 2516s
+  [80/164] HumanEval/79 OK | gen=8.8s tok=485 | ETA 2464s
+  [81/164] HumanEval/80 OK | gen=17.1s tok=950 | ETA 2422s
+  [82/164] HumanEval/81 OK | gen=52.1s tok=2926 | ETA 2416s
+  [83/164] HumanEval/82 OK | gen=21.4s tok=1210 | ETA 2379s
+  [84/164] HumanEval/83 OK | gen=39.1s tok=2154 | ETA 2359s
+  [85/164] HumanEval/84 OK | gen=34.9s tok=1960 | ETA 2334s
+  [86/164] HumanEval/85 OK | gen=16.0s tok=803 | ETA 2292s
+  [87/164] HumanEval/86 OK | gen=15.8s tok=874 | ETA 2251s
+  [88/164] HumanEval/87 OK | gen=25.6s tok=1451 | ETA 2219s
+  [89/164] HumanEval/88 OK | gen=19.8s tok=1110 | ETA 2182s
+  [90/164] HumanEval/89 OK | gen=23.5s tok=1285 | ETA 2148s
+  [91/164] HumanEval/90 OK | gen=25.2s tok=1414 | ETA 2116s
+  [92/164] HumanEval/91 NO_CODE | gen=85.3s tok=4800 | ETA 2131s
+  [93/164] HumanEval/92 OK | gen=28.4s tok=1609 | ETA 2100s
+  [94/164] HumanEval/93 OK | gen=34.3s tok=1942 | ETA 2074s
+  [95/164] HumanEval/94 OK | gen=41.7s tok=2374 | ETA 2053s
+  [96/164] HumanEval/95 OK | gen=45.2s tok=2518 | ETA 2035s
+  [97/164] HumanEval/96 OK | gen=28.5s tok=1621 | ETA 2004s
+  [98/164] HumanEval/97 OK | gen=12.4s tok=712 | ETA 1962s
+  [99/164] HumanEval/98 OK | gen=21.4s tok=1235 | ETA 1927s
+  [100/164] HumanEval/99 OK | gen=38.4s tok=2150 | ETA 1903s
+  [101/164] HumanEval/100 OK | gen=20.2s tok=1125 | ETA 1867s
+  [102/164] HumanEval/101 OK | gen=21.7s tok=1210 | ETA 1833s
+  [103/164] HumanEval/102 OK | gen=16.9s tok=942 | ETA 1796s
+  [104/164] HumanEval/103 OK | gen=26.2s tok=1452 | ETA 1764s
+  [105/164] HumanEval/104 OK | gen=20.9s tok=1172 | ETA 1730s
+  [106/164] HumanEval/105 OK | gen=25.6s tok=1222 | ETA 1699s
+  [107/164] HumanEval/106 OK | gen=24.6s tok=1261 | ETA 1667s
+  [108/164] HumanEval/107 OK | gen=23.4s tok=1229 | ETA 1635s
+  [109/164] HumanEval/108 OK | gen=35.2s tok=2006 | ETA 1609s
+  [110/164] HumanEval/109 OK | gen=80.8s tok=4585 | ETA 1605s
+  [111/164] HumanEval/110 OK | gen=27.5s tok=1587 | ETA 1574s
+  [112/164] HumanEval/111 OK | gen=21.2s tok=1209 | ETA 1540s
+  [113/164] HumanEval/112 OK | gen=16.0s tok=915 | ETA 1504s
+  [114/164] HumanEval/113 OK | gen=38.4s tok=2220 | ETA 1479s
+  [115/164] HumanEval/114 OK | gen=31.8s tok=1817 | ETA 1450s
+  [116/164] HumanEval/115 OK | gen=38.6s tok=2174 | ETA 1424s
+  [117/164] HumanEval/116 NO_CODE | gen=83.5s tok=4800 | ETA 1416s
+  [118/164] HumanEval/117 OK | gen=67.7s tok=3821 | ETA 1401s
+  [119/164] HumanEval/118 NO_CODE | gen=83.7s tok=4800 | ETA 1390s
+  [120/164] HumanEval/119 OK | gen=53.1s tok=3024 | ETA 1368s
+  [121/164] HumanEval/120 OK | gen=18.3s tok=1033 | ETA 1332s
+  [122/164] HumanEval/121 OK | gen=18.2s tok=1037 | ETA 1297s
+  [123/164] HumanEval/122 OK | gen=21.3s tok=1236 | ETA 1263s
+  [124/164] HumanEval/123 OK | gen=25.4s tok=1463 | ETA 1230s
+  [125/164] HumanEval/124 NO_CODE | gen=84.5s tok=4800 | ETA 1216s
+  [126/164] HumanEval/125 OK | gen=32.2s tok=1808 | ETA 1185s
+  [127/164] HumanEval/126 NO_CODE | gen=84.1s tok=4800 | ETA 1169s
+  [128/164] HumanEval/127 OK | gen=33.3s tok=1906 | ETA 1138s
+  [129/164] HumanEval/128 OK | gen=28.1s tok=1611 | ETA 1106s
+  [130/164] HumanEval/129 OK | gen=83.7s tok=4800 | ETA 1088s
+  [131/164] HumanEval/130 NO_CODE | gen=88.4s tok=4800 | ETA 1070s
+  [132/164] HumanEval/131 OK | gen=57.1s tok=3222 | ETA 1044s
+  [133/164] HumanEval/132 OK | gen=45.2s tok=2577 | ETA 1014s
+  [134/164] HumanEval/133 OK | gen=15.1s tok=878 | ETA 977s
+  [135/164] HumanEval/134 NO_CODE | gen=85.5s tok=4800 | ETA 956s
+  [136/164] HumanEval/135 OK | gen=20.7s tok=1168 | ETA 921s
+  [137/164] HumanEval/136 OK | gen=19.5s tok=1136 | ETA 885s
+  [138/164] HumanEval/137 OK | gen=31.7s tok=1838 | ETA 852s
+  [139/164] HumanEval/138 OK | gen=16.8s tok=966 | ETA 816s
+  [140/164] HumanEval/139 OK | gen=29.6s tok=1682 | ETA 783s
+  [141/164] HumanEval/140 NO_CODE | gen=84.1s tok=4800 | ETA 759s
+  [142/164] HumanEval/141 OK | gen=35.1s tok=2035 | ETA 726s
+  [143/164] HumanEval/142 OK | gen=23.0s tok=1319 | ETA 692s
+  [144/164] HumanEval/143 OK | gen=32.0s tok=1755 | ETA 659s
+  [145/164] HumanEval/144 OK | gen=20.4s tok=1170 | ETA 624s
+  [146/164] HumanEval/145 NO_CODE | gen=83.5s tok=4800 | ETA 598s
+  [147/164] HumanEval/146 OK | gen=55.7s tok=3156 | ETA 567s
+  [148/164] HumanEval/147 NO_CODE | gen=84.0s tok=4800 | ETA 539s
+  [149/164] HumanEval/148 OK | gen=41.7s tok=2385 | ETA 506s
+  [150/164] HumanEval/149 OK | gen=26.9s tok=1563 | ETA 472s
+  [151/164] HumanEval/150 OK | gen=18.4s tok=1075 | ETA 437s
+  [152/164] HumanEval/151 OK | gen=19.9s tok=1146 | ETA 402s
+  [153/164] HumanEval/152 OK | gen=13.2s tok=745 | ETA 367s
+  [154/164] HumanEval/153 OK | gen=33.2s tok=1801 | ETA 334s
+  [155/164] HumanEval/154 NO_CODE | gen=86.9s tok=4800 | ETA 304s
+  [156/164] HumanEval/155 OK | gen=15.7s tok=898 | ETA 269s
+  [157/164] HumanEval/156 OK | gen=31.1s tok=1781 | ETA 235s
+  [158/164] HumanEval/157 OK | gen=18.4s tok=1048 | ETA 201s
+  [159/164] HumanEval/158 OK | gen=18.6s tok=1077 | ETA 167s
+  [160/164] HumanEval/159 OK | gen=24.2s tok=1406 | ETA 133s
+  [161/164] HumanEval/160 OK | gen=31.1s tok=1802 | ETA 100s
+  [162/164] HumanEval/161 OK | gen=30.3s tok=1718 | ETA 67s
+  [163/164] HumanEval/162 OK | gen=10.3s tok=565 | ETA 33s
+  [164/164] HumanEval/163 NO_CODE | gen=84.2s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_mt_step200.jsonl (耗时 5491.0s)
+  统计: extract_ok=145 fail=19
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_mt_step200.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.750
+humaneval+ (base + extra tests)
+pass@1:	0.695
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.26it/s]
+164it [00:00, 204.06it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:34
+ 10%| | 16/164 [00:00<00:0
+ 16%|▏| 26/164 [00:00<00:0
+ 20%|▏| 32/164 [00:00<00:0
+ 48%|▍| 78/164 [00:01<00:0
+ 77%|▊| 127/164 [00:01<00:
+ 86%|▊| 141/164 [00:01<00:
+ 98%|▉| 160/164 [00:02<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=mt_step200)
+============================================================
+  humaneval: {'pass@1': 0.695}
+
+汇总已保存: eval_results_v2/summary_mt_step200.json
+<<<<< 多轮训练 step200 完成 <<<<<
+
+>>>>> 多轮训练 step250 | tag=mt_step250 | path=/root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_250_hf >>>>>
+加载模型: /root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_250_hf
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=mt_step250)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=34.5s tok=1747 | ETA 5627s
+  [2/164] HumanEval/1 NO_CODE | gen=82.8s tok=4800 | ETA 9507s
+  [3/164] HumanEval/2 OK | gen=9.5s tok=566 | ETA 6810s
+  [4/164] HumanEval/3 OK | gen=11.5s tok=630 | ETA 5538s
+  [5/164] HumanEval/4 OK | gen=13.3s tok=796 | ETA 4826s
+  [6/164] HumanEval/5 OK | gen=19.7s tok=926 | ETA 4516s
+  [7/164] HumanEval/6 OK | gen=22.9s tok=1214 | ETA 4360s
+  [8/164] HumanEval/7 OK | gen=12.5s tok=678 | ETA 4035s
+  [9/164] HumanEval/8 OK | gen=14.8s tok=806 | ETA 3818s
+  [10/164] HumanEval/9 OK | gen=19.3s tok=1033 | ETA 3712s
+  [11/164] HumanEval/10 OK | gen=22.6s tok=1353 | ETA 3666s
+  [12/164] HumanEval/11 OK | gen=15.7s tok=946 | ETA 3538s
+  [13/164] HumanEval/12 OK | gen=13.8s tok=815 | ETA 3405s
+  [14/164] HumanEval/13 OK | gen=15.7s tok=920 | ETA 3308s
+  [15/164] HumanEval/14 OK | gen=11.4s tok=659 | ETA 3181s
+  [16/164] HumanEval/15 OK | gen=10.2s tok=562 | ETA 3056s
+  [17/164] HumanEval/16 OK | gen=10.3s tok=552 | ETA 2946s
+  [18/164] HumanEval/17 OK | gen=21.8s tok=1188 | ETA 2940s
+  [19/164] HumanEval/18 OK | gen=21.4s tok=1152 | ETA 2930s
+  [20/164] HumanEval/19 OK | gen=29.2s tok=1590 | ETA 2974s
+  [21/164] HumanEval/20 NO_CODE | gen=88.6s tok=4800 | ETA 3417s
+  [22/164] HumanEval/21 OK | gen=14.8s tok=809 | ETA 3334s
+  [23/164] HumanEval/22 OK | gen=25.5s tok=1391 | ETA 3323s
+  [24/164] HumanEval/23 OK | gen=6.0s tok=325 | ETA 3197s
+  [25/164] HumanEval/24 OK | gen=25.3s tok=1374 | ETA 3188s
+  [26/164] HumanEval/25 OK | gen=26.4s tok=1434 | ETA 3183s
+  [27/164] HumanEval/26 OK | gen=36.3s tok=1976 | ETA 3227s
+  [28/164] HumanEval/27 OK | gen=13.0s tok=705 | ETA 3152s
+  [29/164] HumanEval/28 OK | gen=6.5s tok=355 | ETA 3051s
+  [30/164] HumanEval/29 OK | gen=11.8s tok=640 | ETA 2980s
+  [31/164] HumanEval/30 OK | gen=10.2s tok=557 | ETA 2906s
+  [32/164] HumanEval/31 OK | gen=23.5s tok=1280 | ETA 2891s
+  [33/164] HumanEval/32 NO_CODE | gen=87.9s tok=4800 | ETA 3131s
+  [34/164] HumanEval/33 OK | gen=67.0s tok=3669 | ETA 3272s
+  [35/164] HumanEval/34 OK | gen=13.2s tok=763 | ETA 3203s
+  [36/164] HumanEval/35 OK | gen=7.6s tok=440 | ETA 3117s
+  [37/164] HumanEval/36 NO_CODE | gen=85.9s tok=4800 | ETA 3304s
+  [38/164] HumanEval/37 OK | gen=25.1s tok=1351 | ETA 3275s
+  [39/164] HumanEval/38 NO_CODE | gen=89.2s tok=4800 | ETA 3451s
+  [40/164] HumanEval/39 OK | gen=52.9s tok=2846 | ETA 3502s
+  [41/164] HumanEval/40 OK | gen=78.9s tok=4260 | ETA 3626s
+  [42/164] HumanEval/41 OK | gen=31.0s tok=1672 | ETA 3601s
+  [43/164] HumanEval/42 OK | gen=9.8s tok=528 | ETA 3516s
+  [44/164] HumanEval/43 OK | gen=49.5s tok=2652 | ETA 3542s
+  [45/164] HumanEval/44 OK | gen=21.4s tok=1156 | ETA 3491s
+  [46/164] HumanEval/45 OK | gen=7.5s tok=408 | ETA 3406s
+  [47/164] HumanEval/46 NO_CODE | gen=89.0s tok=4800 | ETA 3527s
+  [48/164] HumanEval/47 OK | gen=45.0s tok=2456 | ETA 3533s
+  [49/164] HumanEval/48 OK | gen=9.7s tok=530 | ETA 3454s
+  [50/164] HumanEval/49 OK | gen=17.7s tok=969 | ETA 3395s
+  [51/164] HumanEval/50 OK | gen=52.8s tok=2894 | ETA 3417s
+  [52/164] HumanEval/51 OK | gen=14.3s tok=784 | ETA 3352s
+  [53/164] HumanEval/52 OK | gen=9.2s tok=504 | ETA 3279s
+  [54/164] HumanEval/53 OK | gen=5.3s tok=291 | ETA 3200s
+  [55/164] HumanEval/54 OK | gen=14.5s tok=798 | ETA 3142s
+  [56/164] HumanEval/55 OK | gen=49.4s tok=2727 | ETA 3153s
+  [57/164] HumanEval/56 OK | gen=18.4s tok=992 | ETA 3103s
+  [58/164] HumanEval/57 OK | gen=42.7s tok=2312 | ETA 3099s
+  [59/164] HumanEval/58 OK | gen=11.8s tok=641 | ETA 3039s
+  [60/164] HumanEval/59 OK | gen=43.5s tok=2380 | ETA 3035s
+  [61/164] HumanEval/60 OK | gen=10.6s tok=584 | ETA 2975s
+  [62/164] HumanEval/61 OK | gen=15.1s tok=833 | ETA 2923s
+  [63/164] HumanEval/62 OK | gen=41.9s tok=2300 | ETA 2916s
+  [64/164] HumanEval/63 OK | gen=23.8s tok=1292 | ETA 2879s
+  [65/164] HumanEval/64 OK | gen=18.8s tok=1026 | ETA 2835s
+  [66/164] HumanEval/65 OK | gen=27.8s tok=1529 | ETA 2805s
+  [67/164] HumanEval/66 OK | gen=18.5s tok=1010 | ETA 2762s
+  [68/164] HumanEval/67 OK | gen=20.6s tok=1122 | ETA 2722s
+  [69/164] HumanEval/68 OK | gen=25.7s tok=1375 | ETA 2690s
+  [70/164] HumanEval/69 OK | gen=30.5s tok=1635 | ETA 2665s
+  [71/164] HumanEval/70 OK | gen=24.8s tok=1277 | ETA 2632s
+  [72/164] HumanEval/71 OK | gen=24.6s tok=1412 | ETA 2599s
+  [73/164] HumanEval/72 OK | gen=15.1s tok=885 | ETA 2554s
+  [74/164] HumanEval/73 NO_CODE | gen=82.9s tok=4800 | ETA 2593s
+  [75/164] HumanEval/74 OK | gen=15.2s tok=898 | ETA 2548s
+  [76/164] HumanEval/75 OK | gen=47.1s tok=2743 | ETA 2541s
+  [77/164] HumanEval/76 OK | gen=71.8s tok=3810 | ETA 2560s
+  [78/164] HumanEval/77 OK | gen=44.8s tok=2430 | ETA 2548s
+  [79/164] HumanEval/78 OK | gen=18.2s tok=997 | ETA 2506s
+  [80/164] HumanEval/79 OK | gen=9.0s tok=490 | ETA 2455s
+  [81/164] HumanEval/80 OK | gen=16.7s tok=914 | ETA 2413s
+  [82/164] HumanEval/81 OK | gen=40.7s tok=2210 | ETA 2395s
+  [83/164] HumanEval/82 OK | gen=18.0s tok=967 | ETA 2355s
+  [84/164] HumanEval/83 OK | gen=42.4s tok=2483 | ETA 2339s
+  [85/164] HumanEval/84 OK | gen=69.7s tok=4099 | ETA 2347s
+  [86/164] HumanEval/85 OK | gen=11.7s tok=623 | ETA 2301s
+  [87/164] HumanEval/86 OK | gen=18.9s tok=1008 | ETA 2262s
+  [88/164] HumanEval/87 OK | gen=35.4s tok=1923 | ETA 2238s
+  [89/164] HumanEval/88 OK | gen=22.4s tok=1224 | ETA 2203s
+  [90/164] HumanEval/89 OK | gen=34.4s tok=1869 | ETA 2178s
+  [91/164] HumanEval/90 OK | gen=38.6s tok=2069 | ETA 2155s
+  [92/164] HumanEval/91 OK | gen=25.4s tok=1359 | ETA 2123s
+  [93/164] HumanEval/92 OK | gen=63.5s tok=3462 | ETA 2119s
+  [94/164] HumanEval/93 OK | gen=61.5s tok=3309 | ETA 2113s
+  [95/164] HumanEval/94 OK | gen=33.1s tok=1801 | ETA 2085s
+  [96/164] HumanEval/95 OK | gen=24.6s tok=1349 | ETA 2051s
+  [97/164] HumanEval/96 OK | gen=30.2s tok=1654 | ETA 2020s
+  [98/164] HumanEval/97 OK | gen=12.2s tok=663 | ETA 1978s
+  [99/164] HumanEval/98 OK | gen=19.7s tok=1075 | ETA 1942s
+  [100/164] HumanEval/99 OK | gen=34.1s tok=1856 | ETA 1914s
+  [101/164] HumanEval/100 OK | gen=16.8s tok=917 | ETA 1876s
+  [102/164] HumanEval/101 OK | gen=29.0s tok=1573 | ETA 1846s
+  [103/164] HumanEval/102 OK | gen=22.8s tok=1248 | ETA 1812s
+  [104/164] HumanEval/103 NO_CODE | gen=88.2s tok=4800 | ETA 1816s
+  [105/164] HumanEval/104 OK | gen=24.4s tok=1336 | ETA 1783s
+  [106/164] HumanEval/105 OK | gen=27.5s tok=1507 | ETA 1751s
+  [107/164] HumanEval/106 OK | gen=22.7s tok=1239 | ETA 1717s
+  [108/164] HumanEval/107 OK | gen=21.1s tok=1156 | ETA 1682s
+  [109/164] HumanEval/108 OK | gen=36.7s tok=2006 | ETA 1655s
+  [110/164] HumanEval/109 OK | gen=44.1s tok=2405 | ETA 1632s
+  [111/164] HumanEval/110 OK | gen=23.1s tok=1268 | ETA 1598s
+  [112/164] HumanEval/111 OK | gen=19.6s tok=1074 | ETA 1563s
+  [113/164] HumanEval/112 OK | gen=18.0s tok=981 | ETA 1528s
+  [114/164] HumanEval/113 OK | gen=49.5s tok=2697 | ETA 1506s
+  [115/164] HumanEval/114 OK | gen=32.0s tok=1757 | ETA 1477s
+  [116/164] HumanEval/115 OK | gen=35.3s tok=1929 | ETA 1449s
+  [117/164] HumanEval/116 NO_CODE | gen=89.1s tok=4800 | ETA 1443s
+  [118/164] HumanEval/117 OK | gen=27.6s tok=1510 | ETA 1411s
+  [119/164] HumanEval/118 NO_CODE | gen=88.6s tok=4800 | ETA 1402s
+  [120/164] HumanEval/119 OK | gen=31.4s tok=1708 | ETA 1371s
+  [121/164] HumanEval/120 OK | gen=18.4s tok=1003 | ETA 1335s
+  [122/164] HumanEval/121 OK | gen=19.3s tok=1055 | ETA 1300s
+  [123/164] HumanEval/122 OK | gen=18.7s tok=1026 | ETA 1265s
+  [124/164] HumanEval/123 OK | gen=23.2s tok=1271 | ETA 1232s
+  [125/164] HumanEval/124 NO_CODE | gen=88.3s tok=4800 | ETA 1219s
+  [126/164] HumanEval/125 OK | gen=36.6s tok=1990 | ETA 1189s
+  [127/164] HumanEval/126 NO_CODE | gen=88.3s tok=4800 | ETA 1175s
+  [128/164] HumanEval/127 OK | gen=36.6s tok=1995 | ETA 1144s
+  [129/164] HumanEval/128 OK | gen=28.9s tok=1573 | ETA 1112s
+  [130/164] HumanEval/129 OK | gen=88.4s tok=4800 | ETA 1095s
+  [131/164] HumanEval/130 NO_CODE | gen=88.1s tok=4800 | ETA 1077s
+  [132/164] HumanEval/131 OK | gen=55.0s tok=3015 | ETA 1049s
+  [133/164] HumanEval/132 NO_CODE | gen=87.9s tok=4800 | ETA 1029s
+  [134/164] HumanEval/133 OK | gen=17.8s tok=961 | ETA 993s
+  [135/164] HumanEval/134 NO_CODE | gen=87.6s tok=4800 | ETA 971s
+  [136/164] HumanEval/135 OK | gen=23.5s tok=1286 | ETA 936s
+  [137/164] HumanEval/136 OK | gen=17.0s tok=931 | ETA 899s
+  [138/164] HumanEval/137 OK | gen=47.5s tok=2597 | ETA 869s
+  [139/164] HumanEval/138 OK | gen=15.8s tok=868 | ETA 832s
+  [140/164] HumanEval/139 OK | gen=16.1s tok=881 | ETA 796s
+  [141/164] HumanEval/140 NO_CODE | gen=88.0s tok=4800 | ETA 772s
+  [142/164] HumanEval/141 OK | gen=25.1s tok=1384 | ETA 737s
+  [143/164] HumanEval/142 OK | gen=27.8s tok=1537 | ETA 702s
+  [144/164] HumanEval/143 OK | gen=32.8s tok=1797 | ETA 669s
+  [145/164] HumanEval/144 OK | gen=18.1s tok=988 | ETA 633s
+  [146/164] HumanEval/145 NO_CODE | gen=87.3s tok=4800 | ETA 607s
+  [147/164] HumanEval/146 OK | gen=25.7s tok=1418 | ETA 572s
+  [148/164] HumanEval/147 OK | gen=79.4s tok=4343 | ETA 543s
+  [149/164] HumanEval/148 OK | gen=25.5s tok=1412 | ETA 509s
+  [150/164] HumanEval/149 OK | gen=26.1s tok=1432 | ETA 474s
+  [151/164] HumanEval/150 OK | gen=19.1s tok=1022 | ETA 439s
+  [152/164] HumanEval/151 OK | gen=20.9s tok=1135 | ETA 404s
+  [153/164] HumanEval/152 OK | gen=14.3s tok=784 | ETA 369s
+  [154/164] HumanEval/153 NO_CODE | gen=88.0s tok=4800 | ETA 339s
+  [155/164] HumanEval/154 NO_CODE | gen=88.2s tok=4800 | ETA 308s
+  [156/164] HumanEval/155 OK | gen=14.9s tok=812 | ETA 273s
+  [157/164] HumanEval/156 OK | gen=28.9s tok=1685 | ETA 239s
+  [158/164] HumanEval/157 OK | gen=15.9s tok=957 | ETA 204s
+  [159/164] HumanEval/158 OK | gen=29.1s tok=1753 | ETA 170s
+  [160/164] HumanEval/159 OK | gen=20.7s tok=1243 | ETA 135s
+  [161/164] HumanEval/160 NO_CODE | gen=79.8s tok=4800 | ETA 102s
+  [162/164] HumanEval/161 OK | gen=19.5s tok=1186 | ETA 68s
+  [163/164] HumanEval/162 OK | gen=11.3s tok=682 | ETA 34s
+  [164/164] HumanEval/163 NO_CODE | gen=79.7s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_mt_step250.jsonl (耗时 5608.1s)
+  统计: extract_ok=143 fail=21
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_mt_step250.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.780
+humaneval+ (base + extra tests)
+pass@1:	0.720
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.28it/s]
+164it [00:00, 207.32it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:39
+ 10%| | 16/164 [00:00<00:0
+ 15%|▏| 25/164 [00:00<00:0
+ 19%|▏| 31/164 [00:00<00:0
+ 59%|▌| 96/164 [00:01<00:0
+ 77%|▊| 127/164 [00:01<00:
+ 84%|▊| 137/164 [00:01<00:
+ 98%|▉| 160/164 [00:02<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=mt_step250)
+============================================================
+  humaneval: {'pass@1': 0.72}
+
+汇总已保存: eval_results_v2/summary_mt_step250.json
+<<<<< 多轮训练 step250 完成 <<<<<
+
+>>>>> 多轮训练 step300 | tag=mt_step300 | path=/root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_300_hf >>>>>
+加载模型: /root/autodl-tmp/checkpoints/agentic-rl-cloud/h20-formal-2turn-r4800/global_step_300_hf
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=mt_step300)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=27.8s tok=1441 | ETA 4533s
+  [2/164] HumanEval/1 OK | gen=54.5s tok=2996 | ETA 6669s
+  [3/164] HumanEval/2 OK | gen=9.2s tok=499 | ETA 4910s
+  [4/164] HumanEval/3 OK | gen=11.8s tok=659 | ETA 4132s
+  [5/164] HumanEval/4 OK | gen=14.0s tok=784 | ETA 3730s
+  [6/164] HumanEval/5 OK | gen=15.8s tok=884 | ETA 3505s
+  [7/164] HumanEval/6 OK | gen=23.9s tok=1338 | ETA 3521s
+  [8/164] HumanEval/7 OK | gen=14.2s tok=787 | ETA 3339s
+  [9/164] HumanEval/8 OK | gen=9.5s tok=526 | ETA 3113s
+  [10/164] HumanEval/9 OK | gen=18.4s tok=1027 | ETA 3066s
+  [11/164] HumanEval/10 OK | gen=23.2s tok=1280 | ETA 3092s
+  [12/164] HumanEval/11 OK | gen=15.3s tok=858 | ETA 3010s
+  [13/164] HumanEval/12 OK | gen=15.3s tok=861 | ETA 2938s
+  [14/164] HumanEval/13 OK | gen=17.4s tok=973 | ETA 2897s
+  [15/164] HumanEval/14 OK | gen=10.3s tok=581 | ETA 2789s
+  [16/164] HumanEval/15 OK | gen=8.7s tok=484 | ETA 2677s
+  [17/164] HumanEval/16 OK | gen=9.5s tok=532 | ETA 2585s
+  [18/164] HumanEval/17 OK | gen=32.2s tok=1811 | ETA 2686s
+  [19/164] HumanEval/18 OK | gen=30.7s tok=1722 | ETA 2762s
+  [20/164] HumanEval/19 OK | gen=19.2s tok=1079 | ETA 2744s
+  [21/164] HumanEval/20 NO_CODE | gen=85.9s tok=4800 | ETA 3180s
+  [22/164] HumanEval/21 OK | gen=16.2s tok=895 | ETA 3118s
+  [23/164] HumanEval/22 OK | gen=16.1s tok=888 | ETA 3061s
+  [24/164] HumanEval/23 OK | gen=6.7s tok=371 | ETA 2952s
+  [25/164] HumanEval/24 OK | gen=21.0s tok=1160 | ETA 2930s
+  [26/164] HumanEval/25 OK | gen=30.1s tok=1675 | ETA 2956s
+  [27/164] HumanEval/26 NO_CODE | gen=85.9s tok=4800 | ETA 3262s
+  [28/164] HumanEval/27 OK | gen=10.2s tok=566 | ETA 3172s
+  [29/164] HumanEval/28 OK | gen=6.3s tok=349 | ETA 3069s
+  [30/164] HumanEval/29 OK | gen=11.0s tok=613 | ETA 2994s
+  [31/164] HumanEval/30 OK | gen=9.0s tok=508 | ETA 2915s
+  [32/164] HumanEval/31 OK | gen=31.8s tok=1796 | ETA 2933s
+  [33/164] HumanEval/32 NO_CODE | gen=87.4s tok=4800 | ETA 3170s
+  [34/164] HumanEval/33 OK | gen=46.4s tok=2619 | ETA 3231s
+  [35/164] HumanEval/34 OK | gen=12.9s tok=752 | ETA 3162s
+  [36/164] HumanEval/35 OK | gen=7.1s tok=414 | ETA 3076s
+  [37/164] HumanEval/36 OK | gen=35.3s tok=2056 | ETA 3090s
+  [38/164] HumanEval/37 OK | gen=28.9s tok=1684 | ETA 3081s
+  [39/164] HumanEval/38 OK | gen=41.6s tok=2416 | ETA 3112s
+  [40/164] HumanEval/39 NO_CODE | gen=83.9s tok=4800 | ETA 3270s
+  [41/164] HumanEval/40 NO_CODE | gen=82.7s tok=4800 | ETA 3412s
+  [42/164] HumanEval/41 OK | gen=18.5s tok=1078 | ETA 3358s
+  [43/164] HumanEval/42 OK | gen=8.2s tok=479 | ETA 3276s
+  [44/164] HumanEval/43 OK | gen=72.2s tok=4157 | ETA 3372s
+  [45/164] HumanEval/44 OK | gen=23.1s tok=1340 | ETA 3330s
+  [46/164] HumanEval/45 OK | gen=7.5s tok=437 | ETA 3250s
+  [47/164] HumanEval/46 OK | gen=65.6s tok=3813 | ETA 3317s
+  [48/164] HumanEval/47 NO_CODE | gen=82.5s tok=4800 | ETA 3420s
+  [49/164] HumanEval/48 OK | gen=9.2s tok=536 | ETA 3343s
+  [50/164] HumanEval/49 OK | gen=17.2s tok=1003 | ETA 3287s
+  [51/164] HumanEval/50 OK | gen=20.3s tok=1188 | ETA 3239s
+  [52/164] HumanEval/51 OK | gen=10.8s tok=631 | ETA 3172s
+  [53/164] HumanEval/52 OK | gen=9.8s tok=573 | ETA 3105s
+  [54/164] HumanEval/53 OK | gen=5.2s tok=301 | ETA 3030s
+  [55/164] HumanEval/54 OK | gen=37.7s tok=2187 | ETA 3023s
+  [56/164] HumanEval/55 OK | gen=17.2s tok=1006 | ETA 2975s
+  [57/164] HumanEval/56 OK | gen=19.7s tok=1152 | ETA 2932s
+  [58/164] HumanEval/57 OK | gen=18.5s tok=1086 | ETA 2889s
+  [59/164] HumanEval/58 OK | gen=14.6s tok=857 | ETA 2839s
+  [60/164] HumanEval/59 NO_CODE | gen=82.7s tok=4800 | ETA 2908s
+  [61/164] HumanEval/60 OK | gen=10.2s tok=592 | ETA 2850s
+  [62/164] HumanEval/61 OK | gen=12.0s tok=702 | ETA 2797s
+  [63/164] HumanEval/62 OK | gen=50.6s tok=2941 | ETA 2807s
+  [64/164] HumanEval/63 OK | gen=27.7s tok=1623 | ETA 2779s
+  [65/164] HumanEval/64 OK | gen=19.5s tok=1140 | ETA 2739s
+  [66/164] HumanEval/65 OK | gen=21.3s tok=1235 | ETA 2702s
+  [67/164] HumanEval/66 OK | gen=12.1s tok=708 | ETA 2652s
+  [68/164] HumanEval/67 OK | gen=16.0s tok=940 | ETA 2608s
+  [69/164] HumanEval/68 OK | gen=21.3s tok=1250 | ETA 2573s
+  [70/164] HumanEval/69 OK | gen=27.6s tok=1617 | ETA 2547s
+  [71/164] HumanEval/70 OK | gen=31.1s tok=1813 | ETA 2525s
+  [72/164] HumanEval/71 OK | gen=30.9s tok=1807 | ETA 2502s
+  [73/164] HumanEval/72 OK | gen=12.4s tok=727 | ETA 2457s
+  [74/164] HumanEval/73 OK | gen=27.6s tok=1612 | ETA 2431s
+  [75/164] HumanEval/74 OK | gen=18.6s tok=1080 | ETA 2394s
+  [76/164] HumanEval/75 OK | gen=35.1s tok=2047 | ETA 2376s
+  [77/164] HumanEval/76 NO_CODE | gen=82.7s tok=4800 | ETA 2412s
+  [78/164] HumanEval/77 OK | gen=37.5s tok=2201 | ETA 2395s
+  [79/164] HumanEval/78 OK | gen=17.6s tok=1021 | ETA 2356s
+  [80/164] HumanEval/79 OK | gen=8.1s tok=469 | ETA 2308s
+  [81/164] HumanEval/80 OK | gen=18.3s tok=1065 | ETA 2271s
+  [82/164] HumanEval/81 NO_CODE | gen=82.5s tok=4800 | ETA 2299s
+  [83/164] HumanEval/82 OK | gen=13.8s tok=807 | ETA 2257s
+  [84/164] HumanEval/83 OK | gen=56.4s tok=3292 | ETA 2256s
+  [85/164] HumanEval/84 OK | gen=33.2s tok=1913 | ETA 2233s
+  [86/164] HumanEval/85 OK | gen=10.0s tok=581 | ETA 2188s
+  [87/164] HumanEval/86 OK | gen=11.7s tok=682 | ETA 2145s
+  [88/164] HumanEval/87 OK | gen=28.3s tok=1649 | ETA 2118s
+  [89/164] HumanEval/88 OK | gen=15.8s tok=921 | ETA 2080s
+  [90/164] HumanEval/89 OK | gen=57.0s tok=3311 | ETA 2076s
+  [91/164] HumanEval/90 OK | gen=23.4s tok=1353 | ETA 2044s
+  [92/164] HumanEval/91 OK | gen=56.3s tok=3286 | ETA 2038s
+  [93/164] HumanEval/92 OK | gen=33.2s tok=1934 | ETA 2014s
+  [94/164] HumanEval/93 OK | gen=40.1s tok=2326 | ETA 1994s
+  [95/164] HumanEval/94 OK | gen=33.0s tok=1934 | ETA 1969s
+  [96/164] HumanEval/95 NO_CODE | gen=82.4s tok=4800 | ETA 1979s
+  [97/164] HumanEval/96 OK | gen=32.9s tok=1927 | ETA 1952s
+  [98/164] HumanEval/97 OK | gen=12.2s tok=708 | ETA 1912s
+  [99/164] HumanEval/98 OK | gen=18.1s tok=1055 | ETA 1875s
+  [100/164] HumanEval/99 OK | gen=55.1s tok=3216 | ETA 1863s
+  [101/164] HumanEval/100 OK | gen=13.8s tok=799 | ETA 1825s
+  [102/164] HumanEval/101 OK | gen=15.3s tok=883 | ETA 1787s
+  [103/164] HumanEval/102 OK | gen=21.5s tok=1252 | ETA 1754s
+  [104/164] HumanEval/103 OK | gen=57.2s tok=3350 | ETA 1742s
+  [105/164] HumanEval/104 OK | gen=19.6s tok=1137 | ETA 1708s
+  [106/164] HumanEval/105 OK | gen=24.2s tok=1413 | ETA 1676s
+  [107/164] HumanEval/106 OK | gen=15.3s tok=879 | ETA 1640s
+  [108/164] HumanEval/107 OK | gen=15.4s tok=887 | ETA 1604s
+  [109/164] HumanEval/108 OK | gen=45.8s tok=2630 | ETA 1584s
+  [110/164] HumanEval/109 NO_CODE | gen=82.6s tok=4800 | ETA 1582s
+  [111/164] HumanEval/110 OK | gen=23.7s tok=1371 | ETA 1550s
+  [112/164] HumanEval/111 OK | gen=17.6s tok=1021 | ETA 1515s
+  [113/164] HumanEval/112 OK | gen=16.2s tok=946 | ETA 1480s
+  [114/164] HumanEval/113 OK | gen=45.3s tok=2639 | ETA 1458s
+  [115/164] HumanEval/114 OK | gen=20.1s tok=1174 | ETA 1425s
+  [116/164] HumanEval/115 OK | gen=24.3s tok=1408 | ETA 1394s
+  [117/164] HumanEval/116 NO_CODE | gen=83.2s tok=4800 | ETA 1387s
+  [118/164] HumanEval/117 OK | gen=76.9s tok=4427 | ETA 1376s
+  [119/164] HumanEval/118 NO_CODE | gen=82.8s tok=4800 | ETA 1366s
+  [120/164] HumanEval/119 NO_CODE | gen=83.3s tok=4800 | ETA 1355s
+  [121/164] HumanEval/120 OK | gen=17.8s tok=1030 | ETA 1320s
+  [122/164] HumanEval/121 OK | gen=10.4s tok=599 | ETA 1282s
+  [123/164] HumanEval/122 OK | gen=25.0s tok=1438 | ETA 1250s
+  [124/164] HumanEval/123 OK | gen=35.4s tok=2040 | ETA 1221s
+  [125/164] HumanEval/124 NO_CODE | gen=82.7s tok=4800 | ETA 1207s
+  [126/164] HumanEval/125 OK | gen=28.3s tok=1643 | ETA 1175s
+  [127/164] HumanEval/126 OK | gen=39.0s tok=2259 | ETA 1146s
+  [128/164] HumanEval/127 OK | gen=32.5s tok=1864 | ETA 1116s
+  [129/164] HumanEval/128 OK | gen=22.9s tok=1318 | ETA 1082s
+  [130/164] HumanEval/129 OK | gen=68.7s tok=3989 | ETA 1061s
+  [131/164] HumanEval/130 NO_CODE | gen=84.1s tok=4800 | ETA 1044s
+  [132/164] HumanEval/131 OK | gen=49.1s tok=2834 | ETA 1016s
+  [133/164] HumanEval/132 NO_CODE | gen=83.0s tok=4800 | ETA 996s
+  [134/164] HumanEval/133 OK | gen=14.6s tok=843 | ETA 960s
+  [135/164] HumanEval/134 NO_CODE | gen=82.7s tok=4800 | ETA 939s
+  [136/164] HumanEval/135 OK | gen=27.0s tok=1558 | ETA 906s
+  [137/164] HumanEval/136 OK | gen=13.9s tok=808 | ETA 870s
+  [138/164] HumanEval/137 OK | gen=28.2s tok=1623 | ETA 837s
+  [139/164] HumanEval/138 OK | gen=17.6s tok=1016 | ETA 802s
+  [140/164] HumanEval/139 OK | gen=28.5s tok=1656 | ETA 769s
+  [141/164] HumanEval/140 NO_CODE | gen=83.0s tok=4800 | ETA 745s
+  [142/164] HumanEval/141 OK | gen=33.6s tok=1940 | ETA 713s
+  [143/164] HumanEval/142 OK | gen=22.2s tok=1283 | ETA 679s
+  [144/164] HumanEval/143 OK | gen=29.2s tok=1698 | ETA 647s
+  [145/164] HumanEval/144 OK | gen=17.6s tok=1028 | ETA 612s
+  [146/164] HumanEval/145 NO_CODE | gen=82.4s tok=4800 | ETA 586s
+  [147/164] HumanEval/146 OK | gen=40.3s tok=2236 | ETA 555s
+  [148/164] HumanEval/147 NO_CODE | gen=84.5s tok=4800 | ETA 528s
+  [149/164] HumanEval/148 OK | gen=35.3s tok=2036 | ETA 495s
+  [150/164] HumanEval/149 OK | gen=26.3s tok=1523 | ETA 461s
+  [151/164] HumanEval/150 OK | gen=16.8s tok=964 | ETA 427s
+  [152/164] HumanEval/151 OK | gen=24.6s tok=1419 | ETA 393s
+  [153/164] HumanEval/152 OK | gen=10.0s tok=569 | ETA 359s
+  [154/164] HumanEval/153 OK | gen=63.7s tok=3642 | ETA 328s
+  [155/164] HumanEval/154 NO_CODE | gen=83.5s tok=4800 | ETA 298s
+  [156/164] HumanEval/155 OK | gen=11.2s tok=647 | ETA 264s
+  [157/164] HumanEval/156 OK | gen=35.5s tok=2057 | ETA 231s
+  [158/164] HumanEval/157 OK | gen=20.7s tok=1199 | ETA 198s
+  [159/164] HumanEval/158 OK | gen=32.9s tok=1895 | ETA 165s
+  [160/164] HumanEval/159 OK | gen=19.2s tok=1099 | ETA 131s
+  [161/164] HumanEval/160 OK | gen=37.7s tok=2166 | ETA 99s
+  [162/164] HumanEval/161 OK | gen=33.3s tok=1925 | ETA 66s
+  [163/164] HumanEval/162 OK | gen=10.9s tok=595 | ETA 33s
+  [164/164] HumanEval/163 NO_CODE | gen=89.3s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_mt_step300.jsonl (耗时 5430.6s)
+  统计: extract_ok=141 fail=23
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_mt_step300.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.720
+humaneval+ (base + extra tests)
+pass@1:	0.677
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.16it/s]
+164it [00:00, 188.10it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:37
+ 10%| | 16/164 [00:00<00:0
+ 14%|▏| 23/164 [00:00<00:0
+ 17%|▏| 28/164 [00:00<00:0
+ 55%|▌| 91/164 [00:01<00:0
+ 71%|▋| 116/164 [00:01<00:
+ 82%|▊| 134/164 [00:02<00:
+ 96%|▉| 158/164 [00:02<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=mt_step300)
+============================================================
+  humaneval: {'pass@1': 0.677}
+
+汇总已保存: eval_results_v2/summary_mt_step300.json
+<<<<< 多轮训练 step300 完成 <<<<<
+
+>>>>> 单轮训练 step100 | tag=st_step100 | path=/root/autodl-tmp/hf_models/step100 >>>>>
+加载模型: /root/autodl-tmp/hf_models/step100
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=st_step100)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=26.5s tok=1468 | ETA 4333s
+  [2/164] HumanEval/1 NO_CODE | gen=81.7s tok=4800 | ETA 8770s
+  [3/164] HumanEval/2 OK | gen=23.6s tok=1418 | ETA 7078s
+  [4/164] HumanEval/3 OK | gen=17.0s tok=1012 | ETA 5955s
+  [5/164] HumanEval/4 OK | gen=17.7s tok=1054 | ETA 5296s
+  [6/164] HumanEval/5 OK | gen=17.7s tok=1057 | ETA 4852s
+  [7/164] HumanEval/6 OK | gen=28.2s tok=1690 | ETA 4765s
+  [8/164] HumanEval/7 OK | gen=19.1s tok=1147 | ETA 4516s
+  [9/164] HumanEval/8 OK | gen=12.5s tok=750 | ETA 4203s
+  [10/164] HumanEval/9 OK | gen=25.7s tok=1537 | ETA 4154s
+  [11/164] HumanEval/10 OK | gen=26.4s tok=1558 | ETA 4119s
+  [12/164] HumanEval/11 OK | gen=20.0s tok=1175 | ETA 4004s
+  [13/164] HumanEval/12 OK | gen=21.6s tok=1294 | ETA 3923s
+  [14/164] HumanEval/13 OK | gen=21.1s tok=1265 | ETA 3845s
+  [15/164] HumanEval/14 OK | gen=11.9s tok=711 | ETA 3684s
+  [16/164] HumanEval/15 OK | gen=33.7s tok=2013 | ETA 3742s
+  [17/164] HumanEval/16 OK | gen=8.4s tok=500 | ETA 3571s
+  [18/164] HumanEval/17 OK | gen=20.9s tok=1250 | ETA 3519s
+  [19/164] HumanEval/18 OK | gen=32.1s tok=1928 | ETA 3556s
+  [20/164] HumanEval/19 OK | gen=22.0s tok=1326 | ETA 3514s
+  [21/164] HumanEval/20 OK | gen=66.8s tok=3998 | ETA 3778s
+  [22/164] HumanEval/21 OK | gen=19.6s tok=1128 | ETA 3708s
+  [23/164] HumanEval/22 OK | gen=18.8s tok=1096 | ETA 3637s
+  [24/164] HumanEval/23 OK | gen=5.9s tok=330 | ETA 3495s
+  [25/164] HumanEval/24 OK | gen=35.8s tok=2093 | ETA 3530s
+  [26/164] HumanEval/25 OK | gen=37.6s tok=2243 | ETA 3569s
+  [27/164] HumanEval/26 NO_CODE | gen=80.4s tok=4800 | ETA 3820s
+  [28/164] HumanEval/27 OK | gen=15.9s tok=913 | ETA 3734s
+  [29/164] HumanEval/28 OK | gen=7.1s tok=425 | ETA 3612s
+  [30/164] HumanEval/29 OK | gen=12.2s tok=727 | ETA 3520s
+  [31/164] HumanEval/30 OK | gen=13.4s tok=804 | ETA 3439s
+  [32/164] HumanEval/31 OK | gen=20.9s tok=1260 | ETA 3393s
+  [33/164] HumanEval/32 NO_CODE | gen=81.7s tok=4800 | ETA 3589s
+  [34/164] HumanEval/33 OK | gen=36.6s tok=2164 | ETA 3597s
+  [35/164] HumanEval/34 NO_CODE | gen=81.0s tok=4800 | ETA 3766s
+  [36/164] HumanEval/35 OK | gen=27.6s tok=1651 | ETA 3731s
+  [37/164] HumanEval/36 OK | gen=38.7s tok=2295 | ETA 3735s
+  [38/164] HumanEval/37 OK | gen=25.0s tok=1490 | ETA 3691s
+  [39/164] HumanEval/38 OK | gen=40.0s tok=2389 | ETA 3695s
+  [40/164] HumanEval/39 NO_CODE | gen=80.8s tok=4800 | ETA 3825s
+  [41/164] HumanEval/40 NO_CODE | gen=80.3s tok=4800 | ETA 3942s
+  [42/164] HumanEval/41 NO_CODE | gen=79.3s tok=4800 | ETA 4047s
+  [43/164] HumanEval/42 OK | gen=10.2s tok=619 | ETA 3950s
+  [44/164] HumanEval/43 NO_CODE | gen=79.0s tok=4800 | ETA 4043s
+  [45/164] HumanEval/44 OK | gen=24.7s tok=1480 | ETA 3986s
+  [46/164] HumanEval/45 OK | gen=7.2s tok=431 | ETA 3885s
+  [47/164] HumanEval/46 NO_CODE | gen=80.0s tok=4800 | ETA 3969s
+  [48/164] HumanEval/47 OK | gen=50.7s tok=3020 | ETA 3976s
+  [49/164] HumanEval/48 OK | gen=9.5s tok=560 | ETA 3884s
+  [50/164] HumanEval/49 OK | gen=34.3s tok=2043 | ETA 3851s
+  [51/164] HumanEval/50 OK | gen=53.2s tok=3207 | ETA 3860s
+  [52/164] HumanEval/51 OK | gen=15.6s tok=945 | ETA 3786s
+  [53/164] HumanEval/52 OK | gen=10.1s tok=609 | ETA 3703s
+  [54/164] HumanEval/53 OK | gen=11.9s tok=676 | ETA 3626s
+  [55/164] HumanEval/54 OK | gen=15.9s tok=950 | ETA 3559s
+  [56/164] HumanEval/55 OK | gen=21.9s tok=1258 | ETA 3506s
+  [57/164] HumanEval/56 OK | gen=19.1s tok=1149 | ETA 3448s
+  [58/164] HumanEval/57 OK | gen=31.2s tok=1880 | ETA 3414s
+  [59/164] HumanEval/58 OK | gen=14.7s tok=885 | ETA 3351s
+  [60/164] HumanEval/59 OK | gen=53.4s tok=3180 | ETA 3356s
+  [61/164] HumanEval/60 OK | gen=12.2s tok=727 | ETA 3290s
+  [62/164] HumanEval/61 OK | gen=16.8s tok=1006 | ETA 3233s
+  [63/164] HumanEval/62 OK | gen=53.5s tok=3215 | ETA 3237s
+  [64/164] HumanEval/63 OK | gen=39.9s tok=2380 | ETA 3217s
+  [65/164] HumanEval/64 OK | gen=28.5s tok=1723 | ETA 3179s
+  [66/164] HumanEval/65 OK | gen=30.7s tok=1831 | ETA 3145s
+  [67/164] HumanEval/66 OK | gen=11.1s tok=669 | ETA 3082s
+  [68/164] HumanEval/67 OK | gen=23.7s tok=1432 | ETA 3039s
+  [69/164] HumanEval/68 OK | gen=27.6s tok=1661 | ETA 3002s
+  [70/164] HumanEval/69 OK | gen=38.5s tok=2233 | ETA 2980s
+  [71/164] HumanEval/70 OK | gen=51.2s tok=3073 | ETA 2973s
+  [72/164] HumanEval/71 OK | gen=37.0s tok=2217 | ETA 2948s
+  [73/164] HumanEval/72 OK | gen=23.5s tok=1415 | ETA 2905s
+  [74/164] HumanEval/73 OK | gen=27.4s tok=1646 | ETA 2868s
+  [75/164] HumanEval/74 OK | gen=22.9s tok=1367 | ETA 2825s
+  [76/164] HumanEval/75 OK | gen=36.8s tok=2174 | ETA 2799s
+  [77/164] HumanEval/76 NO_CODE | gen=80.5s tok=4800 | ETA 2823s
+  [78/164] HumanEval/77 NO_CODE | gen=80.6s tok=4800 | ETA 2843s
+  [79/164] HumanEval/78 OK | gen=19.6s tok=1170 | ETA 2796s
+  [80/164] HumanEval/79 OK | gen=20.3s tok=1214 | ETA 2750s
+  [81/164] HumanEval/80 OK | gen=21.1s tok=1261 | ETA 2705s
+  [82/164] HumanEval/81 NO_CODE | gen=81.9s tok=4800 | ETA 2722s
+  [83/164] HumanEval/82 OK | gen=25.7s tok=1520 | ETA 2681s
+  [84/164] HumanEval/83 OK | gen=42.0s tok=2482 | ETA 2657s
+  [85/164] HumanEval/84 OK | gen=71.8s tok=4238 | ETA 2659s
+  [86/164] HumanEval/85 OK | gen=17.0s tok=1010 | ETA 2610s
+  [87/164] HumanEval/86 OK | gen=15.8s tok=950 | ETA 2561s
+  [88/164] HumanEval/87 OK | gen=29.9s tok=1793 | ETA 2525s
+  [89/164] HumanEval/88 OK | gen=21.6s tok=1282 | ETA 2482s
+  [90/164] HumanEval/89 OK | gen=34.8s tok=2034 | ETA 2450s
+  [91/164] HumanEval/90 OK | gen=26.1s tok=1526 | ETA 2412s
+  [92/164] HumanEval/91 OK | gen=62.8s tok=3717 | ETA 2402s
+  [93/164] HumanEval/92 NO_CODE | gen=81.4s tok=4800 | ETA 2405s
+  [94/164] HumanEval/93 OK | gen=63.0s tok=3722 | ETA 2393s
+  [95/164] HumanEval/94 OK | gen=49.5s tok=2859 | ETA 2370s
+  [96/164] HumanEval/95 OK | gen=76.5s tok=4491 | ETA 2366s
+  [97/164] HumanEval/96 OK | gen=46.1s tok=2754 | ETA 2339s
+  [98/164] HumanEval/97 OK | gen=12.1s tok=725 | ETA 2288s
+  [99/164] HumanEval/98 OK | gen=25.5s tok=1410 | ETA 2248s
+  [100/164] HumanEval/99 OK | gen=68.3s tok=4040 | ETA 2235s
+  [101/164] HumanEval/100 OK | gen=14.9s tok=880 | ETA 2187s
+  [102/164] HumanEval/101 OK | gen=75.0s tok=4431 | ETA 2177s
+  [103/164] HumanEval/102 NO_CODE | gen=81.5s tok=4800 | ETA 2169s
+  [104/164] HumanEval/103 OK | gen=30.8s tok=1819 | ETA 2131s
+  [105/164] HumanEval/104 OK | gen=32.5s tok=1916 | ETA 2094s
+  [106/164] HumanEval/105 OK | gen=33.7s tok=1982 | ETA 2057s
+  [107/164] HumanEval/106 OK | gen=31.9s tok=1877 | ETA 2020s
+  [108/164] HumanEval/107 NO_CODE | gen=81.4s tok=4800 | ETA 2008s
+  [109/164] HumanEval/108 OK | gen=30.4s tok=1813 | ETA 1970s
+  [110/164] HumanEval/109 NO_CODE | gen=80.4s tok=4800 | ETA 1956s
+  [111/164] HumanEval/110 OK | gen=24.5s tok=1468 | ETA 1914s
+  [112/164] HumanEval/111 OK | gen=23.0s tok=1375 | ETA 1872s
+  [113/164] HumanEval/112 OK | gen=70.0s tok=4142 | ETA 1851s
+  [114/164] HumanEval/113 NO_CODE | gen=79.8s tok=4800 | ETA 1834s
+  [115/164] HumanEval/114 NO_CODE | gen=79.3s tok=4800 | ETA 1815s
+  [116/164] HumanEval/115 OK | gen=26.7s tok=1618 | ETA 1774s
+  [117/164] HumanEval/116 NO_CODE | gen=79.5s tok=4800 | ETA 1754s
+  [118/164] HumanEval/117 OK | gen=55.7s tok=3221 | ETA 1724s
+  [119/164] HumanEval/118 OK | gen=47.8s tok=2810 | ETA 1690s
+  [120/164] HumanEval/119 OK | gen=45.3s tok=2641 | ETA 1656s
+  [121/164] HumanEval/120 OK | gen=26.0s tok=1522 | ETA 1614s
+  [122/164] HumanEval/121 OK | gen=16.6s tok=975 | ETA 1569s
+  [123/164] HumanEval/122 OK | gen=29.1s tok=1696 | ETA 1529s
+  [124/164] HumanEval/123 OK | gen=31.1s tok=1816 | ETA 1490s
+  [125/164] HumanEval/124 NO_CODE | gen=81.4s tok=4800 | ETA 1466s
+  [126/164] HumanEval/125 OK | gen=51.5s tok=3109 | ETA 1433s
+  [127/164] HumanEval/126 OK | gen=45.3s tok=2724 | ETA 1397s
+  [128/164] HumanEval/127 OK | gen=47.6s tok=2757 | ETA 1362s
+  [129/164] HumanEval/128 OK | gen=24.0s tok=1436 | ETA 1321s
+  [130/164] HumanEval/129 NO_CODE | gen=80.3s tok=4800 | ETA 1294s
+  [131/164] HumanEval/130 NO_CODE | gen=81.0s tok=4800 | ETA 1267s
+  [132/164] HumanEval/131 OK | gen=50.0s tok=2805 | ETA 1231s
+  [133/164] HumanEval/132 NO_CODE | gen=85.2s tok=4800 | ETA 1204s
+  [134/164] HumanEval/133 OK | gen=27.2s tok=1519 | ETA 1162s
+  [135/164] HumanEval/134 NO_CODE | gen=84.4s tok=4800 | ETA 1133s
+  [136/164] HumanEval/135 OK | gen=25.3s tok=1480 | ETA 1092s
+  [137/164] HumanEval/136 OK | gen=16.5s tok=946 | ETA 1048s
+  [138/164] HumanEval/137 OK | gen=84.5s tok=4800 | ETA 1018s
+  [139/164] HumanEval/138 OK | gen=22.9s tok=1333 | ETA 976s
+  [140/164] HumanEval/139 OK | gen=21.2s tok=1215 | ETA 934s
+  [141/164] HumanEval/140 OK | gen=82.4s tok=4800 | ETA 902s
+  [142/164] HumanEval/141 OK | gen=44.9s tok=2539 | ETA 864s
+  [143/164] HumanEval/142 OK | gen=26.7s tok=1575 | ETA 822s
+  [144/164] HumanEval/143 OK | gen=35.0s tok=2007 | ETA 783s
+  [145/164] HumanEval/144 OK | gen=30.7s tok=1808 | ETA 742s
+  [146/164] HumanEval/145 NO_CODE | gen=81.9s tok=4800 | ETA 709s
+  [147/164] HumanEval/146 OK | gen=38.3s tok=2266 | ETA 669s
+  [148/164] HumanEval/147 OK | gen=80.8s tok=4800 | ETA 634s
+  [149/164] HumanEval/148 OK | gen=45.1s tok=2688 | ETA 595s
+  [150/164] HumanEval/149 OK | gen=51.6s tok=3081 | ETA 557s
+  [151/164] HumanEval/150 OK | gen=18.8s tok=1088 | ETA 515s
+  [152/164] HumanEval/151 OK | gen=33.3s tok=1803 | ETA 475s
+  [153/164] HumanEval/152 OK | gen=14.2s tok=731 | ETA 434s
+  [154/164] HumanEval/153 OK | gen=88.6s tok=4788 | ETA 397s
+  [155/164] HumanEval/154 NO_CODE | gen=90.0s tok=4800 | ETA 361s
+  [156/164] HumanEval/155 OK | gen=16.1s tok=851 | ETA 319s
+  [157/164] HumanEval/156 OK | gen=31.5s tok=1673 | ETA 279s
+  [158/164] HumanEval/157 OK | gen=28.8s tok=1561 | ETA 239s
+  [159/164] HumanEval/158 OK | gen=32.8s tok=1851 | ETA 199s
+  [160/164] HumanEval/159 OK | gen=25.1s tok=1350 | ETA 159s
+  [161/164] HumanEval/160 OK | gen=45.5s tok=2469 | ETA 119s
+  [162/164] HumanEval/161 OK | gen=24.6s tok=1329 | ETA 79s
+  [163/164] HumanEval/162 OK | gen=11.1s tok=608 | ETA 39s
+  [164/164] HumanEval/163 NO_CODE | gen=89.5s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_st_step100.jsonl (耗时 6513.8s)
+  统计: extract_ok=137 fail=27
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_st_step100.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.726
+humaneval+ (base + extra tests)
+pass@1:	0.665
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.10it/s]
+164it [00:00, 178.13it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:36
+ 10%| | 16/164 [00:00<00:0
+ 34%|▎| 55/164 [00:00<00:0
+ 51%|▌| 84/164 [00:01<00:0
+ 77%|▊| 127/164 [00:01<00:
+ 97%|▉| 159/164 [00:01<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=st_step100)
+============================================================
+  humaneval: {'pass@1': 0.665}
+
+汇总已保存: eval_results_v2/summary_st_step100.json
+<<<<< 单轮训练 step100 完成 <<<<<
+
+>>>>> 单轮训练 step150 | tag=st_step150 | path=/root/autodl-tmp/hf_models/step150 >>>>>
+加载模型: /root/autodl-tmp/hf_models/step150
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=st_step150)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=43.1s tok=2315 | ETA 7026s
+  [2/164] HumanEval/1 OK | gen=40.4s tok=2043 | ETA 6764s
+  [3/164] HumanEval/2 OK | gen=18.0s tok=949 | ETA 5447s
+  [4/164] HumanEval/3 OK | gen=13.2s tok=734 | ETA 4587s
+  [5/164] HumanEval/4 OK | gen=21.3s tok=1131 | ETA 4323s
+  [6/164] HumanEval/5 OK | gen=20.8s tok=1114 | ETA 4127s
+  [7/164] HumanEval/6 OK | gen=26.7s tok=1467 | ETA 4114s
+  [8/164] HumanEval/7 OK | gen=14.3s tok=784 | ETA 3855s
+  [9/164] HumanEval/8 OK | gen=29.0s tok=1525 | ETA 3904s
+  [10/164] HumanEval/9 OK | gen=23.3s tok=1298 | ETA 3849s
+  [11/164] HumanEval/10 OK | gen=35.6s tok=1950 | ETA 3972s
+  [12/164] HumanEval/11 OK | gen=21.3s tok=1116 | ETA 3887s
+  [13/164] HumanEval/12 OK | gen=20.5s tok=1095 | ETA 3803s
+  [14/164] HumanEval/13 OK | gen=23.7s tok=1324 | ETA 3762s
+  [15/164] HumanEval/14 OK | gen=21.1s tok=1032 | ETA 3698s
+  [16/164] HumanEval/15 OK | gen=14.7s tok=802 | ETA 3579s
+  [17/164] HumanEval/16 OK | gen=10.7s tok=593 | ETA 3439s
+  [18/164] HumanEval/17 NO_CODE | gen=90.2s tok=4800 | ETA 3957s
+  [19/164] HumanEval/18 OK | gen=37.0s tok=1944 | ETA 4005s
+  [20/164] HumanEval/19 OK | gen=23.3s tok=1201 | ETA 3946s
+  [21/164] HumanEval/20 OK | gen=39.4s tok=2182 | ETA 4000s
+  [22/164] HumanEval/21 OK | gen=16.8s tok=874 | ETA 3900s
+  [23/164] HumanEval/22 OK | gen=29.2s tok=1501 | ETA 3884s
+  [24/164] HumanEval/23 OK | gen=6.2s tok=348 | ETA 3731s
+  [25/164] HumanEval/24 OK | gen=30.7s tok=1689 | ETA 3727s
+  [26/164] HumanEval/25 OK | gen=55.5s tok=2862 | ETA 3853s
+  [27/164] HumanEval/26 NO_CODE | gen=89.9s tok=4800 | ETA 4139s
+  [28/164] HumanEval/27 OK | gen=13.6s tok=765 | ETA 4028s
+  [29/164] HumanEval/28 OK | gen=8.2s tok=465 | ETA 3899s
+  [30/164] HumanEval/29 OK | gen=12.9s tok=729 | ETA 3799s
+  [31/164] HumanEval/30 OK | gen=12.8s tok=717 | ETA 3704s
+  [32/164] HumanEval/31 OK | gen=32.5s tok=1838 | ETA 3695s
+  [33/164] HumanEval/32 NO_CODE | gen=83.9s tok=4800 | ETA 3889s
+  [34/164] HumanEval/33 OK | gen=39.2s tok=2234 | ETA 3895s
+  [35/164] HumanEval/34 OK | gen=43.1s tok=2408 | ETA 3914s
+  [36/164] HumanEval/35 OK | gen=15.7s tok=900 | ETA 3831s
+  [37/164] HumanEval/36 OK | gen=46.6s tok=2658 | ETA 3858s
+  [38/164] HumanEval/37 OK | gen=29.4s tok=1686 | ETA 3825s
+  [39/164] HumanEval/38 OK | gen=70.3s tok=3972 | ETA 3923s
+  [40/164] HumanEval/39 OK | gen=47.6s tok=2606 | ETA 3941s
+  [41/164] HumanEval/40 NO_CODE | gen=88.0s tok=4800 | ETA 4078s
+  [42/164] HumanEval/41 OK | gen=33.0s tok=1736 | ETA 4045s
+  [43/164] HumanEval/42 OK | gen=11.6s tok=639 | ETA 3951s
+  [44/164] HumanEval/43 OK | gen=48.7s tok=2460 | ETA 3962s
+  [45/164] HumanEval/44 OK | gen=32.0s tok=1730 | ETA 3926s
+  [46/164] HumanEval/45 OK | gen=11.5s tok=568 | ETA 3838s
+  [47/164] HumanEval/46 OK | gen=94.6s tok=4800 | ETA 3960s
+  [48/164] HumanEval/47 NO_CODE | gen=91.3s tok=4800 | ETA 4065s
+  [49/164] HumanEval/48 OK | gen=12.8s tok=681 | ETA 3978s
+  [50/164] HumanEval/49 OK | gen=48.7s tok=2469 | ETA 3976s
+  [51/164] HumanEval/50 OK | gen=39.4s tok=1911 | ETA 3951s
+  [52/164] HumanEval/51 OK | gen=24.8s tok=1191 | ETA 3894s
+  [53/164] HumanEval/52 OK | gen=13.8s tok=604 | ETA 3815s
+  [54/164] HumanEval/53 OK | gen=8.6s tok=406 | ETA 3728s
+  [55/164] HumanEval/54 OK | gen=25.4s tok=1377 | ETA 3678s
+  [56/164] HumanEval/55 OK | gen=26.9s tok=1460 | ETA 3631s
+  [57/164] HumanEval/56 OK | gen=20.1s tok=982 | ETA 3572s
+  [58/164] HumanEval/57 OK | gen=40.7s tok=2080 | ETA 3552s
+  [59/164] HumanEval/58 OK | gen=18.5s tok=1015 | ETA 3491s
+  [60/164] HumanEval/59 OK | gen=67.3s tok=3233 | ETA 3517s
+  [61/164] HumanEval/60 OK | gen=12.4s tok=633 | ETA 3447s
+  [62/164] HumanEval/61 OK | gen=21.1s tok=996 | ETA 3393s
+  [63/164] HumanEval/62 OK | gen=51.0s tok=2642 | ETA 3388s
+  [64/164] HumanEval/63 OK | gen=33.7s tok=1696 | ETA 3355s
+  [65/164] HumanEval/64 OK | gen=23.8s tok=1184 | ETA 3307s
+  [66/164] HumanEval/65 OK | gen=31.0s tok=1659 | ETA 3270s
+  [67/164] HumanEval/66 OK | gen=19.6s tok=962 | ETA 3216s
+  [68/164] HumanEval/67 OK | gen=21.5s tok=1181 | ETA 3167s
+  [69/164] HumanEval/68 OK | gen=42.7s tok=2294 | ETA 3147s
+  [70/164] HumanEval/69 OK | gen=33.1s tok=1682 | ETA 3114s
+  [71/164] HumanEval/70 OK | gen=37.0s tok=2018 | ETA 3086s
+  [72/164] HumanEval/71 OK | gen=37.1s tok=1981 | ETA 3058s
+  [73/164] HumanEval/72 OK | gen=22.3s tok=1229 | ETA 3011s
+  [74/164] HumanEval/73 OK | gen=31.5s tok=1716 | ETA 2976s
+  [75/164] HumanEval/74 OK | gen=20.7s tok=984 | ETA 2928s
+  [76/164] HumanEval/75 OK | gen=51.4s tok=2580 | ETA 2917s
+  [77/164] HumanEval/76 NO_CODE | gen=94.4s tok=4800 | ETA 2953s
+  [78/164] HumanEval/77 OK | gen=69.9s tok=3719 | ETA 2959s
+  [79/164] HumanEval/78 NO_CODE | gen=86.5s tok=4800 | ETA 2980s
+  [80/164] HumanEval/79 OK | gen=13.4s tok=754 | ETA 2922s
+  [81/164] HumanEval/80 OK | gen=24.0s tok=1278 | ETA 2876s
+  [82/164] HumanEval/81 NO_CODE | gen=85.9s tok=4800 | ETA 2893s
+  [83/164] HumanEval/82 OK | gen=28.5s tok=1587 | ETA 2851s
+  [84/164] HumanEval/83 OK | gen=41.7s tok=2306 | ETA 2822s
+  [85/164] HumanEval/84 NO_CODE | gen=92.9s tok=4800 | ETA 2840s
+  [86/164] HumanEval/85 OK | gen=21.1s tok=1165 | ETA 2791s
+  [87/164] HumanEval/86 OK | gen=21.2s tok=1062 | ETA 2742s
+  [88/164] HumanEval/87 OK | gen=33.4s tok=1749 | ETA 2705s
+  [89/164] HumanEval/88 OK | gen=21.5s tok=1140 | ETA 2657s
+  [90/164] HumanEval/89 OK | gen=27.6s tok=1464 | ETA 2616s
+  [91/164] HumanEval/90 OK | gen=28.3s tok=1484 | ETA 2575s
+  [92/164] HumanEval/91 OK | gen=79.7s tok=4272 | ETA 2574s
+  [93/164] HumanEval/92 OK | gen=56.4s tok=3027 | ETA 2554s
+  [94/164] HumanEval/93 NO_CODE | gen=86.1s tok=4800 | ETA 2555s
+  [95/164] HumanEval/94 NO_CODE | gen=86.6s tok=4800 | ETA 2555s
+  [96/164] HumanEval/95 OK | gen=68.8s tok=3936 | ETA 2541s
+  [97/164] HumanEval/96 OK | gen=38.4s tok=2201 | ETA 2504s
+  [98/164] HumanEval/97 OK | gen=13.0s tok=745 | ETA 2450s
+  [99/164] HumanEval/98 OK | gen=26.1s tok=1484 | ETA 2406s
+  [100/164] HumanEval/99 OK | gen=59.8s tok=3107 | ETA 2384s
+  [101/164] HumanEval/100 OK | gen=15.4s tok=850 | ETA 2333s
+  [102/164] HumanEval/101 OK | gen=45.3s tok=2459 | ETA 2301s
+  [103/164] HumanEval/102 OK | gen=32.5s tok=1850 | ETA 2261s
+  [104/164] HumanEval/103 OK | gen=27.1s tok=1494 | ETA 2218s
+  [105/164] HumanEval/104 OK | gen=28.4s tok=1605 | ETA 2176s
+  [106/164] HumanEval/105 OK | gen=42.9s tok=2448 | ETA 2143s
+  [107/164] HumanEval/106 OK | gen=25.7s tok=1487 | ETA 2100s
+  [108/164] HumanEval/107 OK | gen=30.8s tok=1767 | ETA 2060s
+  [109/164] HumanEval/108 NO_CODE | gen=84.6s tok=4800 | ETA 2047s
+  [110/164] HumanEval/109 NO_CODE | gen=84.7s tok=4800 | ETA 2033s
+  [111/164] HumanEval/110 OK | gen=34.6s tok=1961 | ETA 1994s
+  [112/164] HumanEval/111 OK | gen=32.8s tok=1880 | ETA 1954s
+  [113/164] HumanEval/112 OK | gen=19.3s tok=1112 | ETA 1908s
+  [114/164] HumanEval/113 OK | gen=41.9s tok=2318 | ETA 1873s
+  [115/164] HumanEval/114 OK | gen=30.9s tok=1740 | ETA 1833s
+  [116/164] HumanEval/115 OK | gen=28.1s tok=1579 | ETA 1791s
+  [117/164] HumanEval/116 NO_CODE | gen=84.7s tok=4800 | ETA 1773s
+  [118/164] HumanEval/117 OK | gen=50.7s tok=2837 | ETA 1740s
+  [119/164] HumanEval/118 OK | gen=50.9s tok=2938 | ETA 1708s
+  [120/164] HumanEval/119 OK | gen=69.6s tok=3945 | ETA 1681s
+  [121/164] HumanEval/120 OK | gen=24.3s tok=1366 | ETA 1638s
+  [122/164] HumanEval/121 OK | gen=20.2s tok=1104 | ETA 1594s
+  [123/164] HumanEval/122 OK | gen=29.7s tok=1704 | ETA 1553s
+  [124/164] HumanEval/123 OK | gen=33.3s tok=1917 | ETA 1514s
+  [125/164] HumanEval/124 NO_CODE | gen=83.9s tok=4800 | ETA 1490s
+  [126/164] HumanEval/125 OK | gen=32.6s tok=1874 | ETA 1450s
+  [127/164] HumanEval/126 NO_CODE | gen=84.0s tok=4800 | ETA 1426s
+  [128/164] HumanEval/127 OK | gen=70.3s tok=4074 | ETA 1396s
+  [129/164] HumanEval/128 OK | gen=27.3s tok=1588 | ETA 1354s
+  [130/164] HumanEval/129 NO_CODE | gen=82.8s tok=4800 | ETA 1327s
+  [131/164] HumanEval/130 NO_CODE | gen=90.5s tok=4800 | ETA 1301s
+  [132/164] HumanEval/131 OK | gen=19.7s tok=1045 | ETA 1257s
+  [133/164] HumanEval/132 NO_CODE | gen=91.2s tok=4800 | ETA 1230s
+  [134/164] HumanEval/133 OK | gen=22.7s tok=1210 | ETA 1186s
+  [135/164] HumanEval/134 NO_CODE | gen=90.1s tok=4800 | ETA 1157s
+  [136/164] HumanEval/135 OK | gen=22.8s tok=1220 | ETA 1114s
+  [137/164] HumanEval/136 OK | gen=19.2s tok=1031 | ETA 1070s
+  [138/164] HumanEval/137 NO_CODE | gen=90.6s tok=4800 | ETA 1040s
+  [139/164] HumanEval/138 OK | gen=26.9s tok=1447 | ETA 998s
+  [140/164] HumanEval/139 OK | gen=24.3s tok=1288 | ETA 955s
+  [141/164] HumanEval/140 OK | gen=35.1s tok=1878 | ETA 915s
+  [142/164] HumanEval/141 OK | gen=54.1s tok=2903 | ETA 877s
+  [143/164] HumanEval/142 NO_CODE | gen=90.1s tok=4800 | ETA 845s
+  [144/164] HumanEval/143 OK | gen=32.8s tok=1740 | ETA 803s
+  [145/164] HumanEval/144 OK | gen=27.7s tok=1496 | ETA 762s
+  [146/164] HumanEval/145 NO_CODE | gen=96.1s tok=4800 | ETA 728s
+  [147/164] HumanEval/146 OK | gen=51.9s tok=2529 | ETA 689s
+  [148/164] HumanEval/147 NO_CODE | gen=95.9s tok=4800 | ETA 655s
+  [149/164] HumanEval/148 OK | gen=43.9s tok=2239 | ETA 614s
+  [150/164] HumanEval/149 OK | gen=46.4s tok=2316 | ETA 574s
+  [151/164] HumanEval/150 OK | gen=34.5s tok=1622 | ETA 532s
+  [152/164] HumanEval/151 OK | gen=72.4s tok=3461 | ETA 494s
+  [153/164] HumanEval/152 OK | gen=13.6s tok=696 | ETA 451s
+  [154/164] HumanEval/153 OK | gen=68.8s tok=3371 | ETA 411s
+  [155/164] HumanEval/154 OK | gen=93.9s tok=4574 | ETA 373s
+  [156/164] HumanEval/155 OK | gen=17.1s tok=846 | ETA 331s
+  [157/164] HumanEval/156 OK | gen=38.9s tok=1979 | ETA 289s
+  [158/164] HumanEval/157 OK | gen=30.3s tok=1666 | ETA 247s
+  [159/164] HumanEval/158 OK | gen=45.0s tok=2215 | ETA 206s
+  [160/164] HumanEval/159 OK | gen=29.9s tok=1449 | ETA 165s
+  [161/164] HumanEval/160 OK | gen=73.8s tok=3747 | ETA 124s
+  [162/164] HumanEval/161 OK | gen=39.4s tok=2011 | ETA 83s
+  [163/164] HumanEval/162 OK | gen=11.7s tok=624 | ETA 41s
+  [164/164] HumanEval/163 NO_CODE | gen=90.2s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_st_step150.jsonl (耗时 6805.5s)
+  统计: extract_ok=139 fail=25
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_st_step150.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.738
+humaneval+ (base + extra tests)
+pass@1:	0.665
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.02it/s]
+164it [00:00, 166.29it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:39
+ 10%| | 16/164 [00:00<00:0
+ 13%|▏| 22/164 [00:00<00:0
+ 21%|▏| 34/164 [00:00<00:0
+ 58%|▌| 95/164 [00:01<00:0
+ 77%|▊| 127/164 [00:01<00:
+ 96%|▉| 158/164 [00:01<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=st_step150)
+============================================================
+  humaneval: {'pass@1': 0.665}
+
+汇总已保存: eval_results_v2/summary_st_step150.json
+<<<<< 单轮训练 step150 完成 <<<<<
+
+>>>>> 单轮训练 step200 | tag=st_step200 | path=/root/autodl-tmp/hf_models/step200 >>>>>
+加载模型: /root/autodl-tmp/hf_models/step200
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=st_step200)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=35.6s tok=1795 | ETA 5809s
+  [2/164] HumanEval/1 NO_CODE | gen=88.3s tok=4800 | ETA 10036s
+  [3/164] HumanEval/2 OK | gen=13.5s tok=737 | ETA 7376s
+  [4/164] HumanEval/3 OK | gen=14.7s tok=798 | ETA 6085s
+  [5/164] HumanEval/4 OK | gen=17.4s tok=937 | ETA 5391s
+  [6/164] HumanEval/5 OK | gen=22.1s tok=1193 | ETA 5045s
+  [7/164] HumanEval/6 NO_CODE | gen=90.8s tok=4800 | ETA 6334s
+  [8/164] HumanEval/7 OK | gen=14.2s tok=763 | ETA 5783s
+  [9/164] HumanEval/8 OK | gen=11.5s tok=616 | ETA 5306s
+  [10/164] HumanEval/9 OK | gen=22.0s tok=1194 | ETA 5083s
+  [11/164] HumanEval/10 OK | gen=41.5s tok=2181 | ETA 5168s
+  [12/164] HumanEval/11 OK | gen=21.3s tok=1150 | ETA 4976s
+  [13/164] HumanEval/12 OK | gen=22.4s tok=1202 | ETA 4823s
+  [14/164] HumanEval/13 OK | gen=17.7s tok=946 | ETA 4639s
+  [15/164] HumanEval/14 OK | gen=12.1s tok=625 | ETA 4422s
+  [16/164] HumanEval/15 OK | gen=18.4s tok=991 | ETA 4288s
+  [17/164] HumanEval/16 OK | gen=11.1s tok=593 | ETA 4104s
+  [18/164] HumanEval/17 OK | gen=27.0s tok=1336 | ETA 4069s
+  [19/164] HumanEval/18 OK | gen=40.2s tok=2159 | ETA 4135s
+  [20/164] HumanEval/19 OK | gen=25.0s tok=1341 | ETA 4082s
+  [21/164] HumanEval/20 NO_CODE | gen=90.9s tok=4800 | ETA 4479s
+  [22/164] HumanEval/21 OK | gen=26.6s tok=1402 | ETA 4417s
+  [23/164] HumanEval/22 OK | gen=34.5s tok=1831 | ETA 4407s
+  [24/164] HumanEval/23 OK | gen=7.3s tok=393 | ETA 4237s
+  [25/164] HumanEval/24 OK | gen=44.6s tok=2342 | ETA 4286s
+  [26/164] HumanEval/25 OK | gen=42.4s tok=2266 | ETA 4317s
+  [27/164] HumanEval/26 OK | gen=71.1s tok=3771 | ETA 4488s
+  [28/164] HumanEval/27 OK | gen=16.2s tok=884 | ETA 4375s
+  [29/164] HumanEval/28 OK | gen=8.5s tok=457 | ETA 4232s
+  [30/164] HumanEval/29 OK | gen=12.8s tok=690 | ETA 4118s
+  [31/164] HumanEval/30 OK | gen=14.4s tok=773 | ETA 4017s
+  [32/164] HumanEval/31 OK | gen=37.5s tok=2012 | ETA 4017s
+  [33/164] HumanEval/32 NO_CODE | gen=88.5s tok=4800 | ETA 4217s
+  [34/164] HumanEval/33 OK | gen=45.3s tok=2446 | ETA 4235s
+  [35/164] HumanEval/34 NO_CODE | gen=92.0s tok=4800 | ETA 4422s
+  [36/164] HumanEval/35 OK | gen=7.1s tok=390 | ETA 4291s
+  [37/164] HumanEval/36 OK | gen=58.1s tok=3150 | ETA 4341s
+  [38/164] HumanEval/37 OK | gen=27.1s tok=1477 | ETA 4284s
+  [39/164] HumanEval/38 OK | gen=49.3s tok=2682 | ETA 4299s
+  [40/164] HumanEval/39 OK | gen=57.7s tok=3103 | ETA 4337s
+  [41/164] HumanEval/40 OK | gen=78.3s tok=4180 | ETA 4432s
+  [42/164] HumanEval/41 OK | gen=50.0s tok=2639 | ETA 4437s
+  [43/164] HumanEval/42 OK | gen=10.2s tok=577 | ETA 4327s
+  [44/164] HumanEval/43 OK | gen=49.4s tok=2682 | ETA 4328s
+  [45/164] HumanEval/44 OK | gen=40.2s tok=2065 | ETA 4303s
+  [46/164] HumanEval/45 OK | gen=8.5s tok=476 | ETA 4196s
+  [47/164] HumanEval/46 NO_CODE | gen=88.2s tok=4800 | ETA 4291s
+  [48/164] HumanEval/47 NO_CODE | gen=87.5s tok=4800 | ETA 4377s
+  [49/164] HumanEval/48 OK | gen=15.1s tok=853 | ETA 4287s
+  [50/164] HumanEval/49 OK | gen=41.9s tok=2368 | ETA 4260s
+  [51/164] HumanEval/50 OK | gen=36.7s tok=2066 | ETA 4221s
+  [52/164] HumanEval/51 OK | gen=29.4s tok=1648 | ETA 4167s
+  [53/164] HumanEval/52 OK | gen=11.1s tok=615 | ETA 4075s
+  [54/164] HumanEval/53 OK | gen=9.7s tok=545 | ETA 3983s
+  [55/164] HumanEval/54 NO_CODE | gen=84.4s tok=4800 | ETA 4042s
+  [56/164] HumanEval/55 OK | gen=21.1s tok=1196 | ETA 3974s
+  [57/164] HumanEval/56 OK | gen=17.0s tok=962 | ETA 3900s
+  [58/164] HumanEval/57 OK | gen=24.2s tok=1377 | ETA 3842s
+  [59/164] HumanEval/58 OK | gen=19.1s tok=1076 | ETA 3775s
+  [60/164] HumanEval/59 OK | gen=62.8s tok=3433 | ETA 3786s
+  [61/164] HumanEval/60 OK | gen=10.9s tok=597 | ETA 3706s
+  [62/164] HumanEval/61 OK | gen=20.2s tok=1135 | ETA 3644s
+  [63/164] HumanEval/62 OK | gen=50.3s tok=2793 | ETA 3632s
+  [64/164] HumanEval/63 OK | gen=27.5s tok=1525 | ETA 3582s
+  [65/164] HumanEval/64 OK | gen=27.7s tok=1441 | ETA 3534s
+  [66/164] HumanEval/65 OK | gen=23.4s tok=1303 | ETA 3480s
+  [67/164] HumanEval/66 OK | gen=14.0s tok=784 | ETA 3414s
+  [68/164] HumanEval/67 OK | gen=21.8s tok=1214 | ETA 3360s
+  [69/164] HumanEval/68 OK | gen=25.3s tok=1399 | ETA 3311s
+  [70/164] HumanEval/69 OK | gen=36.3s tok=1947 | ETA 3278s
+  [71/164] HumanEval/70 OK | gen=44.5s tok=2501 | ETA 3256s
+  [72/164] HumanEval/71 OK | gen=37.2s tok=2086 | ETA 3224s
+  [73/164] HumanEval/72 OK | gen=15.7s tok=879 | ETA 3165s
+  [74/164] HumanEval/73 OK | gen=31.2s tok=1756 | ETA 3125s
+  [75/164] HumanEval/74 OK | gen=20.7s tok=1170 | ETA 3074s
+  [76/164] HumanEval/75 OK | gen=82.3s tok=4800 | ETA 3095s
+  [77/164] HumanEval/76 NO_CODE | gen=81.9s tok=4800 | ETA 3112s
+  [78/164] HumanEval/77 NO_CODE | gen=81.9s tok=4800 | ETA 3128s
+  [79/164] HumanEval/78 OK | gen=21.7s tok=1279 | ETA 3075s
+  [80/164] HumanEval/79 OK | gen=13.6s tok=814 | ETA 3015s
+  [81/164] HumanEval/80 OK | gen=21.7s tok=1282 | ETA 2965s
+  [82/164] HumanEval/81 NO_CODE | gen=81.4s tok=4800 | ETA 2975s
+  [83/164] HumanEval/82 OK | gen=28.0s tok=1653 | ETA 2931s
+  [84/164] HumanEval/83 OK | gen=29.6s tok=1746 | ETA 2888s
+  [85/164] HumanEval/84 NO_CODE | gen=81.7s tok=4800 | ETA 2894s
+  [86/164] HumanEval/85 OK | gen=13.1s tok=768 | ETA 2836s
+  [87/164] HumanEval/86 OK | gen=17.8s tok=1040 | ETA 2784s
+  [88/164] HumanEval/87 OK | gen=50.7s tok=2897 | ETA 2760s
+  [89/164] HumanEval/88 OK | gen=26.1s tok=1513 | ETA 2715s
+  [90/164] HumanEval/89 OK | gen=29.6s tok=1734 | ETA 2673s
+  [91/164] HumanEval/90 OK | gen=28.0s tok=1636 | ETA 2631s
+  [92/164] HumanEval/91 OK | gen=46.5s tok=2660 | ETA 2603s
+  [93/164] HumanEval/92 OK | gen=52.8s tok=3017 | ETA 2579s
+  [94/164] HumanEval/93 NO_CODE | gen=84.2s tok=4800 | ETA 2579s
+  [95/164] HumanEval/94 NO_CODE | gen=83.0s tok=4800 | ETA 2575s
+  [96/164] HumanEval/95 OK | gen=55.1s tok=3223 | ETA 2551s
+  [97/164] HumanEval/96 OK | gen=34.4s tok=1999 | ETA 2511s
+  [98/164] HumanEval/97 OK | gen=13.8s tok=813 | ETA 2458s
+  [99/164] HumanEval/98 OK | gen=18.2s tok=1056 | ETA 2408s
+  [100/164] HumanEval/99 OK | gen=57.8s tok=3410 | ETA 2384s
+  [101/164] HumanEval/100 OK | gen=15.1s tok=892 | ETA 2333s
+  [102/164] HumanEval/101 NO_CODE | gen=82.0s tok=4800 | ETA 2323s
+  [103/164] HumanEval/102 OK | gen=23.7s tok=1376 | ETA 2278s
+  [104/164] HumanEval/103 OK | gen=44.7s tok=2541 | ETA 2245s
+  [105/164] HumanEval/104 OK | gen=24.8s tok=1478 | ETA 2200s
+  [106/164] HumanEval/105 OK | gen=33.9s tok=1981 | ETA 2161s
+  [107/164] HumanEval/106 OK | gen=24.8s tok=1469 | ETA 2117s
+  [108/164] HumanEval/107 NO_CODE | gen=81.0s tok=4800 | ETA 2103s
+  [109/164] HumanEval/108 NO_CODE | gen=82.4s tok=4800 | ETA 2088s
+  [110/164] HumanEval/109 OK | gen=73.0s tok=4177 | ETA 2067s
+  [111/164] HumanEval/110 OK | gen=35.1s tok=1901 | ETA 2027s
+  [112/164] HumanEval/111 OK | gen=28.7s tok=1510 | ETA 1985s
+  [113/164] HumanEval/112 OK | gen=26.0s tok=1308 | ETA 1941s
+  [114/164] HumanEval/113 OK | gen=72.2s tok=3795 | ETA 1918s
+  [115/164] HumanEval/114 OK | gen=34.6s tok=1911 | ETA 1878s
+  [116/164] HumanEval/115 OK | gen=28.1s tok=1432 | ETA 1835s
+  [117/164] HumanEval/116 NO_CODE | gen=86.9s tok=4800 | ETA 1817s
+  [118/164] HumanEval/117 OK | gen=53.0s tok=2878 | ETA 1784s
+  [119/164] HumanEval/118 OK | gen=85.6s tok=4714 | ETA 1762s
+  [120/164] HumanEval/119 OK | gen=45.0s tok=2484 | ETA 1725s
+  [121/164] HumanEval/120 OK | gen=24.9s tok=1389 | ETA 1681s
+  [122/164] HumanEval/121 OK | gen=18.5s tok=1014 | ETA 1635s
+  [123/164] HumanEval/122 OK | gen=33.0s tok=1820 | ETA 1594s
+  [124/164] HumanEval/123 OK | gen=47.4s tok=2598 | ETA 1558s
+  [125/164] HumanEval/124 NO_CODE | gen=87.3s tok=4800 | ETA 1534s
+  [126/164] HumanEval/125 OK | gen=54.0s tok=2931 | ETA 1499s
+  [127/164] HumanEval/126 NO_CODE | gen=86.0s tok=4800 | ETA 1473s
+  [128/164] HumanEval/127 OK | gen=48.6s tok=2667 | ETA 1436s
+  [129/164] HumanEval/128 OK | gen=54.4s tok=2946 | ETA 1400s
+  [130/164] HumanEval/129 OK | gen=73.9s tok=3980 | ETA 1369s
+  [131/164] HumanEval/130 NO_CODE | gen=86.5s tok=4800 | ETA 1340s
+  [132/164] HumanEval/131 OK | gen=22.4s tok=1245 | ETA 1295s
+  [133/164] HumanEval/132 OK | gen=29.7s tok=1642 | ETA 1252s
+  [134/164] HumanEval/133 OK | gen=19.6s tok=1101 | ETA 1207s
+  [135/164] HumanEval/134 NO_CODE | gen=87.9s tok=4800 | ETA 1177s
+  [136/164] HumanEval/135 OK | gen=82.6s tok=4428 | ETA 1145s
+  [137/164] HumanEval/136 OK | gen=19.8s tok=1093 | ETA 1100s
+  [138/164] HumanEval/137 OK | gen=58.0s tok=3105 | ETA 1063s
+  [139/164] HumanEval/138 OK | gen=25.8s tok=1423 | ETA 1019s
+  [140/164] HumanEval/139 OK | gen=33.4s tok=1856 | ETA 977s
+  [141/164] HumanEval/140 NO_CODE | gen=86.9s tok=4800 | ETA 944s
+  [142/164] HumanEval/141 OK | gen=62.4s tok=3475 | ETA 906s
+  [143/164] HumanEval/142 OK | gen=26.1s tok=1430 | ETA 863s
+  [144/164] HumanEval/143 OK | gen=34.1s tok=1807 | ETA 821s
+  [145/164] HumanEval/144 OK | gen=24.1s tok=1343 | ETA 777s
+  [146/164] HumanEval/145 NO_CODE | gen=88.7s tok=4800 | ETA 742s
+  [147/164] HumanEval/146 OK | gen=49.5s tok=2740 | ETA 702s
+  [148/164] HumanEval/147 NO_CODE | gen=85.6s tok=4800 | ETA 666s
+  [149/164] HumanEval/148 OK | gen=34.9s tok=1957 | ETA 623s
+  [150/164] HumanEval/149 OK | gen=68.3s tok=3721 | ETA 584s
+  [151/164] HumanEval/150 OK | gen=26.6s tok=1566 | ETA 541s
+  [152/164] HumanEval/151 OK | gen=26.1s tok=1562 | ETA 498s
+  [153/164] HumanEval/152 OK | gen=12.7s tok=752 | ETA 455s
+  [154/164] HumanEval/153 OK | gen=38.8s tok=2299 | ETA 413s
+  [155/164] HumanEval/154 OK | gen=61.7s tok=3621 | ETA 373s
+  [156/164] HumanEval/155 OK | gen=13.6s tok=798 | ETA 330s
+  [157/164] HumanEval/156 OK | gen=32.0s tok=1897 | ETA 289s
+  [158/164] HumanEval/157 OK | gen=35.0s tok=2070 | ETA 247s
+  [159/164] HumanEval/158 OK | gen=44.1s tok=2636 | ETA 206s
+  [160/164] HumanEval/159 OK | gen=19.0s tok=1123 | ETA 164s
+  [161/164] HumanEval/160 OK | gen=69.9s tok=3935 | ETA 124s
+  [162/164] HumanEval/161 OK | gen=23.7s tok=1403 | ETA 82s
+  [163/164] HumanEval/162 OK | gen=13.9s tok=800 | ETA 41s
+  [164/164] HumanEval/163 NO_CODE | gen=83.7s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_st_step200.jsonl (耗时 6760.8s)
+  统计: extract_ok=138 fail=26
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_st_step200.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.744
+humaneval+ (base + extra tests)
+pass@1:	0.683
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.16it/s]
+164it [00:00, 188.24it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:37
+ 10%| | 16/164 [00:00<00:0
+ 14%|▏| 23/164 [00:00<00:0
+ 48%|▍| 79/164 [00:01<00:0
+ 63%|▋| 103/164 [00:01<00:
+ 77%|▊| 127/164 [00:01<00:
+ 87%|▊| 142/164 [00:02<00:
+ 98%|▉| 161/164 [00:02<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=st_step200)
+============================================================
+  humaneval: {'pass@1': 0.683}
+
+汇总已保存: eval_results_v2/summary_st_step200.json
+<<<<< 单轮训练 step200 完成 <<<<<
+
+>>>>> 单轮训练 step250 | tag=st_step250 | path=/root/autodl-tmp/hf_models/step250 >>>>>
+加载模型: /root/autodl-tmp/hf_models/step250
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=st_step250)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=57.0s tok=2895 | ETA 9307s
+  [2/164] HumanEval/1 NO_CODE | gen=91.1s tok=4800 | ETA 12006s
+  [3/164] HumanEval/2 OK | gen=19.0s tok=1021 | ETA 8976s
+  [4/164] HumanEval/3 OK | gen=12.7s tok=686 | ETA 7200s
+  [5/164] HumanEval/4 OK | gen=23.7s tok=1173 | ETA 6476s
+  [6/164] HumanEval/5 OK | gen=21.7s tok=1142 | ETA 5935s
+  [7/164] HumanEval/6 NO_CODE | gen=89.9s tok=4800 | ETA 7070s
+  [8/164] HumanEval/7 OK | gen=16.4s tok=877 | ETA 6467s
+  [9/164] HumanEval/8 OK | gen=18.5s tok=990 | ETA 6031s
+  [10/164] HumanEval/9 OK | gen=22.4s tok=1195 | ETA 5738s
+  [11/164] HumanEval/10 OK | gen=32.2s tok=1731 | ETA 5630s
+  [12/164] HumanEval/11 OK | gen=22.0s tok=1169 | ETA 5405s
+  [13/164] HumanEval/12 OK | gen=21.6s tok=1146 | ETA 5207s
+  [14/164] HumanEval/13 OK | gen=22.7s tok=1218 | ETA 5047s
+  [15/164] HumanEval/14 OK | gen=12.6s tok=667 | ETA 4804s
+  [16/164] HumanEval/15 OK | gen=12.0s tok=633 | ETA 4584s
+  [17/164] HumanEval/16 OK | gen=9.3s tok=490 | ETA 4366s
+  [18/164] HumanEval/17 NO_CODE | gen=89.9s tok=4800 | ETA 4825s
+  [19/164] HumanEval/18 OK | gen=41.3s tok=2217 | ETA 4855s
+  [20/164] HumanEval/19 OK | gen=30.9s tok=1642 | ETA 4802s
+  [21/164] HumanEval/20 OK | gen=75.5s tok=4006 | ETA 5056s
+  [22/164] HumanEval/21 OK | gen=23.5s tok=1240 | ETA 4944s
+  [23/164] HumanEval/22 OK | gen=33.1s tok=1757 | ETA 4899s
+  [24/164] HumanEval/23 OK | gen=8.0s tok=428 | ETA 4708s
+  [25/164] HumanEval/24 OK | gen=33.5s tok=1793 | ETA 4674s
+  [26/164] HumanEval/25 OK | gen=34.1s tok=1714 | ETA 4643s
+  [27/164] HumanEval/26 NO_CODE | gen=95.8s tok=4800 | ETA 4925s
+  [28/164] HumanEval/27 OK | gen=32.0s tok=1600 | ETA 4870s
+  [29/164] HumanEval/28 OK | gen=9.9s tok=515 | ETA 4714s
+  [30/164] HumanEval/29 OK | gen=17.6s tok=843 | ETA 4601s
+  [31/164] HumanEval/30 OK | gen=18.6s tok=844 | ETA 4499s
+  [32/164] HumanEval/31 OK | gen=28.0s tok=1414 | ETA 4441s
+  [33/164] HumanEval/32 NO_CODE | gen=97.6s tok=4800 | ETA 4662s
+  [34/164] HumanEval/33 OK | gen=68.7s tok=3417 | ETA 4753s
+  [35/164] HumanEval/34 OK | gen=19.3s tok=949 | ETA 4653s
+  [36/164] HumanEval/35 OK | gen=11.2s tok=515 | ETA 4528s
+  [37/164] HumanEval/36 OK | gen=37.6s tok=1925 | ETA 4500s
+  [38/164] HumanEval/37 OK | gen=27.4s tok=1442 | ETA 4438s
+  [39/164] HumanEval/38 OK | gen=34.5s tok=1734 | ETA 4401s
+  [40/164] HumanEval/39 OK | gen=82.0s tok=4013 | ETA 4511s
+  [41/164] HumanEval/40 OK | gen=54.9s tok=2440 | ETA 4530s
+  [42/164] HumanEval/41 OK | gen=89.1s tok=4075 | ETA 4645s
+  [43/164] HumanEval/42 OK | gen=12.2s tok=633 | ETA 4534s
+  [44/164] HumanEval/43 OK | gen=32.9s tok=1516 | ETA 4484s
+  [45/164] HumanEval/44 OK | gen=33.6s tok=1726 | ETA 4437s
+  [46/164] HumanEval/45 OK | gen=9.8s tok=507 | ETA 4329s
+  [47/164] HumanEval/46 NO_CODE | gen=98.7s tok=4800 | ETA 4447s
+  [48/164] HumanEval/47 OK | gen=60.3s tok=3033 | ETA 4463s
+  [49/164] HumanEval/48 OK | gen=13.0s tok=671 | ETA 4364s
+  [50/164] HumanEval/49 OK | gen=30.1s tok=1446 | ETA 4308s
+  [51/164] HumanEval/50 OK | gen=33.2s tok=1705 | ETA 4260s
+  [52/164] HumanEval/51 OK | gen=22.4s tok=1105 | ETA 4190s
+  [53/164] HumanEval/52 OK | gen=14.6s tok=759 | ETA 4105s
+  [54/164] HumanEval/53 OK | gen=12.7s tok=656 | ETA 4018s
+  [55/164] HumanEval/54 OK | gen=21.3s tok=1115 | ETA 3951s
+  [56/164] HumanEval/55 OK | gen=33.1s tok=1727 | ETA 3909s
+  [57/164] HumanEval/56 OK | gen=23.2s tok=1211 | ETA 3849s
+  [58/164] HumanEval/57 OK | gen=79.8s tok=4066 | ETA 3893s
+  [59/164] HumanEval/58 OK | gen=20.4s tok=1065 | ETA 3827s
+  [60/164] HumanEval/59 NO_CODE | gen=94.3s tok=4800 | ETA 3891s
+  [61/164] HumanEval/60 OK | gen=12.1s tok=626 | ETA 3811s
+  [62/164] HumanEval/61 OK | gen=19.4s tok=995 | ETA 3745s
+  [63/164] HumanEval/62 OK | gen=47.8s tok=2396 | ETA 3726s
+  [64/164] HumanEval/63 OK | gen=31.0s tok=1607 | ETA 3680s
+  [65/164] HumanEval/64 OK | gen=26.3s tok=1361 | ETA 3627s
+  [66/164] HumanEval/65 OK | gen=40.5s tok=2091 | ETA 3596s
+  [67/164] HumanEval/66 OK | gen=15.1s tok=786 | ETA 3528s
+  [68/164] HumanEval/67 OK | gen=20.0s tok=1040 | ETA 3469s
+  [69/164] HumanEval/68 OK | gen=47.3s tok=2284 | ETA 3448s
+  [70/164] HumanEval/69 OK | gen=42.7s tok=2046 | ETA 3420s
+  [71/164] HumanEval/70 OK | gen=30.0s tok=1522 | ETA 3376s
+  [72/164] HumanEval/71 OK | gen=41.6s tok=2161 | ETA 3346s
+  [73/164] HumanEval/72 OK | gen=21.8s tok=1126 | ETA 3291s
+  [74/164] HumanEval/73 OK | gen=40.8s tok=2062 | ETA 3261s
+  [75/164] HumanEval/74 OK | gen=23.8s tok=1246 | ETA 3210s
+  [76/164] HumanEval/75 OK | gen=94.5s tok=4800 | ETA 3242s
+  [77/164] HumanEval/76 NO_CODE | gen=94.1s tok=4800 | ETA 3269s
+  [78/164] HumanEval/77 OK | gen=58.8s tok=3022 | ETA 3255s
+  [79/164] HumanEval/78 OK | gen=28.1s tok=1483 | ETA 3207s
+  [80/164] HumanEval/79 OK | gen=16.1s tok=756 | ETA 3146s
+  [81/164] HumanEval/80 OK | gen=28.9s tok=1512 | ETA 3100s
+  [82/164] HumanEval/81 NO_CODE | gen=93.0s tok=4800 | ETA 3118s
+  [83/164] HumanEval/82 OK | gen=29.0s tok=1513 | ETA 3072s
+  [84/164] HumanEval/83 OK | gen=37.3s tok=1940 | ETA 3033s
+  [85/164] HumanEval/84 NO_CODE | gen=93.8s tok=4800 | ETA 3047s
+  [86/164] HumanEval/85 OK | gen=18.0s tok=942 | ETA 2990s
+  [87/164] HumanEval/86 OK | gen=24.8s tok=1177 | ETA 2940s
+  [88/164] HumanEval/87 OK | gen=37.6s tok=1979 | ETA 2901s
+  [89/164] HumanEval/88 OK | gen=26.3s tok=1385 | ETA 2853s
+  [90/164] HumanEval/89 OK | gen=37.9s tok=2006 | ETA 2815s
+  [91/164] HumanEval/90 OK | gen=26.5s tok=1405 | ETA 2767s
+  [92/164] HumanEval/91 OK | gen=52.6s tok=2769 | ETA 2741s
+  [93/164] HumanEval/92 OK | gen=78.0s tok=4082 | ETA 2733s
+  [94/164] HumanEval/93 NO_CODE | gen=90.5s tok=4800 | ETA 2734s
+  [95/164] HumanEval/94 NO_CODE | gen=93.2s tok=4800 | ETA 2734s
+  [96/164] HumanEval/95 NO_CODE | gen=92.7s tok=4800 | ETA 2732s
+  [97/164] HumanEval/96 OK | gen=42.4s tok=2182 | ETA 2693s
+  [98/164] HumanEval/97 OK | gen=18.1s tok=848 | ETA 2638s
+  [99/164] HumanEval/98 OK | gen=29.0s tok=1372 | ETA 2591s
+  [100/164] HumanEval/99 OK | gen=54.6s tok=2798 | ETA 2560s
+  [101/164] HumanEval/100 OK | gen=24.1s tok=1245 | ETA 2510s
+  [102/164] HumanEval/101 OK | gen=53.2s tok=2782 | ETA 2479s
+  [103/164] HumanEval/102 OK | gen=55.3s tok=2669 | ETA 2448s
+  [104/164] HumanEval/103 OK | gen=45.4s tok=2272 | ETA 2411s
+  [105/164] HumanEval/104 OK | gen=30.7s tok=1605 | ETA 2365s
+  [106/164] HumanEval/105 OK | gen=35.0s tok=1838 | ETA 2322s
+  [107/164] HumanEval/106 OK | gen=27.9s tok=1435 | ETA 2276s
+  [108/164] HumanEval/107 OK | gen=25.5s tok=1311 | ETA 2229s
+  [109/164] HumanEval/108 OK | gen=48.5s tok=2450 | ETA 2193s
+  [110/164] HumanEval/109 NO_CODE | gen=96.8s tok=4800 | ETA 2181s
+  [111/164] HumanEval/110 OK | gen=29.8s tok=1483 | ETA 2136s
+  [112/164] HumanEval/111 OK | gen=28.6s tok=1278 | ETA 2090s
+  [113/164] HumanEval/112 OK | gen=24.2s tok=1219 | ETA 2043s
+  [114/164] HumanEval/113 OK | gen=72.5s tok=3625 | ETA 2017s
+  [115/164] HumanEval/114 OK | gen=34.1s tok=1809 | ETA 1974s
+  [116/164] HumanEval/115 OK | gen=34.0s tok=1684 | ETA 1931s
+  [117/164] HumanEval/116 NO_CODE | gen=96.5s tok=4800 | ETA 1913s
+  [118/164] HumanEval/117 OK | gen=47.5s tok=2403 | ETA 1875s
+  [119/164] HumanEval/118 OK | gen=64.0s tok=3186 | ETA 1843s
+  [120/164] HumanEval/119 OK | gen=46.6s tok=2281 | ETA 1804s
+  [121/164] HumanEval/120 OK | gen=22.6s tok=1201 | ETA 1757s
+  [122/164] HumanEval/121 OK | gen=18.8s tok=979 | ETA 1708s
+  [123/164] HumanEval/122 OK | gen=28.9s tok=1522 | ETA 1664s
+  [124/164] HumanEval/123 OK | gen=53.8s tok=2807 | ETA 1627s
+  [125/164] HumanEval/124 NO_CODE | gen=92.3s tok=4800 | ETA 1603s
+  [126/164] HumanEval/125 OK | gen=30.5s tok=1595 | ETA 1559s
+  [127/164] HumanEval/126 NO_CODE | gen=92.0s tok=4800 | ETA 1532s
+  [128/164] HumanEval/127 OK | gen=48.9s tok=2533 | ETA 1493s
+  [129/164] HumanEval/128 OK | gen=24.4s tok=1245 | ETA 1447s
+  [130/164] HumanEval/129 OK | gen=95.3s tok=4800 | ETA 1420s
+  [131/164] HumanEval/130 NO_CODE | gen=92.7s tok=4800 | ETA 1391s
+  [132/164] HumanEval/131 OK | gen=22.4s tok=1020 | ETA 1344s
+  [133/164] HumanEval/132 NO_CODE | gen=92.4s tok=4800 | ETA 1314s
+  [134/164] HumanEval/133 OK | gen=19.6s tok=1028 | ETA 1266s
+  [135/164] HumanEval/134 NO_CODE | gen=92.8s tok=4800 | ETA 1235s
+  [136/164] HumanEval/135 OK | gen=29.0s tok=1499 | ETA 1189s
+  [137/164] HumanEval/136 OK | gen=25.7s tok=1331 | ETA 1144s
+  [138/164] HumanEval/137 OK | gen=63.6s tok=3235 | ETA 1105s
+  [139/164] HumanEval/138 OK | gen=24.9s tok=1304 | ETA 1060s
+  [140/164] HumanEval/139 OK | gen=37.0s tok=1942 | ETA 1016s
+  [141/164] HumanEval/140 OK | gen=87.7s tok=4612 | ETA 981s
+  [142/164] HumanEval/141 OK | gen=54.3s tok=2859 | ETA 941s
+  [143/164] HumanEval/142 OK | gen=87.4s tok=4606 | ETA 904s
+  [144/164] HumanEval/143 OK | gen=26.1s tok=1395 | ETA 859s
+  [145/164] HumanEval/144 OK | gen=26.8s tok=1434 | ETA 814s
+  [146/164] HumanEval/145 NO_CODE | gen=90.1s tok=4800 | ETA 777s
+  [147/164] HumanEval/146 OK | gen=53.7s tok=2863 | ETA 735s
+  [148/164] HumanEval/147 NO_CODE | gen=91.5s tok=4800 | ETA 697s
+  [149/164] HumanEval/148 OK | gen=75.9s tok=4028 | ETA 657s
+  [150/164] HumanEval/149 OK | gen=34.3s tok=1804 | ETA 612s
+  [151/164] HumanEval/150 OK | gen=27.4s tok=1462 | ETA 567s
+  [152/164] HumanEval/151 OK | gen=54.4s tok=2876 | ETA 524s
+  [153/164] HumanEval/152 OK | gen=18.1s tok=930 | ETA 479s
+  [154/164] HumanEval/153 NO_CODE | gen=99.0s tok=4800 | ETA 439s
+  [155/164] HumanEval/154 NO_CODE | gen=97.0s tok=4800 | ETA 398s
+  [156/164] HumanEval/155 OK | gen=21.6s tok=1102 | ETA 352s
+  [157/164] HumanEval/156 NO_CODE | gen=98.4s tok=4800 | ETA 311s
+  [158/164] HumanEval/157 OK | gen=26.2s tok=1364 | ETA 266s
+  [159/164] HumanEval/158 OK | gen=36.6s tok=1914 | ETA 221s
+  [160/164] HumanEval/159 OK | gen=28.0s tok=1381 | ETA 177s
+  [161/164] HumanEval/160 OK | gen=65.8s tok=3393 | ETA 133s
+  [162/164] HumanEval/161 OK | gen=22.5s tok=1170 | ETA 88s
+  [163/164] HumanEval/162 OK | gen=14.0s tok=734 | ETA 44s
+  [164/164] HumanEval/163 NO_CODE | gen=92.8s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_st_step250.jsonl (耗时 7257.9s)
+  统计: extract_ok=138 fail=26
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_st_step250.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.744
+humaneval+ (base + extra tests)
+pass@1:	0.689
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.02it/s]
+164it [00:00, 166.18it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:34
+ 10%| | 16/164 [00:00<00:0
+ 32%|▎| 52/164 [00:00<00:0
+ 43%|▍| 70/164 [00:01<00:0
+ 77%|▊| 127/164 [00:01<00:
+ 98%|▉| 160/164 [00:01<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=st_step250)
+============================================================
+  humaneval: {'pass@1': 0.689}
+
+汇总已保存: eval_results_v2/summary_st_step250.json
+<<<<< 单轮训练 step250 完成 <<<<<
+
+>>>>> 单轮训练 step300 | tag=st_step300 | path=/root/autodl-tmp/hf_models/step300 >>>>>
+加载模型: /root/autodl-tmp/hf_models/step300
+`torch_dtype` is deprecated! Use `dtype` instead!
+模型加载完成，设备: cuda:0
+
+============================================================
+评估 humaneval (tag=st_step300)
+============================================================
+  [DEBUG] 总题数: 164, max_new_tokens: 4800
+  [DEBUG] temperature: 0.0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  [1/164] HumanEval/0 OK | gen=36.1s tok=1925 | ETA 5896s
+  [2/164] HumanEval/1 OK | gen=55.1s tok=3081 | ETA 7397s
+  [3/164] HumanEval/2 OK | gen=14.0s tok=786 | ETA 5652s
+  [4/164] HumanEval/3 OK | gen=16.5s tok=906 | ETA 4871s
+  [5/164] HumanEval/4 OK | gen=16.4s tok=913 | ETA 4393s
+  [6/164] HumanEval/5 OK | gen=18.5s tok=974 | ETA 4124s
+  [7/164] HumanEval/6 OK | gen=27.3s tok=1533 | ETA 4124s
+  [8/164] HumanEval/7 OK | gen=14.5s tok=819 | ETA 3868s
+  [9/164] HumanEval/8 OK | gen=17.1s tok=900 | ETA 3711s
+  [10/164] HumanEval/9 OK | gen=21.0s tok=1177 | ETA 3642s
+  [11/164] HumanEval/10 OK | gen=32.9s tok=1837 | ETA 3746s
+  [12/164] HumanEval/11 OK | gen=16.7s tok=972 | ETA 3624s
+  [13/164] HumanEval/12 OK | gen=16.0s tok=920 | ETA 3509s
+  [14/164] HumanEval/13 OK | gen=21.6s tok=1235 | ETA 3468s
+  [15/164] HumanEval/14 OK | gen=17.5s tok=999 | ETA 3389s
+  [16/164] HumanEval/15 OK | gen=18.9s tok=1082 | ETA 3331s
+  [17/164] HumanEval/16 OK | gen=10.6s tok=600 | ETA 3205s
+  [18/164] HumanEval/17 NO_CODE | gen=85.5s tok=4800 | ETA 3700s
+  [19/164] HumanEval/18 OK | gen=49.9s tok=2723 | ETA 3862s
+  [20/164] HumanEval/19 OK | gen=17.4s tok=991 | ETA 3769s
+  [21/164] HumanEval/20 OK | gen=50.6s tok=2891 | ETA 3909s
+  [22/164] HumanEval/21 OK | gen=24.2s tok=1397 | ETA 3861s
+  [23/164] HumanEval/22 OK | gen=17.0s tok=977 | ETA 3772s
+  [24/164] HumanEval/23 OK | gen=7.0s tok=401 | ETA 3630s
+  [25/164] HumanEval/24 OK | gen=39.8s tok=2199 | ETA 3681s
+  [26/164] HumanEval/25 OK | gen=39.0s tok=2248 | ETA 3721s
+  [27/164] HumanEval/26 NO_CODE | gen=83.1s tok=4800 | ETA 3979s
+  [28/164] HumanEval/27 OK | gen=21.1s tok=1230 | ETA 3912s
+  [29/164] HumanEval/28 OK | gen=8.7s tok=506 | ETA 3789s
+  [30/164] HumanEval/29 OK | gen=13.6s tok=790 | ETA 3696s
+  [31/164] HumanEval/30 OK | gen=12.4s tok=710 | ETA 3604s
+  [32/164] HumanEval/31 OK | gen=33.9s tok=1973 | ETA 3605s
+  [33/164] HumanEval/32 NO_CODE | gen=82.2s tok=4800 | ETA 3795s
+  [34/164] HumanEval/33 OK | gen=43.8s tok=2511 | ETA 3823s
+  [35/164] HumanEval/34 OK | gen=14.6s tok=854 | ETA 3739s
+  [36/164] HumanEval/35 OK | gen=8.7s tok=509 | ETA 3638s
+  [37/164] HumanEval/36 OK | gen=40.4s tok=2373 | ETA 3651s
+  [38/164] HumanEval/37 OK | gen=22.6s tok=1330 | ETA 3602s
+  [39/164] HumanEval/38 NO_CODE | gen=82.5s tok=4800 | ETA 3746s
+  [40/164] HumanEval/39 OK | gen=64.4s tok=3805 | ETA 3822s
+  [41/164] HumanEval/40 OK | gen=46.8s tok=2733 | ETA 3839s
+  [42/164] HumanEval/41 OK | gen=24.7s tok=1444 | ETA 3789s
+  [43/164] HumanEval/42 OK | gen=10.4s tok=605 | ETA 3700s
+  [44/164] HumanEval/43 OK | gen=30.6s tok=1770 | ETA 3670s
+  [45/164] HumanEval/44 OK | gen=31.0s tok=1782 | ETA 3640s
+  [46/164] HumanEval/45 OK | gen=10.8s tok=629 | ETA 3559s
+  [47/164] HumanEval/46 OK | gen=73.8s tok=4315 | ETA 3637s
+  [48/164] HumanEval/47 OK | gen=61.3s tok=3585 | ETA 3679s
+  [49/164] HumanEval/48 OK | gen=10.3s tok=608 | ETA 3597s
+  [50/164] HumanEval/49 OK | gen=22.5s tok=1329 | ETA 3546s
+  [51/164] HumanEval/50 OK | gen=27.0s tok=1519 | ETA 3506s
+  [52/164] HumanEval/51 OK | gen=16.8s tok=962 | ETA 3444s
+  [53/164] HumanEval/52 OK | gen=15.6s tok=894 | ETA 3382s
+  [54/164] HumanEval/53 OK | gen=10.7s tok=620 | ETA 3311s
+  [55/164] HumanEval/54 NO_CODE | gen=85.0s tok=4800 | ETA 3390s
+  [56/164] HumanEval/55 OK | gen=24.7s tok=1399 | ETA 3346s
+  [57/164] HumanEval/56 OK | gen=25.4s tok=1268 | ETA 3305s
+  [58/164] HumanEval/57 OK | gen=25.7s tok=1505 | ETA 3264s
+  [59/164] HumanEval/58 OK | gen=17.5s tok=1028 | ETA 3210s
+  [60/164] HumanEval/59 OK | gen=44.3s tok=2591 | ETA 3203s
+  [61/164] HumanEval/60 OK | gen=11.2s tok=657 | ETA 3139s
+  [62/164] HumanEval/61 OK | gen=17.2s tok=1009 | ETA 3087s
+  [63/164] HumanEval/62 OK | gen=25.2s tok=1459 | ETA 3048s
+  [64/164] HumanEval/63 OK | gen=42.4s tok=2413 | ETA 3037s
+  [65/164] HumanEval/64 OK | gen=23.3s tok=1376 | ETA 2996s
+  [66/164] HumanEval/65 OK | gen=22.6s tok=1326 | ETA 2955s
+  [67/164] HumanEval/66 OK | gen=20.2s tok=1176 | ETA 2910s
+  [68/164] HumanEval/67 OK | gen=19.0s tok=1113 | ETA 2864s
+  [69/164] HumanEval/68 OK | gen=25.7s tok=1479 | ETA 2829s
+  [70/164] HumanEval/69 OK | gen=39.3s tok=2207 | ETA 2812s
+  [71/164] HumanEval/70 OK | gen=26.8s tok=1544 | ETA 2778s
+  [72/164] HumanEval/71 OK | gen=33.0s tok=1884 | ETA 2752s
+  [73/164] HumanEval/72 OK | gen=22.5s tok=1310 | ETA 2713s
+  [74/164] HumanEval/73 OK | gen=19.2s tok=1107 | ETA 2670s
+  [75/164] HumanEval/74 OK | gen=23.2s tok=1345 | ETA 2633s
+  [76/164] HumanEval/75 OK | gen=38.8s tok=2248 | ETA 2614s
+  [77/164] HumanEval/76 OK | gen=64.9s tok=3780 | ETA 2624s
+  [78/164] HumanEval/77 NO_CODE | gen=83.0s tok=4800 | ETA 2652s
+  [79/164] HumanEval/78 OK | gen=23.6s tok=1384 | ETA 2613s
+  [80/164] HumanEval/79 OK | gen=22.5s tok=1321 | ETA 2574s
+  [81/164] HumanEval/80 OK | gen=27.7s tok=1620 | ETA 2540s
+  [82/164] HumanEval/81 OK | gen=57.1s tok=3347 | ETA 2536s
+  [83/164] HumanEval/82 OK | gen=26.7s tok=1542 | ETA 2501s
+  [84/164] HumanEval/83 OK | gen=39.0s tok=2268 | ETA 2478s
+  [85/164] HumanEval/84 NO_CODE | gen=85.0s tok=4800 | ETA 2497s
+  [86/164] HumanEval/85 OK | gen=18.8s tok=1089 | ETA 2454s
+  [87/164] HumanEval/86 NO_CODE | gen=84.5s tok=4800 | ETA 2470s
+  [88/164] HumanEval/87 OK | gen=38.7s tok=2225 | ETA 2443s
+  [89/164] HumanEval/88 OK | gen=19.6s tok=1123 | ETA 2401s
+  [90/164] HumanEval/89 OK | gen=20.2s tok=1158 | ETA 2359s
+  [91/164] HumanEval/90 OK | gen=23.6s tok=1360 | ETA 2320s
+  [92/164] HumanEval/91 OK | gen=51.1s tok=2962 | ETA 2304s
+  [93/164] HumanEval/92 OK | gen=50.9s tok=2928 | ETA 2286s
+  [94/164] HumanEval/93 NO_CODE | gen=82.6s tok=4800 | ETA 2291s
+  [95/164] HumanEval/94 OK | gen=41.9s tok=2441 | ETA 2265s
+  [96/164] HumanEval/95 OK | gen=72.6s tok=4197 | ETA 2261s
+  [97/164] HumanEval/96 OK | gen=46.1s tok=2628 | ETA 2236s
+  [98/164] HumanEval/97 OK | gen=13.6s tok=739 | ETA 2190s
+  [99/164] HumanEval/98 OK | gen=34.6s tok=1800 | ETA 2157s
+  [100/164] HumanEval/99 OK | gen=60.4s tok=3365 | ETA 2142s
+  [101/164] HumanEval/100 OK | gen=18.1s tok=948 | ETA 2099s
+  [102/164] HumanEval/101 OK | gen=57.5s tok=3165 | ETA 2080s
+  [103/164] HumanEval/102 OK | gen=34.6s tok=1930 | ETA 2047s
+  [104/164] HumanEval/103 OK | gen=42.1s tok=2310 | ETA 2018s
+  [105/164] HumanEval/104 OK | gen=29.4s tok=1678 | ETA 1982s
+  [106/164] HumanEval/105 OK | gen=45.5s tok=2398 | ETA 1955s
+  [107/164] HumanEval/106 OK | gen=29.3s tok=1560 | ETA 1919s
+  [108/164] HumanEval/107 OK | gen=28.2s tok=1568 | ETA 1883s
+  [109/164] HumanEval/108 NO_CODE | gen=86.9s tok=4800 | ETA 1876s
+  [110/164] HumanEval/109 OK | gen=51.2s tok=2727 | ETA 1850s
+  [111/164] HumanEval/110 OK | gen=24.2s tok=1355 | ETA 1811s
+  [112/164] HumanEval/111 OK | gen=29.3s tok=1580 | ETA 1775s
+  [113/164] HumanEval/112 OK | gen=22.6s tok=1268 | ETA 1735s
+  [114/164] HumanEval/113 OK | gen=63.1s tok=3456 | ETA 1714s
+  [115/164] HumanEval/114 OK | gen=35.0s tok=1870 | ETA 1680s
+  [116/164] HumanEval/115 OK | gen=28.8s tok=1613 | ETA 1644s
+  [117/164] HumanEval/116 NO_CODE | gen=88.9s tok=4800 | ETA 1631s
+  [118/164] HumanEval/117 OK | gen=40.8s tok=2294 | ETA 1599s
+  [119/164] HumanEval/118 OK | gen=56.0s tok=3141 | ETA 1572s
+  [120/164] HumanEval/119 OK | gen=74.3s tok=4163 | ETA 1552s
+  [121/164] HumanEval/120 OK | gen=29.0s tok=1654 | ETA 1514s
+  [122/164] HumanEval/121 OK | gen=17.7s tok=967 | ETA 1473s
+  [123/164] HumanEval/122 OK | gen=38.4s tok=2105 | ETA 1439s
+  [124/164] HumanEval/123 OK | gen=42.4s tok=2405 | ETA 1406s
+  [125/164] HumanEval/124 NO_CODE | gen=85.4s tok=4800 | ETA 1387s
+  [126/164] HumanEval/125 OK | gen=55.8s tok=3138 | ETA 1357s
+  [127/164] HumanEval/126 OK | gen=26.0s tok=1403 | ETA 1319s
+  [128/164] HumanEval/127 OK | gen=52.9s tok=2924 | ETA 1288s
+  [129/164] HumanEval/128 OK | gen=31.9s tok=1541 | ETA 1251s
+  [130/164] HumanEval/129 NO_CODE | gen=88.5s tok=4800 | ETA 1229s
+  [131/164] HumanEval/130 NO_CODE | gen=86.4s tok=4800 | ETA 1206s
+  [132/164] HumanEval/131 OK | gen=21.1s tok=1118 | ETA 1166s
+  [133/164] HumanEval/132 NO_CODE | gen=85.9s tok=4800 | ETA 1141s
+  [134/164] HumanEval/133 OK | gen=25.0s tok=1410 | ETA 1101s
+  [135/164] HumanEval/134 NO_CODE | gen=86.7s tok=4800 | ETA 1075s
+  [136/164] HumanEval/135 OK | gen=17.0s tok=956 | ETA 1034s
+  [137/164] HumanEval/136 OK | gen=24.3s tok=1363 | ETA 995s
+  [138/164] HumanEval/137 OK | gen=62.1s tok=3515 | ETA 963s
+  [139/164] HumanEval/138 OK | gen=22.7s tok=1263 | ETA 923s
+  [140/164] HumanEval/139 OK | gen=26.7s tok=1485 | ETA 884s
+  [141/164] HumanEval/140 OK | gen=52.8s tok=2891 | ETA 850s
+  [142/164] HumanEval/141 OK | gen=47.2s tok=2661 | ETA 815s
+  [143/164] HumanEval/142 OK | gen=34.0s tok=1894 | ETA 777s
+  [144/164] HumanEval/143 OK | gen=32.5s tok=1820 | ETA 740s
+  [145/164] HumanEval/144 OK | gen=27.9s tok=1452 | ETA 701s
+  [146/164] HumanEval/145 NO_CODE | gen=85.8s tok=4800 | ETA 670s
+  [147/164] HumanEval/146 NO_CODE | gen=89.1s tok=4800 | ETA 639s
+  [148/164] HumanEval/147 NO_CODE | gen=89.8s tok=4800 | ETA 607s
+  [149/164] HumanEval/148 OK | gen=30.7s tok=1755 | ETA 569s
+  [150/164] HumanEval/149 OK | gen=26.3s tok=1317 | ETA 530s
+  [151/164] HumanEval/150 OK | gen=29.8s tok=1480 | ETA 491s
+  [152/164] HumanEval/151 OK | gen=26.3s tok=1302 | ETA 452s
+  [153/164] HumanEval/152 OK | gen=14.7s tok=730 | ETA 413s
+  [154/164] HumanEval/153 OK | gen=56.6s tok=3246 | ETA 377s
+  [155/164] HumanEval/154 NO_CODE | gen=84.9s tok=4800 | ETA 342s
+  [156/164] HumanEval/155 OK | gen=16.3s tok=859 | ETA 303s
+  [157/164] HumanEval/156 OK | gen=34.3s tok=1928 | ETA 265s
+  [158/164] HumanEval/157 OK | gen=37.1s tok=1926 | ETA 227s
+  [159/164] HumanEval/158 OK | gen=29.0s tok=1552 | ETA 189s
+  [160/164] HumanEval/159 OK | gen=20.5s tok=1177 | ETA 151s
+  [161/164] HumanEval/160 OK | gen=64.1s tok=3648 | ETA 113s
+  [162/164] HumanEval/161 OK | gen=30.0s tok=1691 | ETA 76s
+  [163/164] HumanEval/162 OK | gen=11.4s tok=650 | ETA 38s
+  [164/164] HumanEval/163 NO_CODE | gen=84.9s tok=4800 | ETA 0s
+
+  生成完成: eval_results_v2/humaneval_st_step300.jsonl (耗时 6214.4s)
+  统计: extract_ok=143 fail=21
+
+EvalPlus 判卷: humaneval
+  输入文件: eval_results_v2/humaneval_st_step300.jsonl
+Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+humaneval (base tests)
+pass@1:	0.768
+humaneval+ (base + extra tests)
+pass@1:	0.732
+
+
+0it [00:00, ?it/s]
+1it [00:00,  1.55it/s]
+164it [00:00, 252.69it/s]
+
+  0%| | 0/164 [00:00<?, ?i
+  1%| | 1/164 [00:00<00:25
+ 10%| | 16/164 [00:00<00:0
+ 32%|▎| 52/164 [00:00<00:0
+ 43%|▍| 70/164 [00:01<00:0
+ 76%|▊| 125/164 [00:01<00:
+ 96%|▉| 157/164 [00:01<00:
+100%|█| 164/164 [00:06<00:
+
+
+============================================================
+评估汇总 (tag=st_step300)
+============================================================
+  humaneval: {'pass@1': 0.732}
+
+汇总已保存: eval_results_v2/summary_st_step300.json
+<<<<< 单轮训练 step300 完成 <<<<<
+
+===== 全部 10 个 checkpoint 评估完成 =====

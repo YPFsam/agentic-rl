@@ -1,0 +1,18 @@
+{
+  "tag": "st_step300",
+  "model_path": "/root/autodl-tmp/hf_models/step300",
+  "max_turns": 3,
+  "max_response_length": 4800,
+  "stats": {
+    "total": 164,
+    "turn1_pass": 126,
+    "turn2_pass": 6,
+    "turn3_pass": 0,
+    "no_code": 21,
+    "final_pass": 132,
+    "extract_ok": 132,
+    "extract_fail": 32
+  },
+  "evalplus_output": "Load from ground-truth from /root/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl\nReading samples...\nhumaneval (base tests)\npass@1:\t0.805\nhumaneval+ (base + extra tests)\npass@1:\t0.762\n",
+  "log_path": "logs/multiturn_eval_st_step300_20260418_200903.jsonl"
+}
