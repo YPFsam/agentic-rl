@@ -43,6 +43,8 @@ wandb/
 .claude/
 .ipynb_checkpoints/
 untitled.md
+agentic-rl-v2.md
+完整方案蓝图.md
 checkpoints/
 data/taco_tmp/
 data/apps_prompt_review.jsonl

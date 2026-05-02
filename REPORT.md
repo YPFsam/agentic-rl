@@ -91,6 +91,21 @@
 
 ## 训练过程分析
 
+**WandB 训练日志：**
+- [多轮 GRPO 训练 (step 1-225)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/myjwtuks)
+- [多轮 GRPO 续训 (step 200-300)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/li01rf8t)
+- [单轮 GRPO 训练 (step 1-300)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/rnplbvm0)
+- [单轮 GRPO 续训 (step 300-350)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/dmsv1uo0)
+
+<!-- 建议在对应分析段落后插入 wandb 导出的图片：
+1. reward/mean 对比图：多轮 vs 单轮
+2. critic/score/mean 对比图
+3. actor/kl_loss 对比图
+4. response_length/mean 对比图
+5. response_length/clip_ratio 对比图
+6. num_turns/mean（仅多轮）
+-->
+
 ### 训练曲线对比
 
 **20 步滑动平均 reward（过滤步间振荡，展示整体趋势）：**
@@ -322,6 +337,8 @@
 
 ## 工程经验总结
 
+> 以下问题的排查过程借助了 AI 辅助（Claude）阅读 veRL/vLLM 源码、分析报错栈和定位根因。最终修复方案均经过人工确认和实测验证。
+
 ### 踩过的坑（25+ 个）
 
 | # | 问题 | 影响 | 解决方案 |
@@ -332,17 +349,6 @@
 | 21 | `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` | vLLM sleep mode 启动崩溃 | 禁止设置此变量 |
 | 23 | ray_trainer 中调用 `torch.cuda.ipc_collect()` | CPU-only 进程调用 GPU API 报错 | 移除，在 vLLM 进程中 gc |
 | 25 | FSDP + LoRA 下 `disable_adapter()` 失效 | kl_loss=0，无正则化 | 独立 ref 模型 |
-
-### 显存预算（H20 96GB）
-
-| 组件 | 显存占用 |
-|------|---------|
-| Actor (LoRA, bf16) | ~6.8 GiB |
-| Ref Model (bf16) | ~3.4 GiB |
-| vLLM Rollout (gpu_util=0.20) | ~19.7 GiB |
-| FSDP 优化器状态 | ~15 GiB |
-| KV cache + 梯度 | ~40+ GiB |
-| **峰值总计** | **~86.6 GiB (88.5%)** |
 
 ### vLLM 多轮抢占问题
 
@@ -377,22 +383,6 @@ agentic-rl/
 ├── data/                       # 训练数据（.gitignore）
 └── REPORT.md                   # 本技术报告
 ```
-
-## WandB 训练日志
-
-- [多轮 GRPO 训练 (step 1-225)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/myjwtuks)
-- [多轮 GRPO 续训 (step 200-300)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/li01rf8t)
-- [单轮 GRPO 训练 (step 1-300)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/rnplbvm0)
-- [单轮 GRPO 续训 (step 300-350)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/dmsv1uo0)
-
-<!-- 建议在此处插入以下图片（从 wandb 导出）：
-1. reward/mean 对比图：多轮 vs 单轮，展示收敛速度差异
-2. critic/score/mean 对比图：展示多轮 reward 始终高于单轮
-3. actor/kl_loss 对比图：展示多轮 KL 增长更快
-4. response_length/mean 对比图：展示输出长度趋势
-5. response_length/clip_ratio 对比图：展示截断率趋势
-6. num_turns/mean（仅多轮）：展示平均轮数趋势
--->
 
 ## 复现指南
 
