@@ -152,65 +152,64 @@ def plot_clip_ratio(multi, single):
 
 
 # ============================================================
-# 图 4: 多轮训练 T1/T2/T3 纠错率趋势（从日志计算）
+# 图 4: 多轮训练 T1/T2/T3 纠错率趋势（合并全部日志）
 # ============================================================
+def load_sorted(files):
+    data = []
+    for f in files:
+        with open(f) as fh:
+            for l in fh:
+                if l.strip():
+                    data.append(json.loads(l))
+    data.sort(key=lambda d: d['timestamp'])
+    return data
+
+
 def plot_correction_rates():
-    # 加载两个日志
-    with open("logs/multiturn_metrics_20260415_002828.jsonl") as f:
-        log1 = [json.loads(l) for l in f]
-    with open("logs/multiturn_metrics_20260415_140459.jsonl") as f:
-        log2 = [json.loads(l) for l in f]
+    # Phase1: step 1-60
+    p1 = load_sorted(["logs/multiturn_metrics_20260414_201023.jsonl",
+                       "logs/multiturn_metrics_20260414_201024.jsonl"])[:60*64]
+    # Phase2: step 61-200
+    p2 = load_sorted(["logs/multiturn_metrics_20260415_002827.jsonl",
+                       "logs/multiturn_metrics_20260415_002828.jsonl"])[:140*64]
+    # Phase3: step 201-300
+    p3 = load_sorted(["logs/multiturn_metrics_20260415_140459.jsonl"])
 
-    samples_per_step = 64
+    all_data = p1 + p2 + p3  # 19200 rows = 300 steps
 
-    def compute_rates(data, step_offset=0):
-        """计算每25步窗口的 T1/T2/T3 纠错率"""
-        windows = defaultdict(lambda: {"total": 0, "t1_ok": 0, "t2_att": 0, "t2_ok": 0,
-                                        "t3_att": 0, "t3_ok": 0, "nocode": 0})
-        for i, d in enumerate(data):
-            s = step_offset + i // samples_per_step + 1
-            w_start = ((s - 1) // 25) * 25 + 1
-            w = f"{w_start}-{w_start + 24}"
-            w_data = windows[w]
-            w_data["total"] += 1
+    window = 25
+    results = defaultdict(lambda: {"total": 0, "t1_ok": 0, "t2_att": 0, "t2_ok": 0,
+                                    "t3_att": 0, "t3_ok": 0, "nocode": 0})
+
+    for i in range(0, len(all_data) - 63, 64):
+        step = i // 64 + 1
+        batch = all_data[i:i+64]
+        w_start = ((step - 1) // window) * window + 1
+        w = f"{w_start}-{w_start + window - 1}"
+        r = results[w]
+        r["total"] += 64
+        for d in batch:
             turns = d.get("turns", [])
             if turns[0]["outcome"] == "SUCCESS":
-                w_data["t1_ok"] += 1
+                r["t1_ok"] += 1
             if len(turns) >= 2:
-                w_data["t2_att"] += 1
+                r["t2_att"] += 1
                 if turns[1]["outcome"] == "SUCCESS":
-                    w_data["t2_ok"] += 1
+                    r["t2_ok"] += 1
             if len(turns) >= 3:
-                w_data["t3_att"] += 1
+                r["t3_att"] += 1
                 if turns[2]["outcome"] == "SUCCESS":
-                    w_data["t3_ok"] += 1
+                    r["t3_ok"] += 1
             if d.get("exec_status") == "NO_CODE":
-                w_data["nocode"] += 1
-        return windows
+                r["nocode"] += 1
 
-    # 用续训日志（step 200-300，无重叠）
-    rates_200_300 = compute_rates(log2, step_offset=200)
-
-    # 用早期日志（step 1-225，有重叠但取 1-200）
-    rates_1_200 = compute_rates(log1[:200 * samples_per_step], step_offset=0)
-
-    # 合并
-    all_rates = {}
-    for w, d in rates_1_200.items():
-        w_start = int(w.split('-')[0])
-        if w_start <= 200:
-            all_rates[w] = d
-    for w, d in rates_200_300.items():
-        all_rates[w] = d
-
-    # 排序
-    sorted_windows = sorted(all_rates.keys(), key=lambda x: int(x.split('-')[0]))
+    sorted_windows = sorted(results.keys(), key=lambda x: int(x.split('-')[0]))
 
     steps_mid = []
     t1_rates, t2_rates, t3_rates, nocode_rates = [], [], [], []
 
     for w in sorted_windows:
-        d = all_rates[w]
+        d = results[w]
         if d["total"] == 0:
             continue
         start = int(w.split('-')[0])
@@ -226,7 +225,7 @@ def plot_correction_rates():
     ax1.plot(steps_mid, t2_rates, 's-', color='#2563eb', label='T2 Correction Rate', linewidth=2, markersize=4)
     ax1.plot(steps_mid, t3_rates, '^-', color='#9333ea', label='T3 Correction Rate', linewidth=2, markersize=4)
     ax1.set_ylabel('Rate (%)')
-    ax1.set_title('Multi-turn Training: Success/Correction Rates by Step Window (25-step)')
+    ax1.set_title('Multi-turn Training: T1/T2/T3 Rates (25-step window, 300 steps)')
     ax1.legend()
     ax1.set_ylim(0, 50)
     ax1.grid(True, alpha=0.3)
@@ -234,7 +233,7 @@ def plot_correction_rates():
     ax2.plot(steps_mid, nocode_rates, 'D-', color='#ea580c', label='NO_CODE Rate', linewidth=2, markersize=4)
     ax2.set_xlabel('Step')
     ax2.set_ylabel('Rate (%)')
-    ax2.set_title('NO_CODE Rate by Step Window')
+    ax2.set_title('NO_CODE Rate (25-step window)')
     ax2.legend()
     ax2.grid(True, alpha=0.3)
 
