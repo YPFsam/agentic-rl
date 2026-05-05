@@ -5,211 +5,402 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background: #fff;
-  padding: 40px;
-  width: 700px;
+  font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #f8fafc;
+  padding: 32px 24px;
+  width: 780px;
+  color: #1e293b;
 }
 
-.layer {
+/* ---- Layer labels ---- */
+.layer-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.layer { margin-bottom: 20px; }
+
+/* ---- Arrow between layers ---- */
+.flow {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  height: 28px;
+  margin-bottom: 20px;
   position: relative;
 }
-
-.box {
-  border-radius: 10px;
-  padding: 14px 20px;
-  text-align: center;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.5;
-  position: relative;
-  min-width: 180px;
-}
-
-.box-small {
-  min-width: 140px;
-  font-size: 13px;
-  padding: 10px 16px;
-}
-
-.box .label {
-  font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 2px;
-}
-
-.box .sub {
-  opacity: 0.85;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-/* Colors */
-.grpo  { background: linear-gradient(135deg, #1e40af, #3b82f6); }
-.actor { background: linear-gradient(135deg, #047857, #10b981); }
-.ref   { background: linear-gradient(135deg, #6b7280, #9ca3af); }
-.vllm  { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
-.agent { background: linear-gradient(135deg, #b45309, #f59e0b); }
-.sandbox { background: linear-gradient(135deg, #0e7490, #22d3ee); }
-.reward  { background: linear-gradient(135deg, #be123c, #fb7185); }
-
-/* Arrows */
-.arrow-down {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-.arrow-down::after {
-  content: '';
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 12px solid #94a3b8;
-}
-
-.arrow-split {
-  display: flex;
-  justify-content: center;
-  gap: 120px;
-  margin-bottom: 16px;
-}
-.arrow-split::after {
-  content: '';
-  /* handled below */
-}
-
-/* Connectors */
-.connector {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  position: relative;
-  height: 30px;
-  margin-bottom: 4px;
-}
-
-.connector .line {
+.flow .shaft {
   width: 2px;
   height: 100%;
-  background: #94a3b8;
+  background: #cbd5e1;
+  position: relative;
+}
+.flow .shaft::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #cbd5e1;
+}
+.flow .flow-label {
+  position: absolute;
+  left: calc(50% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
 }
 
-.connector .fork {
+/* Fork arrow: one input splits into two */
+.fork {
+  display: flex;
+  justify-content: center;
+  height: 36px;
+  margin-bottom: 20px;
   position: relative;
-  width: 280px;
-  height: 30px;
 }
-.connector .fork::before {
+.fork .trunk {
+  width: 2px;
+  height: 18px;
+  background: #cbd5e1;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+.fork .bar {
+  width: 300px;
+  height: 2px;
+  background: #cbd5e1;
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.fork .branch-l,
+.fork .branch-r {
+  width: 2px;
+  height: 18px;
+  background: #cbd5e1;
+  position: absolute;
+  top: 18px;
+}
+.fork .branch-l {
+  left: calc(50% - 150px);
+}
+.fork .branch-r {
+  left: calc(50% + 150px);
+}
+.fork .branch-l::after,
+.fork .branch-r::after {
   content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #cbd5e1;
+}
+
+/* Reverse fork: two inputs merge into one */
+.merge {
+  display: flex;
+  justify-content: center;
+  height: 36px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.merge .trunk {
+  width: 2px;
+  height: 18px;
+  background: #cbd5e1;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+}
+.merge .trunk::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #cbd5e1;
+}
+.merge .bar {
+  width: 340px;
+  height: 2px;
+  background: #cbd5e1;
   position: absolute;
   top: 0;
   left: 50%;
+  transform: translateX(-50%);
+}
+.merge .branch-l,
+.merge .branch-r {
   width: 2px;
-  height: 15px;
-  background: #94a3b8;
-}
-.connector .fork::after {
-  content: '';
+  height: 18px;
+  background: #cbd5e1;
   position: absolute;
-  top: 15px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #94a3b8;
+  top: 0;
 }
-.connector .fork .left,
-.connector .fork .right {
-  position: absolute;
-  top: 15px;
-  width: 2px;
-  height: 15px;
-  background: #94a3b8;
-}
-.connector .fork .left { left: 0; }
-.connector .fork .right { right: 0; }
+.merge .branch-l { left: calc(50% - 170px); }
+.merge .branch-r { left: calc(50% + 170px); }
 
-.connector-split .fork {
-  width: 360px;
+/* ---- Box ---- */
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
+.box {
+  border-radius: 8px;
+  padding: 12px 18px;
+  text-align: center;
+  border: 2px solid;
+  background: #fff;
+}
+.box .name {
+  font-weight: 700;
+  font-size: 13.5px;
+  margin-bottom: 2px;
+}
+.box .desc {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+/* Color themes */
+.box-train {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+.box-train .name { color: #1d4ed8; }
+
+.box-model-active {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+.box-model-active .name { color: #047857; }
+
+.box-model-frozen {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+.box-model-frozen .name { color: #6b7280; }
+
+.box-infra {
+  border-color: #8b5cf6;
+  background: #f5f3ff;
+}
+.box-infra .name { color: #6d28d9; }
+
+.box-agent {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+.box-agent .name { color: #b45309; }
+
+.box-env {
+  border-color: #06b6d4;
+  background: #ecfeff;
+}
+.box-env .name { color: #0e7490; }
+
+.box-reward {
+  border-color: #f43f5e;
+  background: #fff1f2;
+}
+.box-reward .name { color: #be123c; }
+
+/* Wide box */
+.box-wide { min-width: 480px; }
+
+/* Feedback loop arrow (right side) */
+.feedback {
+  position: absolute;
+  right: -10px;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+}
+.feedback .line {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  bottom: -50%;
+  width: 2px;
+  background: #f43f5e;
+  opacity: 0.5;
+}
+.feedback .arrow {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-right: 6px solid #f43f5e;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  opacity: 0.5;
+}
+.feedback .fb-label {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-size: 10px;
+  color: #f43f5e;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.main-flow {
+  position: relative;
+}
+
+/* Horizontal feedback arrow on the right */
+.feedback-loop {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+  padding: 8px 0;
+}
+.feedback-loop .fb-line {
+  flex: 1;
+  height: 2px;
+  background: repeating-linear-gradient(to left, #f43f5e 0, #f43f5e 6px, transparent 6px, transparent 10px);
+  opacity: 0.6;
+}
+.feedback-loop .fb-text {
+  font-size: 11px;
+  color: #f43f5e;
+  padding: 0 8px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
 </style>
 </head>
 <body>
 
-<!-- GRPO Trainer -->
-<div class="layer">
-  <div class="box grpo" style="min-width:420px">
-    <div class="label">GRPO Trainer (veRL)</div>
-    <div class="sub">PPO loss + KL penalty (coef=0.003)</div>
-  </div>
-</div>
+<div class="main-flow">
 
-<!-- Fork to Actor/Ref -->
-<div class="connector">
+  <!-- Layer 1: Training Data -->
+  <div class="layer">
+    <div class="row">
+      <div class="box box-env" style="min-width:320px">
+        <div class="name">Training Data</div>
+        <div class="desc">MBPP (464) + APPS-easy (140) = 602 条 · batch=8, GRPO n=8</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="shaft"></div>
+    <div class="flow-label">prompts</div>
+  </div>
+
+  <!-- Layer 2: GRPO Trainer -->
+  <div class="layer">
+    <div class="row">
+      <div class="box box-train box-wide">
+        <div class="name">GRPO Trainer (veRL 0.8)</div>
+        <div class="desc">PPO clipped loss · KL penalty (coef=0.003) · FSDP + LoRA</div>
+      </div>
+    </div>
+  </div>
+
   <div class="fork">
-    <div class="left"></div>
-    <div class="right"></div>
+    <div class="trunk"></div>
+    <div class="bar"></div>
+    <div class="branch-l"></div>
+    <div class="branch-r"></div>
   </div>
-</div>
 
-<!-- Actor + Ref -->
-<div class="layer">
-  <div class="box actor">
-    <div class="label">Actor + LoRA</div>
-    <div class="sub">trainable, rank=16</div>
+  <!-- Layer 3: Actor & Ref -->
+  <div class="layer">
+    <div class="row">
+      <div class="box box-model-active" style="min-width:220px">
+        <div class="name">Actor + LoRA (rank=16)</div>
+        <div class="desc">可训练 · bf16 · 梯度更新</div>
+      </div>
+      <div class="box box-model-frozen" style="min-width:220px">
+        <div class="name">Ref Model (独立)</div>
+        <div class="desc">冻结 · 仅用于 KL 散度计算</div>
+      </div>
+    </div>
   </div>
-  <div class="box ref">
-    <div class="label">Ref Model</div>
-    <div class="sub">frozen (KL 计算)</div>
+
+  <div class="flow">
+    <div class="shaft"></div>
+    <div class="flow-label">generate (sampling)</div>
   </div>
-</div>
 
-<!-- Arrow -->
-<div class="arrow-down"></div>
-
-<!-- vLLM -->
-<div class="layer">
-  <div class="box vllm" style="min-width:360px">
-    <div class="label">vLLM Rollout</div>
-    <div class="sub">async · sleep mode · gpu_util=0.20 · max_model_len=6400</div>
+  <!-- Layer 4: vLLM -->
+  <div class="layer">
+    <div class="row">
+      <div class="box box-infra box-wide">
+        <div class="name">vLLM Rollout (async)</div>
+        <div class="desc">sleep mode · gpu_util=0.20 · max_model_len=6400 · 2 workers</div>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- Arrow -->
-<div class="arrow-down"></div>
-
-<!-- AgentLoop -->
-<div class="layer">
-  <div class="box agent" style="min-width:400px">
-    <div class="label">CodeAgentLoop (自定义)</div>
-    <div class="sub">generate → exec → feedback → regenerate · max_turns=3 · budget=4800</div>
+  <div class="flow">
+    <div class="shaft"></div>
+    <div class="flow-label">tokens</div>
   </div>
-</div>
 
-<!-- Fork to Sandbox/Reward -->
-<div class="connector connector-split">
+  <!-- Layer 5: AgentLoop -->
+  <div class="layer">
+    <div class="row">
+      <div class="box box-agent box-wide">
+        <div class="name">CodeAgentLoop (自定义)</div>
+        <div class="desc">多轮交互循环 · max_turns=3 · response_budget=4800</div>
+      </div>
+    </div>
+  </div>
+
   <div class="fork">
-    <div class="left"></div>
-    <div class="right"></div>
+    <div class="trunk"></div>
+    <div class="bar" style="width:340px"></div>
+    <div class="branch-l" style="left:calc(50% - 170px)"></div>
+    <div class="branch-r" style="left:calc(50% + 170px)"></div>
   </div>
-</div>
 
-<!-- Sandbox + Reward -->
-<div class="layer">
-  <div class="box-small sandbox">
-    <div class="label">evalplus 沙盒</div>
-    <div class="sub">untrusted_check()</div>
+  <!-- Layer 6: Sandbox & Reward -->
+  <div class="layer">
+    <div class="row">
+      <div class="box box-env" style="min-width:220px">
+        <div class="name">evalplus 沙盒</div>
+        <div class="desc">untrusted_check() · 执行代码 · 返回 pass/fail + traceback</div>
+      </div>
+      <div class="box box-reward" style="min-width:220px">
+        <div class="name">Reward 函数</div>
+        <div class="desc">T1=+1.0 · T2=+0.85 · T3=+0.70 · fail=0 · NO_CODE=-1</div>
+      </div>
+    </div>
   </div>
-  <div class="box-small reward">
-    <div class="label">Reward 函数</div>
-    <div class="sub">T1=+1 · T2=0.85 · T3=0.70 · fail=0 · NO_CODE=-1</div>
+
+  <!-- Feedback loop -->
+  <div class="feedback-loop">
+    <div class="fb-line"></div>
+    <div class="fb-text">reward signal → GRPO Trainer</div>
+    <div class="fb-line"></div>
   </div>
+
 </div>
 
 </body>
