@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #fff;
+  padding: 40px;
+  width: 700px;
+}
+
+.layer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.box {
+  border-radius: 10px;
+  padding: 14px 20px;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  position: relative;
+  min-width: 180px;
+}
+
+.box-small {
+  min-width: 140px;
+  font-size: 13px;
+  padding: 10px 16px;
+}
+
+.box .label {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.box .sub {
+  opacity: 0.85;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* Colors */
+.grpo  { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+.actor { background: linear-gradient(135deg, #047857, #10b981); }
+.ref   { background: linear-gradient(135deg, #6b7280, #9ca3af); }
+.vllm  { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+.agent { background: linear-gradient(135deg, #b45309, #f59e0b); }
+.sandbox { background: linear-gradient(135deg, #0e7490, #22d3ee); }
+.reward  { background: linear-gradient(135deg, #be123c, #fb7185); }
+
+/* Arrows */
+.arrow-down {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.arrow-down::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid #94a3b8;
+}
+
+.arrow-split {
+  display: flex;
+  justify-content: center;
+  gap: 120px;
+  margin-bottom: 16px;
+}
+.arrow-split::after {
+  content: '';
+  /* handled below */
+}
+
+/* Connectors */
+.connector {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  height: 30px;
+  margin-bottom: 4px;
+}
+
+.connector .line {
+  width: 2px;
+  height: 100%;
+  background: #94a3b8;
+}
+
+.connector .fork {
+  position: relative;
+  width: 280px;
+  height: 30px;
+}
+.connector .fork::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 15px;
+  background: #94a3b8;
+}
+.connector .fork::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #94a3b8;
+}
+.connector .fork .left,
+.connector .fork .right {
+  position: absolute;
+  top: 15px;
+  width: 2px;
+  height: 15px;
+  background: #94a3b8;
+}
+.connector .fork .left { left: 0; }
+.connector .fork .right { right: 0; }
+
+.connector-split .fork {
+  width: 360px;
+}
+</style>
+</head>
+<body>
+
+<!-- GRPO Trainer -->
+<div class="layer">
+  <div class="box grpo" style="min-width:420px">
+    <div class="label">GRPO Trainer (veRL)</div>
+    <div class="sub">PPO loss + KL penalty (coef=0.003)</div>
+  </div>
+</div>
+
+<!-- Fork to Actor/Ref -->
+<div class="connector">
+  <div class="fork">
+    <div class="left"></div>
+    <div class="right"></div>
+  </div>
+</div>
+
+<!-- Actor + Ref -->
+<div class="layer">
+  <div class="box actor">
+    <div class="label">Actor + LoRA</div>
+    <div class="sub">trainable, rank=16</div>
+  </div>
+  <div class="box ref">
+    <div class="label">Ref Model</div>
+    <div class="sub">frozen (KL 计算)</div>
+  </div>
+</div>
+
+<!-- Arrow -->
+<div class="arrow-down"></div>
+
+<!-- vLLM -->
+<div class="layer">
+  <div class="box vllm" style="min-width:360px">
+    <div class="label">vLLM Rollout</div>
+    <div class="sub">async · sleep mode · gpu_util=0.20 · max_model_len=6400</div>
+  </div>
+</div>
+
+<!-- Arrow -->
+<div class="arrow-down"></div>
+
+<!-- AgentLoop -->
+<div class="layer">
+  <div class="box agent" style="min-width:400px">
+    <div class="label">CodeAgentLoop (自定义)</div>
+    <div class="sub">generate → exec → feedback → regenerate · max_turns=3 · budget=4800</div>
+  </div>
+</div>
+
+<!-- Fork to Sandbox/Reward -->
+<div class="connector connector-split">
+  <div class="fork">
+    <div class="left"></div>
+    <div class="right"></div>
+  </div>
+</div>
+
+<!-- Sandbox + Reward -->
+<div class="layer">
+  <div class="box-small sandbox">
+    <div class="label">evalplus 沙盒</div>
+    <div class="sub">untrusted_check()</div>
+  </div>
+  <div class="box-small reward">
+    <div class="label">Reward 函数</div>
+    <div class="sub">T1=+1 · T2=0.85 · T3=0.70 · fail=0 · NO_CODE=-1</div>
+  </div>
+</div>
+
+</body>
+</html>
