@@ -97,15 +97,6 @@
 - [单轮 GRPO 训练 (step 1-300)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/rnplbvm0)
 - [单轮 GRPO 续训 (step 300-350)](https://wandb.ai/17872439283ypf-tongji-university/agentic-rl-cloud/runs/dmsv1uo0)
 
-<!-- 建议在对应分析段落后插入 wandb 导出的图片：
-1. reward/mean 对比图：多轮 vs 单轮
-2. critic/score/mean 对比图
-3. actor/kl_loss 对比图
-4. response_length/mean 对比图
-5. response_length/clip_ratio 对比图
-6. num_turns/mean（仅多轮）
--->
-
 ### 训练曲线对比
 
 **20 步滑动平均 reward（过滤步间振荡，展示整体趋势）：**
@@ -128,8 +119,7 @@
 | 280 | +0.402 | +0.089 | +0.313 |
 | 300 | +0.448 | +0.120 | +0.328 |
 
-<!-- [训练曲线图：插入 wandb reward/mean 对比图] -->
-<!-- [训练曲线图：插入 wandb critic/score/mean 对比图] -->
+![Training Reward: Multi-turn vs Single-turn GRPO](report_figures/reward_mean.png)
 
 多轮 GRPO 的 reward 在整个训练过程中始终高于单轮，差距从 step 60 开始拉大，到 step 200 达到 +0.316 并基本保持。这说明多轮纠错提供的额外正 reward signal 确实加速了训练。
 
@@ -152,7 +142,7 @@
 
 多轮 GRPO 的 KL 散度始终高于单轮（约 1.5-2x），说明多轮训练中策略偏离参考模型更快。原因：多轮交互产生了更丰富的 reward signal（T1 成功/T2 纠错/T3 纠错/失败/NO_CODE 五种情况），驱动模型做更大的策略更新。
 
-<!-- [KL散度对比图：插入 wandb actor/kl_loss 对比图] -->
+![KL Divergence: Multi-turn vs Single-turn](report_figures/kl_loss.png)
 
 ### reward 波动分析
 
@@ -179,6 +169,8 @@
 
 两种训练方式的截断率都呈下降趋势（模型逐渐学会更短的输出），但多轮训练的截断率波动更剧烈。
 
+![Clip Ratio](report_figures/clip_ratio.png)
+
 ### 多轮训练中的纠错能力演化
 
 **训练中 T2 纠错率从初期 ~8% 逐步提升到 40-44%：**
@@ -199,7 +191,7 @@
 
 **关键观察：T1 成功率在训练全程基本不变（10-19%），提升主要来自 T2 纠错能力。** T2 纠错率从 7% 稳步提升到 45%，说明模型确实在学会"看到错误反馈后修正代码"。但 T3 纠错率始终很低（1.7%-4.0%），没有上升趋势——T2 都没修好的题，第三轮也很难修好。
 
-<!-- [纠错率趋势图：T2纠错率 vs step] -->
+![Multi-turn Training: T1/T2/T3 Correction Rates](report_figures/correction_rates.png)
 
 **reward 组成分解（step 200-300，6400 samples）：**
 
@@ -261,13 +253,13 @@
 
 > HumanEval 共 164 题，因此 0.006 约等于 1 道题，0.030 约等于 5 道题。本文对 0.01–0.03 量级的差异按趋势解释，不作为强显著性结论。
 
-| checkpoint | r4800 HEval+ | r8192 HEval+ | r8192 提升 | r4800 T1 | r8192 T1 | T1 新增 | r4800 NO_CODE | r8192 NO_CODE | NO_CODE 减少 |
+![Evaluation Results: HumanEval+](report_figures/eval_heval_plus.png)
 |---|---|---|---|---|---|---|---|---|---|
 | baseline | 0.573 | **0.671** | **+0.098** | 100 | 113 | +13 | 52 | 33 | -19 |
 | mt_s150 | 0.750 | **0.780** | **+0.030** | 129 | 135 | +6 | 21 | 8 | -13 |
 | st_s300 | 0.762 | **0.787** | **+0.025** | 126 | 131 | +5 | 21 | 9 | -12 |
 
-<!-- [response_length对比图：r4800 vs r8192 分数对比柱状图] -->
+![r4800 vs r8192 Comparison](report_figures/budget_comparison.png)
 
 **分析：**
 
