@@ -10,7 +10,7 @@
 
 ### 训练框架
 
-![Training Architecture](report_figures/architecture.png)
+![Training Architecture](report_figures/项目流程框图.png)
 
 ### 核心组件
 
