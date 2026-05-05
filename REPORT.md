@@ -20,7 +20,7 @@
 | 单轮奖励函数 | `src/reward.py` | 代码执行 pass=+1, fail/syntax=0, no_code=-1 |
 | 多轮奖励函数 | `src/reward_multiturn.py` | 稀疏奖励：T1通过=1.0, T2通过=0.85, T3通过=0.70, 失败=0, NO_CODE=-1 |
 | evalplus 沙盒 | `src/evalplus_sandbox.py` | 直接调用 evalplus 的 `untrusted_check()`，100% 对齐 `evalplus.evaluate` 判卷 |
-| 旧沙盒 | `src/sandbox.py` | 训练时用的同步沙盒（subprocess 隔离） |
+| 训练沙盒 | `src/sandbox.py` | 训练时用的同步沙盒（subprocess 隔离） |
 | 数据准备 | `src/data_prepare.py` | MBPP(train+val) + APPS-easy 混合，去重后 602 条 |
 | 测试用例生成 | `scripts/synth_testcases.py` | 用 LLM API（DeepSeek）将 APPS 的 input/output 对转为 assert 测试用例 |
 | vLLM 补丁 | `scripts/patch_vllm.py` | 修复 LoRA 权重名、numpy int64、显存泄漏等 8 个问题 |
