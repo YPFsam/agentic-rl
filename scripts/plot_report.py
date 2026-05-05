@@ -244,52 +244,59 @@ def plot_correction_rates():
 
 
 # ============================================================
-# 图 5: 评估结果柱状图 - HumanEval+ 对比
+# 图 5: 评估结果柱状图 - 拆成两张子图
 # ============================================================
 def plot_eval_bars():
-    # 数据来自 REPORT.md 中的评估结果表
-    checkpoints = ['baseline', 'mt_s100', 'mt_s150', 'mt_s200', 'mt_s250', 'mt_s300',
-                   'st_s100', 'st_s150', 'st_s200', 'st_s250', 'st_s300']
+    # 多轮训练 checkpoints
+    mt_cks = ['baseline', 's100', 's150', 's200', 's250', 's300']
+    mt_single = [0.561, 0.677, 0.732, 0.695, 0.720, 0.677]  # 单轮评估 HEval+
+    mt_multi  = [0.573, 0.683, 0.750, 0.707, 0.732, 0.701]  # 多轮评估 HEval+
 
-    # 单轮评估 HEval+
-    single_heval = [0.561, 0.677, 0.732, 0.695, 0.720, 0.677,
-                    0.665, 0.665, 0.683, 0.689, 0.732]
-    # 多轮评估 HEval+
-    multi_heval =  [0.573, 0.683, 0.750, 0.707, 0.732, 0.701,
-                    0.689, 0.683, 0.695, 0.695, 0.762]
+    # 单轮训练 checkpoints
+    st_cks = ['baseline', 's100', 's150', 's200', 's250', 's300']
+    st_single = [0.561, 0.665, 0.665, 0.683, 0.689, 0.732]
+    st_multi  = [0.573, 0.689, 0.683, 0.695, 0.695, 0.762]
 
-    fig, ax = plt.subplots(figsize=(12, 5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
 
-    x = np.arange(len(checkpoints))
-    width = 0.35
+    width = 0.3
 
-    bars1 = ax.bar(x - width/2, single_heval, width, label='Single-turn Eval', color='#93c5fd', edgecolor='#2563eb')
-    bars2 = ax.bar(x + width/2, multi_heval, width, label='Multi-turn Eval', color='#fca5a5', edgecolor='#dc2626')
+    # 左图：多轮训练
+    x1 = np.arange(len(mt_cks))
+    ax1.bar(x1 - width/2, mt_single, width, label='Single-turn Eval', color='#60a5fa', edgecolor='#2563eb')
+    ax1.bar(x1 + width/2, mt_multi,  width, label='Multi-turn Eval',  color='#f87171', edgecolor='#dc2626')
+    ax1.set_title('Multi-turn GRPO Trained', fontsize=12, fontweight='bold')
+    ax1.set_xticks(x1)
+    ax1.set_xticklabels(mt_cks)
+    ax1.set_ylabel('HumanEval+ Score')
+    ax1.legend(loc='lower right')
+    ax1.set_ylim(0.5, 0.8)
+    ax1.grid(True, axis='y', alpha=0.3)
+    # 标数值
+    for i in range(len(mt_cks)):
+        ax1.text(i - width/2, mt_single[i] + 0.004, f'{mt_single[i]:.3f}', ha='center', fontsize=7)
+        ax1.text(i + width/2, mt_multi[i]  + 0.004, f'{mt_multi[i]:.3f}',  ha='center', fontsize=7)
+    # 标最佳
+    best_idx = np.argmax(mt_multi)
+    ax1.bar(x1[best_idx] + width/2, mt_multi[best_idx], width, color='#f87171', edgecolor='#dc2626', linewidth=2.5)
 
-    ax.set_xlabel('Checkpoint')
-    ax.set_ylabel('HumanEval+ Score')
-    ax.set_title('Evaluation Results: HumanEval+ Score by Checkpoint')
-    ax.set_xticks(x)
-    ax.set_xticklabels(checkpoints, rotation=30, ha='right')
-    ax.legend()
-    ax.set_ylim(0.5, 0.8)
-    ax.grid(True, axis='y', alpha=0.3)
+    # 右图：单轮训练
+    x2 = np.arange(len(st_cks))
+    ax2.bar(x2 - width/2, st_single, width, label='Single-turn Eval', color='#60a5fa', edgecolor='#2563eb')
+    ax2.bar(x2 + width/2, st_multi,  width, label='Multi-turn Eval',  color='#f87171', edgecolor='#dc2626')
+    ax2.set_title('Single-turn GRPO Trained', fontsize=12, fontweight='bold')
+    ax2.set_xticks(x2)
+    ax2.set_xticklabels(st_cks)
+    ax2.legend(loc='lower right')
+    ax2.set_ylim(0.5, 0.8)
+    ax2.grid(True, axis='y', alpha=0.3)
+    for i in range(len(st_cks)):
+        ax2.text(i - width/2, st_single[i] + 0.004, f'{st_single[i]:.3f}', ha='center', fontsize=7)
+        ax2.text(i + width/2, st_multi[i]  + 0.004, f'{st_multi[i]:.3f}',  ha='center', fontsize=7)
+    best_idx2 = np.argmax(st_multi)
+    ax2.bar(x2[best_idx2] + width/2, st_multi[best_idx2], width, color='#f87171', edgecolor='#dc2626', linewidth=2.5)
 
-    # 标注最佳
-    best_single_idx = np.argmax(single_heval)
-    best_multi_idx = np.argmax(multi_heval)
-    ax.annotate(f'{single_heval[best_single_idx]:.3f}',
-                xy=(x[best_single_idx] - width/2, single_heval[best_single_idx]),
-                xytext=(0, 5), textcoords='offset points', ha='center', fontweight='bold')
-    ax.annotate(f'{multi_heval[best_multi_idx]:.3f}',
-                xy=(x[best_multi_idx] + width/2, multi_heval[best_multi_idx]),
-                xytext=(0, 5), textcoords='offset points', ha='center', fontweight='bold')
-
-    # 分隔线：多轮训练 vs 单轮训练
-    ax.axvline(x=5.5, color='gray', linestyle='--', linewidth=1, alpha=0.5)
-    ax.text(2.5, 0.795, 'Multi-turn Trained', ha='center', fontsize=10, color='#2563eb')
-    ax.text(8, 0.795, 'Single-turn Trained', ha='center', fontsize=10, color='#dc2626')
-
+    fig.suptitle('HumanEval+ Scores: Single-turn vs Multi-turn Evaluation', fontsize=13)
     fig.savefig(OUT / 'eval_heval_plus.png')
     plt.close(fig)
     print(f"  -> eval_heval_plus.png")
