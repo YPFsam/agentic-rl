@@ -10,6 +10,45 @@
 
 ### 训练框架
 
+```mermaid
+graph TB
+    subgraph GRPO["GRPO Trainer (veRL)"]
+        direction LR
+        loss["PPO loss + KL penalty (0.003)"]
+    end
+
+    subgraph models["训练模型"]
+        direction LR
+        actor["Actor + LoRA<br/>trainable, rank=16"]
+        ref["Ref Model<br/>frozen"]
+    end
+
+    subgraph rollout["vLLM Rollout"]
+        direction LR
+        vllm["async, sleep mode<br/>gpu_util=0.20<br/>max_model_len=6400"]
+    end
+
+    subgraph agent["CodeAgentLoop (自定义)"]
+        direction LR
+        loop["generate → exec → feedback → regenerate<br/>max_turns=3, budget=4800"]
+    end
+
+    subgraph env["环境"]
+        direction LR
+        sandbox["evalplus 沙盒<br/>untrusted_check"]
+        reward["reward 函数<br/>稀疏: +1/0/-1"]
+    end
+
+    GRPO --> models
+    actor --> rollout
+    rollout --> agent
+    agent --> sandbox
+    agent --> reward
+    reward --> GRPO
+```
+
+<details><summary>ASCII 版本（备用）</summary>
+
 ```
                     ┌─────────────────────────────────┐
                     │        GRPO Trainer (veRL)        │
@@ -41,6 +80,8 @@
           │  untrusted_check │  │  稀疏: +1/-1/0   │
           └─────────────────┘  └─────────────────┘
 ```
+
+</details>
 
 ### 核心组件
 
