@@ -244,59 +244,72 @@ def plot_correction_rates():
 
 
 # ============================================================
-# 图 5: 评估结果柱状图 - 拆成两张子图
+# 图 5: 评估结果 2x2 折线图
+# 上=Base, 下=HEval+, 左=单轮评估, 右=多轮评估
+# 每图中两条线: 多轮训练 checkpoints vs 单轮训练 checkpoints
 # ============================================================
 def plot_eval_bars():
-    # 多轮训练 checkpoints
-    mt_cks = ['baseline', 's100', 's150', 's200', 's250', 's300']
-    mt_single = [0.561, 0.677, 0.732, 0.695, 0.720, 0.677]  # 单轮评估 HEval+
-    mt_multi  = [0.573, 0.683, 0.750, 0.707, 0.732, 0.701]  # 多轮评估 HEval+
+    steps = [0, 100, 150, 200, 250, 300]
+
+    # 多轮训练 checkpoints (mt_s0=baseline, mt_s100, ..., mt_s300)
+    mt_base_single = [0.610, 0.726, 0.787, 0.750, 0.780, 0.720]
+    mt_base_multi  = [0.622, 0.738, 0.805, 0.768, 0.799, 0.750]
+    mt_heval_single = [0.561, 0.677, 0.732, 0.695, 0.720, 0.677]
+    mt_heval_multi  = [0.573, 0.683, 0.750, 0.707, 0.732, 0.701]
 
     # 单轮训练 checkpoints
-    st_cks = ['baseline', 's100', 's150', 's200', 's250', 's300']
-    st_single = [0.561, 0.665, 0.665, 0.683, 0.689, 0.732]
-    st_multi  = [0.573, 0.689, 0.683, 0.695, 0.695, 0.762]
+    st_base_single = [0.610, 0.726, 0.738, 0.744, 0.744, 0.768]
+    st_base_multi  = [0.622, 0.750, 0.762, 0.756, 0.756, 0.805]
+    st_heval_single = [0.561, 0.665, 0.665, 0.683, 0.689, 0.732]
+    st_heval_multi  = [0.573, 0.689, 0.683, 0.695, 0.695, 0.762]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(12, 9), sharex=True)
 
-    width = 0.3
+    marker_kw = dict(markersize=7, linewidth=2)
+    mt_style = dict(color='#2563eb', marker='o', label='Multi-turn Trained')
+    st_style = dict(color='#dc2626', marker='s', label='Single-turn Trained')
 
-    # 左图：多轮训练
-    x1 = np.arange(len(mt_cks))
-    ax1.bar(x1 - width/2, mt_single, width, label='Single-turn Eval', color='#60a5fa', edgecolor='#2563eb')
-    ax1.bar(x1 + width/2, mt_multi,  width, label='Multi-turn Eval',  color='#f87171', edgecolor='#dc2626')
-    ax1.set_title('Multi-turn GRPO Trained', fontsize=12, fontweight='bold')
-    ax1.set_xticks(x1)
-    ax1.set_xticklabels(mt_cks)
-    ax1.set_ylabel('HumanEval+ Score')
-    ax1.legend(loc='lower right')
-    ax1.set_ylim(0.5, 0.8)
-    ax1.grid(True, axis='y', alpha=0.3)
-    # 标数值
-    for i in range(len(mt_cks)):
-        ax1.text(i - width/2, mt_single[i] + 0.004, f'{mt_single[i]:.3f}', ha='center', fontsize=7)
-        ax1.text(i + width/2, mt_multi[i]  + 0.004, f'{mt_multi[i]:.3f}',  ha='center', fontsize=7)
-    # 标最佳
-    best_idx = np.argmax(mt_multi)
-    ax1.bar(x1[best_idx] + width/2, mt_multi[best_idx], width, color='#f87171', edgecolor='#dc2626', linewidth=2.5)
+    # Top-left: Base, Single-turn Eval
+    ax = axes[0][0]
+    ax.plot(steps, mt_base_single, **mt_style, **marker_kw)
+    ax.plot(steps, st_base_single, **st_style, **marker_kw)
+    ax.set_ylabel('Score')
+    ax.set_title('HumanEval Base (Single-turn Eval)')
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(0.55, 0.85)
 
-    # 右图：单轮训练
-    x2 = np.arange(len(st_cks))
-    ax2.bar(x2 - width/2, st_single, width, label='Single-turn Eval', color='#60a5fa', edgecolor='#2563eb')
-    ax2.bar(x2 + width/2, st_multi,  width, label='Multi-turn Eval',  color='#f87171', edgecolor='#dc2626')
-    ax2.set_title('Single-turn GRPO Trained', fontsize=12, fontweight='bold')
-    ax2.set_xticks(x2)
-    ax2.set_xticklabels(st_cks)
-    ax2.legend(loc='lower right')
-    ax2.set_ylim(0.5, 0.8)
-    ax2.grid(True, axis='y', alpha=0.3)
-    for i in range(len(st_cks)):
-        ax2.text(i - width/2, st_single[i] + 0.004, f'{st_single[i]:.3f}', ha='center', fontsize=7)
-        ax2.text(i + width/2, st_multi[i]  + 0.004, f'{st_multi[i]:.3f}',  ha='center', fontsize=7)
-    best_idx2 = np.argmax(st_multi)
-    ax2.bar(x2[best_idx2] + width/2, st_multi[best_idx2], width, color='#f87171', edgecolor='#dc2626', linewidth=2.5)
+    # Top-right: Base, Multi-turn Eval
+    ax = axes[0][1]
+    ax.plot(steps, mt_base_multi, **mt_style, **marker_kw)
+    ax.plot(steps, st_base_multi, **st_style, **marker_kw)
+    ax.set_title('HumanEval Base (Multi-turn Eval)')
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(0.55, 0.85)
 
-    fig.suptitle('HumanEval+ Scores: Single-turn vs Multi-turn Evaluation', fontsize=13)
+    # Bottom-left: HEval+, Single-turn Eval
+    ax = axes[1][0]
+    ax.plot(steps, mt_heval_single, **mt_style, **marker_kw)
+    ax.plot(steps, st_heval_single, **st_style, **marker_kw)
+    ax.set_xlabel('Training Step')
+    ax.set_ylabel('Score')
+    ax.set_title('HumanEval+ (Single-turn Eval)')
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(0.50, 0.80)
+
+    # Bottom-right: HEval+, Multi-turn Eval
+    ax = axes[1][1]
+    ax.plot(steps, mt_heval_multi, **mt_style, **marker_kw)
+    ax.plot(steps, st_heval_multi, **st_style, **marker_kw)
+    ax.set_xlabel('Training Step')
+    ax.set_title('HumanEval+ (Multi-turn Eval)')
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(0.50, 0.80)
+
+    fig.suptitle('Evaluation Scores Across Checkpoints', fontsize=14, fontweight='bold')
     fig.savefig(OUT / 'eval_heval_plus.png')
     plt.close(fig)
     print(f"  -> eval_heval_plus.png")
@@ -324,12 +337,12 @@ def plot_budget_comparison():
     ax1.set_title('HumanEval+')
     ax1.set_xticks(x)
     ax1.set_xticklabels(checkpoints)
-    ax1.legend()
+    ax1.legend(loc='upper left')
     ax1.set_ylim(0.5, 0.85)
     ax1.grid(True, axis='y', alpha=0.3)
     for i, (v1, v2) in enumerate(zip(heval_4800, heval_8192)):
-        ax1.text(i - width/2, v1 + 0.005, f'{v1:.3f}', ha='center', fontsize=8)
-        ax1.text(i + width/2, v2 + 0.005, f'{v2:.3f}', ha='center', fontsize=8)
+        ax1.text(i - width/2, v1 + 0.006, f'{v1:.3f}', ha='center', fontsize=8)
+        ax1.text(i + width/2, v2 + 0.006, f'{v2:.3f}', ha='center', fontsize=8)
 
     # HumanEval/Base
     ax2.bar(x - width/2, base_4800, width, label='r4800', color='#fca5a5', edgecolor='#dc2626')
@@ -338,12 +351,12 @@ def plot_budget_comparison():
     ax2.set_title('HumanEval (Base)')
     ax2.set_xticks(x)
     ax2.set_xticklabels(checkpoints)
-    ax2.legend()
+    ax2.legend(loc='upper left')
     ax2.set_ylim(0.5, 0.9)
     ax2.grid(True, axis='y', alpha=0.3)
     for i, (v1, v2) in enumerate(zip(base_4800, base_8192)):
-        ax2.text(i - width/2, v1 + 0.005, f'{v1:.3f}', ha='center', fontsize=8)
-        ax2.text(i + width/2, v2 + 0.005, f'{v2:.3f}', ha='center', fontsize=8)
+        ax2.text(i - width/2, v1 + 0.006, f'{v1:.3f}', ha='center', fontsize=8)
+        ax2.text(i + width/2, v2 + 0.006, f'{v2:.3f}', ha='center', fontsize=8)
 
     fig.suptitle('Response Budget Comparison: r4800 vs r8192', fontsize=13)
     fig.savefig(OUT / 'budget_comparison.png')
