@@ -174,9 +174,18 @@ def load_apps_cleaned(max_samples: int = 3000, max_prompt_chars: int | None = No
                 if max_prompt_chars and len(item["prompt"]) >= max_prompt_chars:
                     skipped_by_length += 1
                     continue
+                # 从 assert 中提取函数名，追加到 prompt 中
+                # 这样模型生成的函数名与 test_cases 中的调用一致
+                func_match = re.search(r'assert\s+(\w+)\s*\(', item["test_cases"])
+                if func_match:
+                    func_name = func_match.group(1)
+                    prompt_text = item["prompt"] + f"\n\nYour solution must define a function named `{func_name}`."
+                else:
+                    prompt_text = item["prompt"]
+
                 samples.append({
                     "task_id": item["task_id"],
-                    "prompt": item["prompt"],
+                    "prompt": prompt_text,
                     "test_cases": item["test_cases"],
                     "data_source": item["data_source"],
                 })
