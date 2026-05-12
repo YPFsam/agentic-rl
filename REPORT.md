@@ -411,6 +411,7 @@ bash scripts/eval_all_checkpoints_multiturn.sh # 多轮评估
 - **数据量有限**：602 条训练数据，300 步即约 4 epochs，过拟合窗口窄
 - **单评估基准**：仅在 HumanEval（164 题）上评估，结论可能不代表其他代码基准（MBPP、LiveCodeBench 等）
 - **只验证了 greedy 评估**：未测试 temperature>0 的 pass@k，可能低估了模型的真实纠错能力
+- **多轮训练的 credit assignment 粗糙**：当前采用 sparse reward + full-trajectory gradient，即整个多轮轨迹（T1 错误代码 + T2 纠错代码）共享同一个标量 advantage。训练中 T2 纠错贡献了 66% 的正 reward，但这些正梯度同时流回了 T1 的错误代码 token。这可能是 T1 成功率全程未提升（11-18%）的原因之一——模型在强化纠错能力的同时，也在强化首轮生成错误代码的模式。单轮训练没有这种信号污染，优化目标更单一，最终在多轮评估中反而更好（st_s300 HEval+ 0.762 vs mt_s150 0.750）。这一假设需要通过 per-turn reward 消融实验验证
 
 ### 改进方向
 
@@ -418,3 +419,4 @@ bash scripts/eval_all_checkpoints_multiturn.sh # 多轮评估
 2. **限制 Qwen3 thinking**：thinking 消耗大量 budget，可加 thinking budget 上限
 3. **降低 KL coef 或加 KL warmup**：多轮训练 KL 增长过快导致后期过拟合
 4. **更大基模型**：Qwen3-4B 或 8B，代码生成基线更强，纠错空间更大
+5. **Per-turn reward**：当前整个轨迹共享一个 reward，T2 纠错的正梯度会流回 T1 的错误 token。改为每轮 EOS 独立放 reward（T1 失败=0，T2 纠错=+0.85），切断跨轮信号污染。实现上只需在 `CodeAgentLoop` 中记录轮次边界，重写 `_postprocess` 的 `rm_scores` 构造，不涉及框架改动
