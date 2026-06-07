@@ -58,6 +58,8 @@ class ExecResult:
     status: ExecStatus
     stdout: str
     stderr: str
+    n_passed: int = 0   # 通过的 assert 数量（仅 count_passes=True 时填充）
+    n_total: int = 0    # 总 assert 数量（仅 count_passes=True 时填充）
 
     @property
     def passed(self) -> bool:
@@ -69,6 +71,7 @@ async def execute_code(
     code: str,
     test_cases: str = "",
     timeout: float = 5.0,
+    count_passes: bool = False,
 ) -> ExecResult:
     """
     在隔离子进程中异步执行 Python 代码。
@@ -79,12 +82,15 @@ async def execute_code(
         code: 模型生成的 Python 代码
         test_cases: 测试用例（assert 语句，每行一个）
         timeout: 超时秒数，默认 5 秒
+        count_passes: 是否统计每个 assert 的通过数（用于过程奖励 C_t 计算）
 
     Returns:
         ExecResult 包含执行状态、标准输出和标准错误
     """
     # 拼接代码和测试用例
-    if test_cases:
+    if count_passes and test_cases:
+        full_code = _build_counting_wrapper(code, test_cases)
+    elif test_cases:
         full_code = f"{code}\n\n{test_cases}"
     else:
         full_code = code
@@ -132,11 +138,16 @@ async def execute_code(
         stdout = stdout_bytes.decode("utf-8", errors="replace")
         stderr = stderr_bytes.decode("utf-8", errors="replace")
 
+        # 从 stdout 解析 assert 通过计数
+        n_passed, n_total = _parse_pass_count(stdout)
+
         if proc.returncode == 0:
             return ExecResult(
                 status=ExecStatus.SUCCESS,
                 stdout=stdout,
                 stderr=stderr,
+                n_passed=n_passed,
+                n_total=n_total,
             )
 
         # 根据错误类型判断状态
@@ -145,12 +156,16 @@ async def execute_code(
                 status=ExecStatus.SYNTAX_ERROR,
                 stdout=stdout,
                 stderr=stderr,
+                n_passed=n_passed,
+                n_total=n_total,
             )
         else:
             return ExecResult(
                 status=ExecStatus.RUNTIME_ERROR,
                 stdout=stdout,
                 stderr=stderr,
+                n_passed=n_passed,
+                n_total=n_total,
             )
 
     finally:
@@ -159,6 +174,66 @@ async def execute_code(
             os.unlink(tmp_path)
         except OSError:
             pass
+
+
+_PASS_COUNT_RE = re.compile(r'__PASS_COUNT__:(\d+)/(\d+)')
+
+
+def _build_counting_wrapper(code: str, test_cases: str) -> str:
+    """
+    构建 assert 计数包装代码。
+
+    将 test_cases 中的每个 assert 逐个用 try-except 包裹，
+    统计通过数，最后通过 stdout 输出 __PASS_COUNT__:X/Y。
+
+    注意：函数定义和 check() 调用不参与 assert 计数，
+    只有独立的 assert 语句被计数。
+    """
+    lines = test_cases.strip().split('\n')
+    assert_lines = []
+    other_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith('assert ') or stripped.startswith('assert\t'):
+            assert_lines.append(stripped)
+        else:
+            other_lines.append(line)
+
+    n_total = len(assert_lines)
+    if n_total == 0:
+        # 没有 assert 语句，直接执行原始代码
+        return f"{code}\n\n{test_cases}"
+
+    # 构建计数包装
+    wrapper_lines = [
+        code,
+        "",
+        "# === assert 计数包装 ===",
+        f"__n_passed__ = 0",
+        f"__n_total__ = {n_total}",
+    ]
+    # 先执行非 assert 的代码（函数定义等）
+    if other_lines:
+        wrapper_lines.append("")
+        wrapper_lines.extend(other_lines)
+    # 逐个执行 assert 并计数
+    for assert_line in assert_lines:
+        wrapper_lines.append("try:")
+        wrapper_lines.append(f"    {assert_line}")
+        wrapper_lines.append("    __n_passed__ += 1")
+        wrapper_lines.append("except Exception:")
+        wrapper_lines.append("    pass")
+    wrapper_lines.append(f'print(f"__PASS_COUNT__:{{__n_passed__}}/{{__n_total__}}")')
+
+    return "\n".join(wrapper_lines)
+
+
+def _parse_pass_count(stdout: str) -> tuple[int, int]:
+    """从 stdout 中解析 __PASS_COUNT__:X/Y"""
+    match = _PASS_COUNT_RE.search(stdout)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    return 0, 0
 
 
 async def execute_batch(

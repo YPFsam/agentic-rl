@@ -25,13 +25,14 @@ import argparse
 import subprocess
 import sys
 import time
+import asyncio
 import warnings
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from src.evalplus_sandbox import evalplus_check, EvalPlusResult
+from src.sandbox import execute_code, ExecResult, ExecStatus
 from src.reward import extract_code
 
 
@@ -45,26 +46,31 @@ SYSTEM_PROMPT = (
     "Provide only ONE complete Python code block — do not include alternative solutions or extra code blocks."
 )
 
-def build_error_feedback(turn: int, max_turns: int, error: str) -> str:
-    """构造错误反馈（避免 .format() 被错误信息中的花括号干扰）。"""
-    return (
-        f"\n\n[Execution Feedback - Turn {turn}/{max_turns}]\n"
-        f"Your code produced the following error:\n"
-        f"```\n{error}\n```\n"
-        f"Please analyze the error and fix your code.\n"
-        f"Output your revised solution in a python code block.\n"
-    )
+ERROR_FEEDBACK_TEMPLATE = (
+    "\n\n[Execution Feedback - Turn {turn}/{max_turns}]\n"
+    "Your code produced the following error:\n"
+    "```\n{error}\n```\n"
+    "Please analyze the error and fix your code.\n"
+    "Output your revised solution in a python code block.\n"
+)
+
+_ASSERT_LINE_PATTERN = re.compile(r'^(\s+)assert\s+.+$', re.MULTILINE)
+_ASSERT_LINE_REPLACEMENT = r'\1assert <test_case>'
 
 
-def format_error(result: EvalPlusResult) -> str:
-    """格式化错误信息（evalplus_sandbox 已完成脱敏，只需加前缀）。"""
-    if result.is_timeout:
-        return f"TimeoutError: Code execution exceeded time limit (possible infinite loop)."
-    error_msg = result.error_msg
-    if "SyntaxError" in error_msg:
-        return f"SyntaxError:\n{error_msg}"
+def format_error(result: ExecResult, turn: int, max_turns: int, timeout: float = 5.0,
+                 max_error_length: int = 500) -> str:
+    """格式化错误信息，与 agent_loop._format_error 一致。"""
+    if result.status == ExecStatus.TIMEOUT:
+        return f"TimeoutError: Code execution exceeded {timeout}s limit (possible infinite loop)."
+    stderr = result.stderr
+    stderr = _ASSERT_LINE_PATTERN.sub(_ASSERT_LINE_REPLACEMENT, stderr)
+    if len(stderr) > max_error_length:
+        stderr = stderr[-max_error_length:]
+    if result.status == ExecStatus.SYNTAX_ERROR:
+        return f"SyntaxError:\n{stderr}"
     else:
-        return f"RuntimeError:\n{error_msg}"
+        return f"RuntimeError:\n{stderr}"
 
 
 # ========== 日志 ==========
@@ -80,7 +86,7 @@ class EvalLogger:
 
     def log_sample(self, task_id: str, passed_at_turn: int,
                    turn_details: list[dict], final_code: str | None,
-                   prompt: str, entry_point: str):
+                   prompt: str, test_cases: str, entry_point: str):
         record = {
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "task_id": task_id,
@@ -89,6 +95,7 @@ class EvalLogger:
             "final_pass": passed_at_turn > 0,
             "final_code_length": len(final_code) if final_code else 0,
             "entry_point": entry_point,
+            "test_cases": test_cases,
             "prompt": prompt[:500],  # 截断防止日志过大
             "turns": turn_details,
         }
@@ -117,25 +124,18 @@ def multiturn_evaluate(
     max_turns: int = 3,
     max_response_length: int = 4800,
     temperature: float = 0.0,
-    task_ids_filter: set | None = None,
+    timeout: float = 5.0,
 ):
     """
-    串行多轮推理评估（使用 evalplus 对齐沙盒）。
+    串行多轮推理评估。
 
     Token 预算与训练 agent_loop 完全一致：
       - response_length = max_response_length（4800）
       - remaining = response_length - budget_used
       - 每轮 max_new_tokens = remaining（agent_loop: min(remaining, response_length)）
       - 反馈文本 token 也计入 budget_used
-
-    判卷使用 evalplus 的 untrusted_check()，与 `python -m evalplus.evaluate` 完全一致。
     """
     dataset = load_humaneval()
-
-    # 按 task_ids 过滤
-    if task_ids_filter is not None:
-        dataset = [item for item in dataset if item["task_id"] in task_ids_filter]
-        print(f"  [过滤] 仅评估 {len(dataset)} 个指定样本")
     logger = EvalLogger(log_path)
     total = len(dataset)
     model.eval()
@@ -164,12 +164,10 @@ def multiturn_evaluate(
     }
 
     print(f"  [DEBUG] 总题数: {total}, max_turns: {max_turns}, max_response_length: {max_response_length}")
-    print(f"  [DEBUG] temperature: {temperature}, 沙盒: evalplus untrusted_check")
+    print(f"  [DEBUG] temperature: {temperature}, timeout: {timeout}s")
 
     eval_start = time.monotonic()
     done_count = len(completed_ids)
-    extract_ok = 0
-    extract_fail = 0
 
     with open(output_file, "a", encoding="utf-8") as f:
         for item in dataset:
@@ -177,6 +175,11 @@ def multiturn_evaluate(
 
             if task_id in completed_ids:
                 continue
+
+            # 构造测试用例
+            entry_point = item.get("entry_point", "")
+            test_raw = item.get("test", "")
+            test_cases = (test_raw + f"\ncheck({entry_point})\n") if test_raw and entry_point else ""
 
             # 对话历史
             messages = [
@@ -192,7 +195,6 @@ def multiturn_evaluate(
             turn_details = []
             code = None       # 初始化，防止循环未执行时 NameError
             generated = ""    # 初始化，同上
-            last_valid_code = None  # 记录最后一次成功提取的代码（多轮覆盖修复）
 
             for turn in range(max_turns):
                 # 预算检查（agent_loop: remaining = response_length - len(response_ids)）
@@ -239,16 +241,6 @@ def multiturn_evaluate(
                 code = extract_code(generated)
 
                 if code is None:
-                    if turn < max_turns - 1:
-                        feedback_text = (
-                            "\n\n[Format Error]\n"
-                            "Error: No Python code block found in your response. "
-                            "Please use a python code block.\n"
-                        )
-                        messages.append({"role": "assistant", "content": generated})
-                        messages.append({"role": "user", "content": feedback_text})
-                        fb_tokens = len(tokenizer.encode(feedback_text, add_special_tokens=False))
-                        budget_used += fb_tokens
                     turn_detail = {
                         "turn": turn + 1,
                         "gen_time_s": round(gen_time, 2),
@@ -256,7 +248,7 @@ def multiturn_evaluate(
                         "input_token_count": input_token_count,
                         "max_new_tokens": max_new_tokens,
                         "generated_length": len(generated),
-                        "generated_text": generated,
+                        "generated_text": generated,  # debug: 模型原始输出
                         "code_extracted": False,
                         "extracted_code": None,
                         "exec_status": "NO_CODE",
@@ -264,39 +256,45 @@ def multiturn_evaluate(
                         "exec_time_s": 0,
                         "budget_used": budget_used,
                         "budget_remaining": response_length - budget_used,
-                        "feedback_sent": feedback_text if turn < max_turns - 1 else None,
                     }
+                    if turn < max_turns - 1:
+                        # 与 agent_loop L171-175 对齐：有 \n\n 前缀
+                        feedback_text = (
+                            "\n\n[Format Error]\n"
+                            "Error: No Python code block found in your response. "
+                            "Please use a python code block.\n"
+                        )
+                        turn_detail["feedback_sent"] = feedback_text
+                        messages.append({"role": "assistant", "content": generated})
+                        messages.append({"role": "user", "content": feedback_text})
+                        fb_tokens = len(tokenizer.encode(feedback_text, add_special_tokens=False))
+                        budget_used += fb_tokens
                     turn_details.append(turn_detail)
                     continue
 
-                # 沙盒执行（使用 evalplus untrusted_check，判卷与 evalplus.evaluate 完全一致）
+                # 沙盒执行
                 t_exec_start = time.monotonic()
-                result: EvalPlusResult = evalplus_check(task_id, code)
+                result: ExecResult = asyncio.run(execute_code(code, test_cases, timeout=timeout))
                 exec_time = time.monotonic() - t_exec_start
 
-                # 记录成功提取的代码（即使执行失败）
-                last_valid_code = code
+                turn_detail = {
+                    "turn": turn + 1,
+                    "gen_time_s": round(gen_time, 2),
+                    "gen_token_count": gen_token_count,
+                    "input_token_count": input_token_count,
+                    "max_new_tokens": max_new_tokens,
+                    "generated_length": len(generated),
+                    "generated_text": generated,  # debug: 模型原始输出
+                    "code_extracted": True,
+                    "extracted_code": code,       # debug: 提取的代码
+                    "exec_status": result.status.name,
+                    "exec_stderr": result.stderr,  # debug: 完整 stderr
+                    "exec_time_s": round(exec_time, 3),
+                    "budget_used": budget_used,
+                    "budget_remaining": response_length - budget_used,
+                }
 
-                if result.passed:
-                    # feedback_tokens = 0（成功不需要发反馈）
-                    turn_detail = {
-                        "turn": turn + 1,
-                        "gen_time_s": round(gen_time, 2),
-                        "gen_token_count": gen_token_count,
-                        "input_token_count": input_token_count,
-                        "max_new_tokens": max_new_tokens,
-                        "generated_length": len(generated),
-                        "generated_text": generated,
-                        "code_extracted": True,
-                        "extracted_code": code,
-                        "exec_status": "PASS",
-                        "evalplus_details": result.details,
-                        "evalplus_n_passed": result.n_passed,
-                        "evalplus_n_total": result.n_total,
-                        "exec_time_s": round(exec_time, 3),
-                        "budget_used": budget_used,
-                        "budget_remaining": response_length - budget_used,
-                    }
+                if result.status == ExecStatus.SUCCESS:
                     final_completion = code
                     passed_at_turn = turn + 1
                     stats[f"turn{turn + 1}_pass"] += 1
@@ -304,66 +302,34 @@ def multiturn_evaluate(
                     turn_details.append(turn_detail)
                     break
                 else:
-                    # 先发反馈、更新 budget，再构造 turn_detail（日志准确）
-                    feedback = None
+                    turn_details.append(turn_detail)
                     if turn < max_turns - 1:
-                        error_msg = format_error(result)
-                        feedback = build_error_feedback(turn + 1, max_turns, error_msg)
+                        error_msg = format_error(result, turn, max_turns, timeout)
+                        feedback = ERROR_FEEDBACK_TEMPLATE.format(
+                            turn=turn + 1, max_turns=max_turns, error=error_msg,
+                        )
+                        turn_detail["feedback_sanitized"] = error_msg
+                        turn_detail["feedback_sent"] = feedback
                         messages.append({"role": "assistant", "content": generated})
                         messages.append({"role": "user", "content": feedback})
                         fb_tokens = len(tokenizer.encode(feedback, add_special_tokens=False))
                         budget_used += fb_tokens
 
-                    turn_detail = {
-                        "turn": turn + 1,
-                        "gen_time_s": round(gen_time, 2),
-                        "gen_token_count": gen_token_count,
-                        "input_token_count": input_token_count,
-                        "max_new_tokens": max_new_tokens,
-                        "generated_length": len(generated),
-                        "generated_text": generated,
-                        "code_extracted": True,
-                        "extracted_code": code,
-                        "exec_status": "TIMEOUT" if result.is_timeout else "FAIL",
-                        "error_msg_raw": result.error_msg_raw,
-                        "error_msg_sanitized": result.error_msg,
-                        "evalplus_details": result.details,
-                        "evalplus_n_passed": result.n_passed,
-                        "evalplus_n_total": result.n_total,
-                        "exec_time_s": round(exec_time, 3),
-                        "budget_used": budget_used,
-                        "budget_remaining": response_length - budget_used,
-                        "feedback_sent": feedback,
-                    }
-                    turn_details.append(turn_detail)
-
             # 记录结果
             if final_completion is None:
-                if last_valid_code is not None:
-                    # 有提取到过代码但都没通过测试，提交最后一次的代码
-                    final_completion = last_valid_code
-                elif code is None:
+                if code is None:
                     stats["no_code"] += 1
-                    # 全程未提取到代码，提交空字符串（而非 thinking 全文）
-                    final_completion = ""
+                    final_completion = generated.strip() if generated else ""
                 else:
                     final_completion = code
 
             f.write(json.dumps({"task_id": task_id, "completion": final_completion}, ensure_ascii=False) + "\n")
             f.flush()
             logger.log_sample(task_id, passed_at_turn, turn_details, final_completion,
-                              prompt=item["prompt"], entry_point=item.get("entry_point", ""))
+                              prompt=item["prompt"], test_cases=test_cases, entry_point=entry_point)
 
             done_count += 1
-            if passed_at_turn > 0:
-                extract_ok += 1
-            else:
-                extract_fail += 1
-
-            # 每样本控制台 debug 输出 + ETA
-            elapsed = time.monotonic() - eval_start
-            speed = done_count / elapsed if elapsed > 0 else 0
-            eta = (total - done_count) / speed if speed > 0 else 0
+            # 每样本控制台 debug 输出
             turn_summary = " → ".join(
                 f"T{t['turn']}:{t['exec_status']}" for t in turn_details
             ) if turn_details else "NO_TURNS"
@@ -371,14 +337,11 @@ def multiturn_evaluate(
             last = turn_details[-1] if turn_details else {}
             print(f"  [{done_count}/{total}] {task_id} {result_mark} at T{passed_at_turn} | "
                   f"{turn_summary} | budget={last.get('budget_used','?')}/{response_length} "
-                  f"gen={last.get('gen_time_s','?')}s exec={last.get('exec_time_s','?')}s | ETA {eta:.0f}s")
+                  f"gen={last.get('gen_time_s','?')}s")
 
     eval_time = time.monotonic() - eval_start
     print(f"\n  生成完成: {output_file} (耗时 {eval_time:.1f}s)")
-    print(f"  统计: extract_ok={extract_ok} fail={extract_fail}")
     print(f"  详情日志: {log_path}")
-    stats["extract_ok"] = extract_ok
-    stats["extract_fail"] = extract_fail
     return stats
 
 
@@ -393,15 +356,7 @@ def main():
                         help="多轮共享 token 预算（与训练 response_length 一致）")
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--output_dir", type=str, default="eval_results")
-    parser.add_argument("--task_ids_file", type=str, default=None,
-                        help="JSON 文件，包含要评估的 task_id 列表（不指定则评估全部）")
     args = parser.parse_args()
-
-    # 加载 task_ids 过滤
-    task_ids_filter = None
-    if args.task_ids_file:
-        with open(args.task_ids_file, "r", encoding="utf-8") as f:
-            task_ids_filter = set(json.load(f))
 
     print(f"加载模型: {args.model_path}")
     tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True)
@@ -429,21 +384,14 @@ def main():
         max_turns=args.max_turns,
         max_response_length=args.max_response_length,
         temperature=args.temperature,
-        task_ids_filter=task_ids_filter,
     )
 
     # evalplus 判卷
     print(f"\nEvalPlus 判卷...")
     cmd = [sys.executable, "-m", "evalplus.evaluate",
            "--dataset", "humaneval", "--samples", output_file]
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
-        print(result.stdout)
-        if result.stderr and "warning" not in result.stderr.lower():
-            print(result.stderr)
-    except subprocess.TimeoutExpired:
-        result = None
-        print("  evalplus 判卷超时，跳过")
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    print(result.stdout)
 
     # 汇总
     total = stats["total"]
@@ -464,7 +412,7 @@ def main():
         "max_turns": args.max_turns,
         "max_response_length": args.max_response_length,
         "stats": stats,
-        "evalplus_output": result.stdout if result else None,
+        "evalplus_output": result.stdout,
         "log_path": log_path,
     }
     summary_path = os.path.join(args.output_dir, f"summary_{args.tag}_multiturn.json")

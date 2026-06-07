@@ -20,3 +20,6 @@ try:
     }
 except ImportError:
     pass
+
+# 注册过程奖励 advantage estimator
+from src.advantage_process_outcome import compute_grpo_process_outcome_advantage

@@ -113,6 +113,8 @@ class CodeAgentLoop(AgentLoopBase):
 
         # 异常样本追踪：每轮收集详情
         turn_details_raw = []
+        # 过程奖励：每轮 assistant token 的起止位置
+        turn_token_boundaries = []
 
         for turn in range(self.max_turns):
             # 预算检查：剩余空间不足则提前终止
@@ -141,6 +143,7 @@ class CodeAgentLoop(AgentLoopBase):
 
             # LLM 生成的 token → mask=1（参与策略梯度）
             generated_ids = llm_output.token_ids
+            assistant_start = len(response_ids)  # 记录 assistant 起始位置
             response_ids.extend(generated_ids)
             response_mask.extend([1] * len(generated_ids))
             current_ids.extend(generated_ids)
@@ -167,6 +170,13 @@ class CodeAgentLoop(AgentLoopBase):
                     "exec_stderr": None,
                     "tool_time": 0.0,
                 })
+                turn_token_boundaries.append({
+                    "assistant_start": assistant_start,
+                    "assistant_end": len(response_ids),
+                    "exec_status": "NO_CODE",
+                    "n_passed": 0,
+                    "n_total": 0,
+                })
                 if turn < self.max_turns - 1:
                     feedback = (
                         "\n\n[Format Error]\n"
@@ -179,7 +189,8 @@ class CodeAgentLoop(AgentLoopBase):
             # ===== 3. 沙盒执行 =====
             t_tool_start = time.monotonic()
             with simple_timer("tool_calls", metrics):
-                result = await execute_code(code, test_cases, timeout=self.timeout)
+                result = await execute_code(code, test_cases, timeout=self.timeout,
+                                            count_passes=True)
             tool_time = time.monotonic() - t_tool_start
 
             if result.status == ExecStatus.SUCCESS:
@@ -193,6 +204,13 @@ class CodeAgentLoop(AgentLoopBase):
                     "exec_status": "SUCCESS",
                     "exec_stderr": None,
                     "tool_time": tool_time,
+                })
+                turn_token_boundaries.append({
+                    "assistant_start": assistant_start,
+                    "assistant_end": len(response_ids),
+                    "exec_status": "SUCCESS",
+                    "n_passed": result.n_passed,
+                    "n_total": result.n_total,
                 })
                 self._append_feedback(
                     SUCCESS_FEEDBACK, response_ids, response_mask, current_ids
@@ -209,6 +227,13 @@ class CodeAgentLoop(AgentLoopBase):
                     "exec_status": result.status.name,
                     "exec_stderr_raw": (result.stderr or "")[:500],
                     "tool_time": tool_time,
+                })
+                turn_token_boundaries.append({
+                    "assistant_start": assistant_start,
+                    "assistant_end": len(response_ids),
+                    "exec_status": result.status.name,
+                    "n_passed": result.n_passed,
+                    "n_total": result.n_total,
                 })
                 # 最后一轮不追加错误反馈：避免 (a) 轮次计数虚高 (b) extract_last_code 提取失败
                 if turn < self.max_turns - 1:
@@ -240,6 +265,9 @@ class CodeAgentLoop(AgentLoopBase):
             # 每轮结构化数据：exec_status 由 agent_loop 沙盒执行确定，不受 echo 影响
             # 传完整原始数据方便 debug，每步 64 样本约 0.3 MB，可忽略
             extra_info["turn_details"] = turn_details_raw
+
+            # 过程奖励：每轮 assistant token 边界 + 执行状态
+            extra_info["turn_token_boundaries"] = turn_token_boundaries
 
         # 异常样本检测与记录
         self._log_if_anomalous(

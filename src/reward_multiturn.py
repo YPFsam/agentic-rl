@@ -34,6 +34,11 @@ from pathlib import Path
 from src.sandbox import ExecResult, ExecStatus, MAX_MEMORY_BYTES, MAX_CPU_SECONDS, _preexec_fn
 from src.reward import extract_code
 
+# 注册过程奖励 advantage estimator
+# reward_multiturn.py 被 veRL 的 load_extern_object 动态加载，
+# 此时 import 会触发 @register_adv_est 装饰器注册
+from src.advantage_process_outcome import compute_grpo_process_outcome_advantage
+
 
 # ========== 同步执行（避免在已有 event loop 中 asyncio.run 冲突）==========
 
@@ -517,3 +522,146 @@ def compute_score_multiturn(
             extra_info, result.status.name, turn_details=turn_details,
         )
         return 0.0
+
+
+# ========== 过程奖励函数（turn-level process reward） ==========
+
+def _compute_state_score(exec_status: str, n_passed: int = 0, n_total: int = 0) -> float | None:
+    """
+    计算轮次状态分数 C_t。
+
+    Returns:
+        None: 格式非法（NO_CODE），不更新状态
+        float: 状态分数 [0, 1]
+    """
+    if exec_status == "NO_CODE":
+        return None  # 格式非法标记
+    if exec_status in ("TIMEOUT", "SYNTAX_ERROR"):
+        return 0.0
+    if exec_status == "SUCCESS":
+        return 1.0
+    if exec_status == "RUNTIME_ERROR":
+        if n_total == 0:
+            return 0.0
+        p_t = n_passed / n_total
+        if p_t >= 1.0:
+            return 1.0  # 边界情况：counting wrapper 全通过但整体有其他运行时错误
+        return 0.2 + 0.8 * p_t
+    return 0.0
+
+
+def _compute_process_and_outcome_rewards(
+    turn_details: list[dict],
+    turn_penalty: float = 0.15,
+) -> tuple[list[float], float, list[bool]]:
+    """
+    计算每轮过程奖励和最终 outcome 奖励。
+
+    Args:
+        turn_details: agent_loop 传入的每轮详情，每条含 exec_status, n_passed, n_total
+        turn_penalty: 每轮扣分系数
+
+    Returns:
+        process_rewards: 每轮的 r_proc（长度 T）
+        outcome_reward: 最终 r_O
+        format_invalid: 每轮是否格式非法（长度 T）
+    """
+    T = len(turn_details)
+    if T == 0:
+        return [], -1.0, []
+
+    prev_C = 0.0
+    process_rewards = []
+    format_invalid = []
+
+    for t in range(T):
+        td = turn_details[t]
+        exec_status = td.get("exec_status", "NO_CODE")
+        n_passed = td.get("n_passed", 0)
+        n_total = td.get("n_total", 0)
+
+        C_t = _compute_state_score(exec_status, n_passed, n_total)
+
+        if C_t is None:
+            # 格式非法：惩罚 + 不更新状态
+            format_invalid.append(True)
+            process_rewards.append(-1.0)
+        else:
+            format_invalid.append(False)
+            r_proc = C_t - prev_C
+            process_rewards.append(r_proc)
+            prev_C = C_t
+
+    # Outcome reward（基于最后一轮）
+    last_status = turn_details[-1].get("exec_status", "NO_CODE")
+
+    if format_invalid[-1]:
+        r_O = -1.0
+    elif last_status == "SUCCESS":
+        r_O = 1.0 - turn_penalty * (T - 1)
+    else:
+        r_O = 0.0
+
+    return process_rewards, r_O, format_invalid
+
+
+def compute_score_process_multiturn(
+    data_source: str,
+    solution_str: str,
+    ground_truth: str,
+    extra_info: Optional[dict] = None,
+    turn_penalty: float = 0.15,
+) -> dict:
+    """
+    过程奖励函数入口（turn-level process reward）。
+
+    计算每轮的过程奖励 r_proc 和最终 outcome 奖励 r_O，
+    返回 dict 供 veRL reward loop 解析。
+
+    veRL reward loop 会：
+      1. 取 result["score"] 作为标量 reward（兼容现有流程）
+      2. 其余 key 放入 reward_extra_info → non_tensor_batch
+      3. 自定义 advantage estimator 从 non_tensor_batch 读取
+
+    Returns:
+        {
+            "score": float,                      # 兼容标量
+            "turn_process_rewards": list[float],  # 每轮 r_proc
+            "outcome_reward": float,              # 最终 r_O
+            "turn_token_boundaries": list[dict],   # 每轮 token 边界（从 agent_loop 透传）
+            "format_invalid_turns": list[bool],    # 每轮是否格式非法
+            "n_turns": int,                        # 总轮数
+        }
+    """
+    if extra_info is None:
+        extra_info = {}
+
+    turn_details = extra_info.get("turn_details", [])
+    turn_token_boundaries = extra_info.get("turn_token_boundaries", [])
+
+    # 计算过程奖励和 outcome 奖励
+    process_rewards, outcome_reward, format_invalid = _compute_process_and_outcome_rewards(
+        turn_details, turn_penalty=turn_penalty,
+    )
+
+    # 兼容标量：过程奖励之和 + outcome
+    scalar_score = sum(process_rewards) + outcome_reward
+
+    # 记录日志（复用现有日志基础设施）
+    num_turns = len(turn_details)
+    # 取最后一轮的 exec_status
+    exec_status = turn_details[-1].get("exec_status", "NO_CODE") if turn_details else "NO_CODE"
+
+    _log_multiturn_metrics(
+        solution_str, scalar_score, num_turns,
+        extra_info, exec_status, turn_details=turn_details,
+    )
+
+    return {
+        "score": scalar_score,
+        "turn_process_rewards": process_rewards,
+        "outcome_reward": outcome_reward,
+        "turn_token_boundaries": turn_token_boundaries,
+        "format_invalid_turns": format_invalid,
+        "n_turns": num_turns,
+    }
